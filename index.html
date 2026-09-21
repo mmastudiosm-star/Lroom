@@ -232,8 +232,6 @@ button{font-family:inherit}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:var(--bg-primary)}
 ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:4px}
-
-/* ===== AUTH ===== */
 #authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9999;overflow-y:auto}
 .auth-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
@@ -252,8 +250,6 @@ button{font-family:inherit}
 .auth-error.show{display:block}
 .auth-success{background:rgba(52,168,83,.15);border:1px solid var(--success);color:#81c995;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
 .auth-success.show{display:block}
-
-/* ===== EXPIRED ===== */
 #expiredScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9998;overflow-y:auto}
 .expired-box{background:var(--bg-secondary);border:2px solid var(--danger);border-radius:16px;padding:28px 24px;width:100%;max-width:500px;text-align:center}
 .expired-box h1{font-size:22px;color:var(--danger);margin-bottom:8px}
@@ -268,8 +264,6 @@ button{font-family:inherit}
 .bale-note{background:var(--bg-tertiary);border-radius:10px;padding:14px;margin-top:16px;font-size:13px;line-height:1.8}
 .bale-note .bale-id{display:inline-block;background:var(--accent);color:#202124;padding:4px 12px;border-radius:8px;font-weight:700;margin-top:8px;font-size:15px;user-select:all}
 .logout-btn{margin-top:16px;padding:10px 24px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
-
-/* ===== ADMIN ===== */
 #adminPanel{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:80px 20px 20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9997;overflow-y:auto}
 .admin-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:24px;width:100%;max-width:900px}
 .admin-box h1{font-size:22px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
@@ -285,14 +279,52 @@ button{font-family:inherit}
 .admin-table .actions .btn-6m{background:#fbbc04;color:#202124}
 .admin-table .actions .btn-1y{background:#9c27b0}
 .admin-table .actions .btn-del{background:var(--danger)}
+.admin-table .actions .btn-cancel{background:#d32f2f;color:#fff;font-weight:600}
 .role-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .role-badge.admin{background:#ffd700;color:#202124}
 .role-badge.user{background:var(--bg-tertiary);color:var(--text-secondary)}
 .expiry-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .expiry-badge.valid{background:var(--success);color:#fff}
 .expiry-badge.expired{background:var(--danger);color:#fff}
-
-/* ===== USER BADGE ===== */
+.admin-tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border-color);padding-bottom:0;flex-wrap:wrap}
+.admin-tab-btn{padding:10px 18px;background:none;border:none;border-bottom:3px solid transparent;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:.2s;border-radius:6px 6px 0 0}
+.admin-tab-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+.admin-tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg-tertiary)}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.admin-stat-card{background:var(--bg-tertiary);border-radius:10px;padding:14px;text-align:center;border-right:4px solid var(--accent)}
+.admin-stat-card.green{border-right-color:var(--success)}
+.admin-stat-card.red{border-right-color:var(--danger)}
+.admin-stat-card.yellow{border-right-color:var(--warning)}
+.admin-stat-card .num{font-size:24px;font-weight:700;color:var(--text-primary);display:block}
+.admin-stat-card .lbl{font-size:11px;color:var(--text-secondary);margin-top:4px}
+.admin-search{width:100%;padding:10px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:13px;margin-bottom:12px}
+.admin-search:focus{outline:none;border-color:var(--accent)}
+.discount-card{background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-right:4px solid var(--accent)}
+.discount-card.expired{border-right-color:var(--danger);opacity:.6}
+.discount-card .dc-code{font-family:monospace;font-size:16px;font-weight:700;color:var(--accent);user-select:all}
+.discount-card .dc-info{flex:1;font-size:11px;color:var(--text-secondary)}
+.discount-card .dc-info .dc-percent{color:#ffd700;font-weight:700;font-size:13px}
+.discount-card .dc-actions{display:flex;gap:4px}
+.discount-card .dc-actions button{padding:5px 10px;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-family:inherit}
+.discount-card .dc-actions .dc-del{background:var(--danger);color:#fff}
+#discountBox{background:var(--bg-tertiary);border-radius:12px;padding:14px;margin-bottom:16px;border:1px dashed var(--accent);display:none}
+#discountBox.show{display:block}
+#discountBox label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+#discountBox .dc-row{display:flex;gap:8px}
+#discountBox input{flex:1;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:monospace;font-size:14px;text-transform:uppercase}
+#discountBox input:focus{outline:none;border-color:var(--accent)}
+#discountBox button{padding:10px 18px;background:var(--accent);color:#202124;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700}
+#discountBox .dc-msg{font-size:12px;margin-top:8px;padding:6px 10px;border-radius:6px;display:none}
+#discountBox .dc-msg.ok{display:block;background:rgba(52,168,83,.2);color:#81c995}
+#discountBox .dc-msg.err{display:block;background:rgba(234,67,53,.2);color:#ff8a80}
+.plan .price-discounted{color:var(--success);font-weight:700;display:block}
+.plan .price-original{color:var(--text-secondary);text-decoration:line-through;font-size:11px;display:block;margin-top:2px}
+.plan .discount-badge{display:inline-block;background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-top:4px}
+#globalAnnouncement{display:none;position:fixed;top:calc(65px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#fbbc04,#f9a825);color:#202124;padding:14px 44px 14px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(251,188,4,.5);z-index:8000;max-width:90%;text-align:center;animation:annPulse 2s infinite;line-height:1.6}
+#globalAnnouncement.show{display:block}
+#globalAnnouncement .ann-close{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.15);border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:14px;color:#202124;font-weight:700;display:flex;align-items:center;justify-content:center}
+#globalAnnouncement .ann-from{display:block;font-size:11px;font-weight:400;color:rgba(32,33,36,.7);margin-top:4px}
+@keyframes annPulse{0%,100%{box-shadow:0 8px 32px rgba(251,188,4,.5)}50%{box-shadow:0 8px 40px rgba(251,188,4,.9)}}
 #userBadge{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:20px;background:var(--bg-tertiary);font-size:12px;cursor:pointer;position:relative}
 #userBadge:hover{background:var(--bg-hover)}
 #userBadge .crown{color:#ffd700;font-size:16px;animation:crownGlow 2s infinite}
@@ -304,7 +336,6 @@ button{font-family:inherit}
 .user-menu .menu-item{padding:10px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
 .user-menu .menu-item:hover{background:var(--bg-hover)}
 .user-menu .menu-sep{height:1px;background:var(--border-color);margin:6px 0}
-
 @media (max-width:768px){
 .logo-text{font-size:36px}.logo-icon{width:52px;height:52px;font-size:32px}
 #lobby{gap:12px;padding:15px;justify-content:flex-start;padding-top:calc(80px + env(safe-area-inset-top,0px))}
@@ -330,7 +361,12 @@ button{font-family:inherit}
 </head>
 <body>
 
-<!-- ========== AUTH SCREEN ========== -->
+<div id="globalAnnouncement">
+    <button class="ann-close" onclick="hideGlobalAnnouncement()">✕</button>
+    <span id="globalAnnText"></span>
+    <span class="ann-from" id="globalAnnFrom"></span>
+</div>
+
 <div id="authScreen">
     <div class="auth-box">
         <div class="auth-logo">
@@ -364,28 +400,35 @@ button{font-family:inherit}
     </div>
 </div>
 
-<!-- ========== EXPIRED SCREEN ========== -->
 <div id="expiredScreen">
     <div class="expired-box">
         <h1>⛔ اعتبار شما تمام شده است</h1>
         <p class="user-name">کاربر گرامی <b id="expUserName">-</b></p>
         <p style="color:var(--text-secondary);font-size:13px;">برای ادامه، یکی از بسته‌ها را انتخاب کنید:</p>
+        <div id="discountBox" class="show">
+            <label>🎟️ کد تخفیف دارید؟</label>
+            <div class="dc-row">
+                <input type="text" id="discountInput" placeholder="مثلاً WELCOME50" />
+                <button onclick="applyDiscount()">اعمال</button>
+            </div>
+            <div class="dc-msg" id="discountMsg"></div>
+        </div>
         <div class="plans">
-            <div class="plan" onclick="selectPlan('1 ماهه','10,000')">
+            <div class="plan" onclick="selectPlan('1 ماهه',10000)">
                 <div class="duration">🎫 ۱ ماهه</div>
-                <div class="price">۱۰٬۰۰۰ <span class="toman">تومان</span></div>
+                <div class="price" data-original="10000">۱۰٬۰۰۰ <span class="toman">تومان</span></div>
             </div>
-            <div class="plan" onclick="selectPlan('3 ماهه','60,000')">
+            <div class="plan" onclick="selectPlan('3 ماهه',60000)">
                 <div class="duration">🎫 ۳ ماهه</div>
-                <div class="price">۶۰٬۰۰۰ <span class="toman">تومان</span></div>
+                <div class="price" data-original="60000">۶۰٬۰۰۰ <span class="toman">تومان</span></div>
             </div>
-            <div class="plan" onclick="selectPlan('6 ماهه','100,000')">
+            <div class="plan" onclick="selectPlan('6 ماهه',100000)">
                 <div class="duration">🎫 ۶ ماهه</div>
-                <div class="price">۱۰۰٬۰۰۰ <span class="toman">تومان</span></div>
+                <div class="price" data-original="100000">۱۰۰٬۰۰۰ <span class="toman">تومان</span></div>
             </div>
-            <div class="plan" onclick="selectPlan('1 ساله','200,000')">
+            <div class="plan" onclick="selectPlan('1 ساله',200000)">
                 <div class="duration">🎫 ۱ ساله</div>
-                <div class="price">۲۰۰٬۰۰۰ <span class="toman">تومان</span></div>
+                <div class="price" data-original="200000">۲۰۰٬۰۰۰ <span class="toman">تومان</span></div>
             </div>
         </div>
         <div class="bale-note">
@@ -396,16 +439,48 @@ button{font-family:inherit}
     </div>
 </div>
 
-<!-- ========== ADMIN PANEL ========== -->
 <div id="adminPanel">
     <div class="admin-box">
         <h1><span class="crown">👑</span> پنل مدیریت</h1>
         <button onclick="showLobbyFromAdmin()" style="padding:8px 16px;background:var(--accent);color:#202124;border:none;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:16px;font-family:inherit;">🏠 بازگشت به کلاس‌ها</button>
-        <div id="adminUsersList"></div>
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" id="adminTabUsers" onclick="switchAdminTab('users')">👥 کاربران</button>
+            <button class="admin-tab-btn" id="adminTabAnnounce" onclick="switchAdminTab('announce')">📨 اعلان همگانی</button>
+            <button class="admin-tab-btn" id="adminTabDiscount" onclick="switchAdminTab('discount')">🎟️ کد تخفیف</button>
+        </div>
+        <div id="adminUsersTab">
+            <div class="admin-stats" id="adminStats"></div>
+            <input type="text" class="admin-search" id="adminSearch" placeholder="🔍 جستجو بر اساس نام یا ایمیل..." oninput="filterAdminUsers(this.value)" />
+            <div id="adminUsersList"></div>
+        </div>
+        <div id="adminAnnounceTab" style="display:none;">
+            <div style="background:var(--bg-tertiary);border-radius:12px;padding:16px;margin-bottom:16px;">
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">📝 پیام اعلان</label>
+                <textarea id="adminAnnText" rows="3" style="width:100%;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;resize:vertical;" placeholder="متن اعلان..."></textarea>
+                <button onclick="sendGlobalAnnouncement()" style="padding:10px 24px;background:var(--accent);color:#202124;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;margin-top:10px;">📨 ارسال به همه</button>
+                <button onclick="clearAllAnnouncements()" style="padding:10px 24px;background:var(--bg-primary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;margin-top:10px;margin-right:6px;">🗑️ حذف همه</button>
+            </div>
+            <h3 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">اعلان‌های اخیر:</h3>
+            <div id="adminAnnounceList"></div>
+        </div>
+        <div id="adminDiscountTab" style="display:none;">
+            <div style="background:var(--bg-tertiary);border-radius:12px;padding:16px;margin-bottom:16px;">
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;">🎟️ کد تخفیف جدید</label>
+                <input type="text" id="newDiscountCode" placeholder="مثلاً WELCOME50" style="width:100%;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:monospace;font-size:14px;text-transform:uppercase;margin-bottom:10px;" />
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;">📊 درصد تخفیف (۱ تا ۱۰۰)</label>
+                <input type="number" id="newDiscountPercent" min="1" max="100" value="50" style="width:100%;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;margin-bottom:10px;" />
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;">🔢 حداکثر تعداد استفاده</label>
+                <input type="number" id="newDiscountMaxUses" min="1" value="100" style="width:100%;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;margin-bottom:10px;" />
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;">📅 تاریخ انقضا (اختیاری)</label>
+                <input type="date" id="newDiscountExpires" style="width:100%;padding:10px 14px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;margin-bottom:10px;" />
+                <button onclick="createDiscountCode()" style="padding:10px 24px;background:var(--accent);color:#202124;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;">➕ ساخت کد</button>
+            </div>
+            <h3 style="font-size:14px;margin-bottom:10px;color:var(--text-secondary);">کدهای فعال:</h3>
+            <div id="adminDiscountList"></div>
+        </div>
     </div>
 </div>
 
-<!-- ========== LOBBY ========== -->
 <div id="lobby">
 <div class="top-bar">
 <div></div>
@@ -444,9 +519,7 @@ button{font-family:inherit}
 <button id="previewCamBtn" onclick="togglePreviewCam()">📹</button>
 </div>
 </div>
-<div class="row">
-<input type="text" id="roomId" placeholder="کد جلسه" value="class101" />
-</div>
+<div class="row"><input type="text" id="roomId" placeholder="کد جلسه" value="class101" /></div>
 <div class="row">
 <select id="roleSelect">
 <option value="teacher">👨‍🏫 مدرس</option>
@@ -458,7 +531,6 @@ button{font-family:inherit}
 <p class="hint">💡 مدرس اول رمز تعیین می‌کند، دانشجو با همان رمز وارد می‌شود.</p>
 </div>
 
-<!-- ========== MEETING ========== -->
 <div id="meeting">
 <div id="header">
 <div id="roomTitle">
@@ -668,7 +740,7 @@ button{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
 <script>
 /* ============================================================
-   Lroom - LiveKit + Supabase + All PeerJS Features
+   Lroom - LiveKit + Supabase + All Features
    ============================================================ */
 
 // ==================== CONFIG ====================
@@ -724,12 +796,14 @@ let certTemplate = { title: 'گواهی‌نامه', subtitle: 'به پاس شر
 try { const st = localStorage.getItem('lroom_cert'); if (st) certTemplate = JSON.parse(st); } catch (e) {}
 let bellAudioCtx = null;
 let currentTheme = localStorage.getItem('lroom_theme') || 'dark';
+let appliedDiscount = null;
 
 // ==================== HELPERS ====================
 function sanitize(r) { return r.replace(/[^a-zA-Z0-9]/g, '') || 'default'; }
 function fmtTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); return `${m}:${(s % 60).toString().padStart(2, '0')}`; }
 function fmtDT(d) { const dt = new Date(d); return `${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}:${dt.getSeconds().toString().padStart(2,'0')}`; }
 function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(2) + ' MB'; }
+function fmtNum(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '٬').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function showToast(txt) {
     if (!txt) return;
@@ -916,7 +990,7 @@ async function handleLogin(e) {
     }
 }
 
-function checkAndShow() {
+async function checkAndShow() {
     if (!currentUser) return;
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('expiredScreen').style.display = 'none';
@@ -930,13 +1004,15 @@ function checkAndShow() {
     if (isAdmin || !isExpired) {
         document.getElementById('lobby').style.display = 'flex';
         document.getElementById('userBadgeName').textContent = currentUser.name;
-        document.getElementById('userBadgeDays').textContent = isAdmin ? '' : `(${daysLeft} روز مانده)`;
+        document.getElementById('userBadgeDays').textContent = isAdmin ? '(نامحدود)' : `(${daysLeft} روز مانده)`;
         document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
         document.getElementById('menuAdmin').style.display = isAdmin ? 'flex' : 'none';
         startPreview();
+        loadGlobalAnnouncement();
     } else {
         document.getElementById('expiredScreen').style.display = 'flex';
         document.getElementById('expUserName').textContent = currentUser.name;
+        document.getElementById('discountBox').classList.add('show');
     }
 }
 
@@ -974,7 +1050,13 @@ document.addEventListener('click', (e) => {
 
 // ==================== SUBSCRIPTION ====================
 function selectPlan(name, price) {
-    alert(`شما بسته «${name}» با قیمت ${price} تومان را انتخاب کردید.\n\nبرای نهایی کردن خرید، به آیدی زیر در پیام‌رسان بله پیام دهید:\n\n${BALE_ID}\n\nو رسید پرداخت را ارسال کنید.`);
+    let priceText = fmtNum(price) + ' تومان';
+    let discountText = '';
+    if (appliedDiscount) {
+        const discounted = Math.round(price * (100 - appliedDiscount.discount_percent) / 100);
+        discountText = `\n\n🎟️ کد تخفیف: ${appliedDiscount.code} (${appliedDiscount.discount_percent}٪)\nقیمت با تخفیف: ${fmtNum(discounted)} تومان`;
+    }
+    alert(`شما بسته «${name}» را انتخاب کردید.\n\nقیمت اصلی: ${priceText}${discountText}\n\nبرای نهایی کردن خرید، به آیدی زیر در پیام‌رسان بله پیام دهید:\n\n${BALE_ID}\n\nو رسید پرداخت را ارسال کنید.`);
 }
 
 function showSubscriptionInfo() {
@@ -987,53 +1069,190 @@ function showSubscriptionInfo() {
     else alert(`⛔ اعتبار شما به پایان رسیده.\n\nبرای تمدید به پیام‌رسان بله مراجعه کنید:\n${BALE_ID}`);
 }
 
+// ==================== DISCOUNT ====================
+async function applyDiscount() {
+    const input = document.getElementById('discountInput');
+    const msg = document.getElementById('discountMsg');
+    const code = input.value.trim().toUpperCase();
+    if (!code) { msg.className = 'dc-msg err'; msg.textContent = '⚠️ کد را وارد کنید'; return; }
+    msg.className = 'dc-msg'; msg.textContent = '⏳ بررسی...'; msg.style.display = 'block';
+    try {
+        const data = await supabaseRequest(`discount_codes?code=eq.${encodeURIComponent(code)}&select=*`);
+        if (!data || data.length === 0) { msg.className = 'dc-msg err'; msg.textContent = '❌ کد تخفیف معتبر نیست'; return; }
+        const d = data[0];
+        const now = new Date();
+        if (!d.is_active) { msg.className = 'dc-msg err'; msg.textContent = '❌ این کد غیرفعال است'; return; }
+        if (d.used_count >= d.max_uses) { msg.className = 'dc-msg err'; msg.textContent = '❌ ظرفیت این کد پر شده'; return; }
+        if (d.expires_at && new Date(d.expires_at) < now) { msg.className = 'dc-msg err'; msg.textContent = '❌ این کد منقضی شده'; return; }
+        appliedDiscount = d;
+        msg.className = 'dc-msg ok'; msg.textContent = `✅ کد اعمال شد! ${d.discount_percent}٪ تخفیف`;
+        updatePlanPrices();
+        showToast(`🎟️ ${d.discount_percent}٪ تخفیف اعمال شد`);
+
+        const recordKey = 'lroom_du_' + d.code + '_' + (currentUser?.email || 'guest');
+        if (!localStorage.getItem(recordKey)) {
+            try {
+                await supabaseRequest('discount_uses', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        code: d.code,
+                        user_name: currentUser?.name || 'کاربر مهمان',
+                        user_email: currentUser?.email || '-',
+                    }),
+                });
+                await supabaseRequest(`discount_codes?id=eq.${d.id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ used_count: (d.used_count || 0) + 1 }),
+                });
+                localStorage.setItem(recordKey, '1');
+            } catch (err) { console.warn('خطا در ثبت گزارش:', err); }
+        }
+    } catch (e) { msg.className = 'dc-msg err'; msg.textContent = '❌ خطا در بررسی کد'; }
+}
+
+function updatePlanPrices() {
+    const plans = document.querySelectorAll('.plan');
+    plans.forEach(plan => {
+        const priceEl = plan.querySelector('.price');
+        if (!priceEl) return;
+        const original = parseInt(priceEl.getAttribute('data-original')) || 0;
+        if (!appliedDiscount) {
+            priceEl.innerHTML = `${fmtNum(original)} <span class="toman">تومان</span>`;
+            return;
+        }
+        const discounted = Math.round(original * (100 - appliedDiscount.discount_percent) / 100);
+        priceEl.innerHTML = `<span class="price-discounted">${fmtNum(discounted)} تومان</span><span class="price-original">${fmtNum(original)} تومان</span><span class="discount-badge">${appliedDiscount.discount_percent}٪ تخفیف</span>`;
+    });
+}
+
+// ==================== GLOBAL ANNOUNCEMENT ====================
+async function loadGlobalAnnouncement() {
+    try {
+        const data = await supabaseRequest('announcements?is_active=eq.true&select=*&order=created_at.desc&limit=1');
+        if (data && data.length > 0) {
+            const ann = data[0];
+            const dismissed = localStorage.getItem('lroom_ann_dismissed_' + ann.id);
+            if (!dismissed) {
+                document.getElementById('globalAnnText').textContent = '📢 ' + ann.message;
+                document.getElementById('globalAnnFrom').textContent = ann.from_name ? 'از: ' + ann.from_name : '';
+                document.getElementById('globalAnnouncement').classList.add('show');
+                window._currentAnnId = ann.id;
+            }
+        }
+    } catch (e) { console.error(e); }
+}
+
+function hideGlobalAnnouncement() {
+    document.getElementById('globalAnnouncement').classList.remove('show');
+    if (window._currentAnnId) {
+        localStorage.setItem('lroom_ann_dismissed_' + window._currentAnnId, '1');
+    }
+}
+
 // ==================== ADMIN ====================
 function goToAdmin() {
     if (!currentUser || currentUser.role !== 'admin') return showToast('⚠️ فقط ادمین');
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'flex';
-    loadAdminUsers();
+    switchAdminTab('users');
 }
+
 function showLobbyFromAdmin() {
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('lobby').style.display = 'flex';
+    loadGlobalAnnouncement();
 }
+
+function switchAdminTab(tab) {
+    ['users', 'announce', 'discount'].forEach(t => {
+        document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+        document.getElementById('admin' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab').style.display = t === tab ? 'block' : 'none';
+    });
+    if (tab === 'users') loadAdminUsers();
+    if (tab === 'announce') loadAnnouncements();
+    if (tab === 'discount') loadDiscounts();
+}
+
+async function loadAdminStats() {
+    try {
+        const users = await supabaseRequest('users?select=*');
+        const now = new Date();
+        const total = users.length;
+        const active = users.filter(u => u.role === 'admin' || (u.subscription_end && new Date(u.subscription_end) > now)).length;
+        const expired = total - active;
+        const today = users.filter(u => {
+            const d = new Date(u.created_at);
+            return d.toDateString() === now.toDateString();
+        }).length;
+        document.getElementById('adminStats').innerHTML = `
+            <div class="admin-stat-card"><span class="num">${fmtNum(total)}</span><span class="lbl">👥 کل کاربران</span></div>
+            <div class="admin-stat-card green"><span class="num">${fmtNum(active)}</span><span class="lbl">✅ فعال</span></div>
+            <div class="admin-stat-card red"><span class="num">${fmtNum(expired)}</span><span class="lbl">⛔ منقضی</span></div>
+            <div class="admin-stat-card yellow"><span class="num">${fmtNum(today)}</span><span class="lbl">🆕 امروز</span></div>
+        `;
+    } catch (e) { console.error(e); }
+}
+
+let _allUsersCache = [];
+function filterAdminUsers(query) {
+    const q = (query || '').trim().toLowerCase();
+    const filtered = q ? _allUsersCache.filter(u =>
+        (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+    ) : _allUsersCache;
+    renderAdminUsersTable(filtered);
+}
+
 async function loadAdminUsers() {
     const container = document.getElementById('adminUsersList');
+    if (!container) return;
     container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">⏳ بارگذاری...</p>';
     try {
         const users = await supabaseRequest('users?select=*&order=created_at.desc');
-        if (!users || users.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">کاربری نیست</p>';
-            return;
-        }
-        const now = new Date();
-        container.innerHTML = `<table class="admin-table">
-            <thead><tr><th>نام</th><th>ایمیل</th><th>نقش</th><th>انقضا</th><th>وضعیت</th><th>عملیات</th></tr></thead>
-            <tbody>${users.map(u => {
-                const end = u.subscription_end ? new Date(u.subscription_end) : null;
-                const valid = end && end > now;
-                const isAdmin = u.role === 'admin';
-                return `<tr>
-                    <td>${escapeHtml(u.name)} ${isAdmin ? '👑' : ''}</td>
-                    <td style="font-size:10px;direction:ltr;text-align:left;">${escapeHtml(u.email)}</td>
-                    <td><span class="role-badge ${isAdmin ? 'admin' : 'user'}">${isAdmin ? 'ادمین' : 'کاربر'}</span></td>
-                    <td style="font-size:10px;">${end ? end.toLocaleDateString('fa-IR') : '-'}</td>
-                    <td><span class="expiry-badge ${valid ? 'valid' : 'expired'}">${valid ? 'فعال' : 'منقضی'}</span></td>
-                    <td><div class="actions">
-                        <button class="btn-1m" onclick="setUserSubscription(${u.id}, 1)">۱ماه</button>
-                        <button class="btn-3m" onclick="setUserSubscription(${u.id}, 3)">۳ماه</button>
-                        <button class="btn-6m" onclick="setUserSubscription(${u.id}, 6)">۶ماه</button>
-                        <button class="btn-1y" onclick="setUserSubscription(${u.id}, 12)">۱سال</button>
-                        ${u.email !== ADMIN_EMAIL ? `<button class="btn-del" onclick="deleteUser(${u.id}, '${escapeHtml(u.email)}')">🗑️</button>` : ''}
-                    </div></td>
-                </tr>`;
-            }).join('')}</tbody>
-        </table>`;
+        _allUsersCache = users || [];
+        loadAdminStats();
+        const q = (document.getElementById('adminSearch')?.value || '').trim().toLowerCase();
+        const filtered = q ? _allUsersCache.filter(u =>
+            (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
+        ) : _allUsersCache;
+        renderAdminUsersTable(filtered);
     } catch (err) {
         container.innerHTML = `<p style="color:var(--danger);text-align:center;">خطا: ${escapeHtml(err.message)}</p>`;
     }
 }
+
+function renderAdminUsersTable(users) {
+    const container = document.getElementById('adminUsersList');
+    if (!users || users.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">کاربری یافت نشد</p>';
+        return;
+    }
+    const now = new Date();
+    container.innerHTML = `<table class="admin-table">
+        <thead><tr><th>نام</th><th>ایمیل</th><th>نقش</th><th>انقضا</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+        <tbody>${users.map(u => {
+            const end = u.subscription_end ? new Date(u.subscription_end) : null;
+            const valid = end && end > now;
+            const isAdmin = u.role === 'admin';
+            return `<tr>
+                <td>${escapeHtml(u.name)} ${isAdmin ? '👑' : ''}</td>
+                <td style="font-size:10px;direction:ltr;text-align:left;">${escapeHtml(u.email)}</td>
+                <td><span class="role-badge ${isAdmin ? 'admin' : 'user'}">${isAdmin ? 'ادمین' : 'کاربر'}</span></td>
+                <td style="font-size:10px;">${isAdmin ? '👑 نامحدود' : (end ? end.toLocaleDateString('fa-IR') : '-')}</td>
+                <td>${isAdmin ? '<span class="expiry-badge valid">👑 نامحدود</span>' : `<span class="expiry-badge ${valid ? 'valid' : 'expired'}">${valid ? 'فعال' : 'منقضی'}</span>`}</td>
+                <td><div class="actions">
+                    <button class="btn-1m" onclick="setUserSubscription(${u.id}, 1)">۱ماه</button>
+                    <button class="btn-3m" onclick="setUserSubscription(${u.id}, 3)">۳ماه</button>
+                    <button class="btn-6m" onclick="setUserSubscription(${u.id}, 6)">۶ماه</button>
+                    <button class="btn-1y" onclick="setUserSubscription(${u.id}, 12)">۱سال</button>
+                    <button style="background:var(--warning);color:#202124;" onclick="openAdjustDaysModal(${u.id})">📅</button>
+                    ${!isAdmin ? `<button class="btn-cancel" onclick="cancelUserSubscription(${u.id})">⛔ لغو</button>` : ''}
+                    ${u.email !== ADMIN_EMAIL ? `<button class="btn-del" onclick="deleteUser(${u.id}, '${escapeHtml(u.email)}')">🗑️</button>` : ''}
+                </div></td>
+            </tr>`;
+        }).join('')}</tbody>
+    </table>`;
+}
+
 async function setUserSubscription(userId, months) {
     if (!confirm(`اعتبار ${months} ماه تنظیم شود؟`)) return;
     try {
@@ -1047,6 +1266,119 @@ async function setUserSubscription(userId, months) {
         loadAdminUsers();
     } catch (err) { showToast('❌ ' + err.message); }
 }
+
+// ==================== ADJUST USER DAYS ====================
+function openAdjustDaysModal(userId) {
+    const u = _allUsersCache.find(x => x.id === userId);
+    if (!u) return showToast('⚠️ کاربر پیدا نشد');
+    const userName = u.name || 'کاربر';
+
+    let modal = document.getElementById('adjustDaysModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'adjustDaysModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:480px;">
+                <h2>📅 تنظیم اعتبار</h2>
+                <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">
+                    کاربر: <b id="adjustUserName" style="color:var(--accent);"></b>
+                </p>
+                <div style="background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:14px;">
+                    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">وضعیت فعلی:</div>
+                    <div id="adjustCurrentStatus" style="font-size:14px;font-weight:700;"></div>
+                </div>
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">⚡ کاهش سریع:</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                    <button onclick="adjustUserDays(${userId}, -1)" style="flex:1;min-width:70px;background:#fbbc04;color:#202124;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">-۱ روز</button>
+                    <button onclick="adjustUserDays(${userId}, -3)" style="flex:1;min-width:70px;background:#fbbc04;color:#202124;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">-۳ روز</button>
+                    <button onclick="adjustUserDays(${userId}, -7)" style="flex:1;min-width:70px;background:#fbbc04;color:#202124;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">-۷ روز</button>
+                    <button onclick="adjustUserDays(${userId}, -30)" style="flex:1;min-width:70px;background:#ea4335;color:#fff;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">-۱ ماه</button>
+                </div>
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:8px;">⚡ افزایش سریع:</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                    <button onclick="adjustUserDays(${userId}, 1)" style="flex:1;min-width:70px;background:#34a853;color:#fff;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">+۱ روز</button>
+                    <button onclick="adjustUserDays(${userId}, 7)" style="flex:1;min-width:70px;background:#34a853;color:#fff;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">+۷ روز</button>
+                    <button onclick="adjustUserDays(${userId}, 15)" style="flex:1;min-width:70px;background:#34a853;color:#fff;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">+۱۵ روز</button>
+                    <button onclick="adjustUserDays(${userId}, 30)" style="flex:1;min-width:70px;background:#1a73e8;color:#fff;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;">+۱ ماه</button>
+                </div>
+                <label style="display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;">🔢 تعداد روز دلخواه (مثبت یا منفی):</label>
+                <input type="number" id="adjustCustomDays" placeholder="مثلاً ۵ یا -۱۰" style="width:100%;padding:10px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;margin-bottom:10px;" />
+                <button onclick="adjustUserDaysCustom(${userId})" style="width:100%;padding:10px;background:var(--accent);color:#202124;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:14px;margin-bottom:10px;">اعمال تعداد دلخواه</button>
+                <div style="height:1px;background:var(--border-color);margin:12px 0;"></div>
+                <button onclick="cancelUserSubscription(${userId});closeModal('adjustDaysModal')" style="width:100%;padding:10px;background:var(--danger);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:14px;margin-bottom:8px;">⛔ لغو کامل اعتبار</button>
+                <button class="secondary" onclick="closeModal('adjustDaysModal')">بستن</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('adjustUserName').textContent = userName;
+    const curEl = document.getElementById('adjustCurrentStatus');
+    const end = u.subscription_end ? new Date(u.subscription_end) : null;
+    const now = new Date();
+    const daysLeft = end ? Math.ceil((end - now) / (1000 * 60 * 60 * 24)) : 0;
+    if (u.role === 'admin') {
+        curEl.innerHTML = '👑 ادمین (دسترسی نامحدود - بدون انقضا)';
+        curEl.style.color = '#ffd700';
+    } else if (daysLeft > 0) {
+        curEl.innerHTML = `✅ ${daysLeft} روز باقی‌مانده (تا ${end.toLocaleDateString('fa-IR')})`;
+        curEl.style.color = 'var(--success)';
+    } else {
+        curEl.innerHTML = '⛔ منقضی شده';
+        curEl.style.color = 'var(--danger)';
+    }
+    document.getElementById('adjustCustomDays').value = '';
+    modal.classList.add('open');
+}
+
+async function adjustUserDays(userId, days) {
+    try {
+        const u = _allUsersCache.find(x => x.id === userId);
+        if (!u) return showToast('⚠️ کاربر پیدا نشد');
+        if (u.role === 'admin') return showToast('⚠️ ادمین را نمی‌توان تغییر داد');
+        const now = new Date();
+        const currentEnd = u.subscription_end ? new Date(u.subscription_end) : null;
+        let baseDate = (currentEnd && currentEnd > now) ? new Date(currentEnd) : new Date(now);
+        baseDate.setDate(baseDate.getDate() + days);
+        let newEnd = baseDate;
+        if (newEnd < now) newEnd = new Date(now);
+        await supabaseRequest(`users?id=eq.${userId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ subscription_end: newEnd.toISOString() }),
+        });
+        const label = days > 0 ? 'افزایش' : 'کاهش';
+        showToast(`✅ ${label} ${Math.abs(days)} روز انجام شد`);
+        loadAdminUsers();
+        closeModal('adjustDaysModal');
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function adjustUserDaysCustom(userId) {
+    const input = document.getElementById('adjustCustomDays');
+    const days = parseInt(input.value);
+    if (isNaN(days) || days === 0) return showToast('⚠️ یک عدد غیر صفر وارد کن');
+    if (Math.abs(days) > 3650) return showToast('⚠️ حداکثر ۱۰ سال');
+    await adjustUserDays(userId, days);
+}
+
+// ==================== CANCEL SUBSCRIPTION ====================
+async function cancelUserSubscription(userId) {
+    const u = _allUsersCache.find(x => x.id === userId);
+    if (!u) return showToast('⚠️ کاربر پیدا نشد');
+    if (u.role === 'admin') return showToast('⚠️ ادمین قابل لغو نیست');
+    if (!confirm(`اعتبار «${u.name}» لغو شود؟`)) return;
+    try {
+        const pastDate = new Date();
+        pastDate.setDate(pastDate.getDate() - 1);
+        await supabaseRequest(`users?id=eq.${userId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ subscription_end: pastDate.toISOString() }),
+        });
+        showToast(`⛔ اعتبار ${u.name} لغو شد`);
+        loadAdminUsers();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
 async function deleteUser(userId, email) {
     if (!confirm(`کاربر ${email} حذف شود؟`)) return;
     try {
@@ -1054,6 +1386,221 @@ async function deleteUser(userId, email) {
         showToast('✅ حذف شد');
         loadAdminUsers();
     } catch (err) { showToast('❌ ' + err.message); }
+}
+
+// ==================== ADMIN ANNOUNCEMENTS ====================
+async function sendGlobalAnnouncement() {
+    const text = document.getElementById('adminAnnText').value.trim();
+    if (!text) return showToast('⚠️ پیام را وارد کنید');
+    try {
+        await supabaseRequest(`announcements?is_active=eq.true`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_active: false }),
+        });
+        await supabaseRequest('announcements', {
+            method: 'POST',
+            body: JSON.stringify({ message: text, from_name: currentUser.name, is_active: true }),
+        });
+        document.getElementById('adminAnnText').value = '';
+        showToast('📨 ارسال شد');
+        loadAnnouncements();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function loadAnnouncements() {
+    const container = document.getElementById('adminAnnounceList');
+    if (!container) return;
+    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">⏳ بارگذاری...</p>';
+    try {
+        const list = await supabaseRequest('announcements?select=*&order=created_at.desc&limit=20');
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:12px;">اعلانی نیست</p>';
+            return;
+        }
+        container.innerHTML = list.map(a => `
+            <div class="discount-card ${a.is_active ? '' : 'expired'}">
+                <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${escapeHtml(a.message)}</div>
+                    <div class="dc-info">
+                        ${a.from_name ? 'از: ' + escapeHtml(a.from_name) + ' • ' : ''}
+                        ${new Date(a.created_at).toLocaleString('fa-IR')}
+                        ${a.is_active ? ' • ✅ فعال' : ' • ⚫ غیرفعال'}
+                    </div>
+                </div>
+                <div class="dc-actions">
+                    ${a.is_active ? `<button style="background:var(--warning);color:#202124;" onclick="toggleAnnouncement(${a.id}, false)">⏹️</button>` : `<button style="background:var(--success);color:#fff;" onclick="toggleAnnouncement(${a.id}, true)">✅</button>`}
+                    <button class="dc-del" onclick="deleteAnnouncement(${a.id})">🗑️</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = `<p style="color:var(--danger);text-align:center;">خطا: ${escapeHtml(e.message)}</p>`;
+    }
+}
+
+async function toggleAnnouncement(id, active) {
+    try {
+        if (active) {
+            await supabaseRequest(`announcements?is_active=eq.true`, {
+                method: 'PATCH',
+                body: JSON.stringify({ is_active: false }),
+            });
+        }
+        await supabaseRequest(`announcements?id=eq.${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_active: active }),
+        });
+        showToast(active ? '✅ فعال شد' : '⏹️ غیرفعال شد');
+        loadAnnouncements();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function deleteAnnouncement(id) {
+    if (!confirm('حذف شود؟')) return;
+    try {
+        await supabaseRequest(`announcements?id=eq.${id}`, { method: 'DELETE' });
+        showToast('🗑️ حذف شد');
+        loadAnnouncements();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function clearAllAnnouncements() {
+    if (!confirm('همه اعلان‌ها حذف شوند؟')) return;
+    try {
+        await supabaseRequest('announcements?id=gt.0', { method: 'DELETE' });
+        showToast('🗑️ همه حذف شدند');
+        loadAnnouncements();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+// ==================== ADMIN DISCOUNTS ====================
+async function createDiscountCode() {
+    const code = document.getElementById('newDiscountCode').value.trim().toUpperCase();
+    const percent = parseInt(document.getElementById('newDiscountPercent').value);
+    const maxUses = parseInt(document.getElementById('newDiscountMaxUses').value) || 100;
+    const expires = document.getElementById('newDiscountExpires').value;
+    if (!code) return showToast('⚠️ کد را وارد کنید');
+    if (!percent || percent < 1 || percent > 100) return showToast('⚠️ درصد باید ۱ تا ۱۰۰ باشد');
+    try {
+        const body = { code, discount_percent: percent, max_uses: maxUses, used_count: 0, is_active: true };
+        if (expires) body.expires_at = new Date(expires).toISOString();
+        await supabaseRequest('discount_codes', { method: 'POST', body: JSON.stringify(body) });
+        document.getElementById('newDiscountCode').value = '';
+        document.getElementById('newDiscountExpires').value = '';
+        showToast('🎟️ کد ساخته شد');
+        loadDiscounts();
+    } catch (e) {
+        if (e.message.includes('duplicate') || e.message.includes('unique')) showToast('⚠️ این کد قبلاً ساخته شده');
+        else showToast('❌ ' + e.message);
+    }
+}
+
+async function loadDiscounts() {
+    const container = document.getElementById('adminDiscountList');
+    if (!container) return;
+    container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">⏳ بارگذاری...</p>';
+    try {
+        const list = await supabaseRequest('discount_codes?select=*&order=created_at.desc');
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:12px;">کدی نیست</p>';
+            return;
+        }
+        const now = new Date();
+        container.innerHTML = list.map(d => {
+            const expires = d.expires_at ? new Date(d.expires_at) : null;
+            const isExpired = (expires && expires < now) || (d.used_count >= d.max_uses) || !d.is_active;
+            return `<div class="discount-card ${isExpired ? 'expired' : ''}">
+                <div>
+                    <div class="dc-code">${escapeHtml(d.code)}</div>
+                    <div class="dc-info">
+                        <span class="dc-percent">${d.discount_percent}٪ تخفیف</span>
+                        • استفاده: ${d.used_count} از ${d.max_uses}
+                        ${expires ? ' • انقضا: ' + expires.toLocaleDateString('fa-IR') : ''}
+                    </div>
+                </div>
+                <div class="dc-actions">
+                    <button style="background:var(--accent);color:#202124;font-weight:700;" onclick="showDiscountReport('${escapeHtml(d.code)}')">📊</button>
+                    <button class="dc-del" onclick="deleteDiscount(${d.id})">🗑️</button>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        container.innerHTML = `<p style="color:var(--danger);text-align:center;">خطا: ${escapeHtml(e.message)}</p>`;
+    }
+}
+
+async function deleteDiscount(id) {
+    if (!confirm('کد حذف شود؟')) return;
+    try {
+        await supabaseRequest(`discount_codes?id=eq.${id}`, { method: 'DELETE' });
+        showToast('🗑️ حذف شد');
+        loadDiscounts();
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+// ==================== DISCOUNT REPORT ====================
+async function showDiscountReport(code) {
+    let modal = document.getElementById('discountReportModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'discountReportModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:600px;">
+                <h2>📊 گزارش استفاده از کد <span style="color:var(--accent);font-family:monospace;" id="discountReportCode"></span></h2>
+                <p id="discountReportCount" style="margin-bottom:12px;"></p>
+                <div style="text-align:right;max-height:400px;overflow-y:auto;" id="discountReportList"></div>
+                <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
+                    <button style="background:var(--danger);color:#fff;" onclick="clearDiscountReport(document.getElementById('discountReportCode').textContent)">🗑️ حذف همه</button>
+                    <button class="secondary" onclick="closeModal('discountReportModal')">بستن</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('discountReportCode').textContent = code;
+    document.getElementById('discountReportList').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">⏳ بارگذاری...</p>';
+    document.getElementById('discountReportCount').textContent = '';
+    modal.classList.add('open');
+    try {
+        const list = await supabaseRequest(`discount_uses?code=eq.${encodeURIComponent(code)}&select=*&order=used_at.desc`);
+        const count = list ? list.length : 0;
+        document.getElementById('discountReportCount').textContent = `👥 ${count} نفر از این کد استفاده کرده‌اند`;
+        if (!list || list.length === 0) {
+            document.getElementById('discountReportList').innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:20px;">هنوز کسی از این کد استفاده نکرده</p>';
+            return;
+        }
+        document.getElementById('discountReportList').innerHTML = list.map(u => `
+            <div style="background:var(--bg-tertiary);border-radius:8px;padding:10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;border-right:3px solid var(--accent);">
+                <div style="flex:1;text-align:right;">
+                    <div style="font-size:13px;font-weight:600;">👤 ${escapeHtml(u.user_name || 'کاربر')}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);direction:ltr;text-align:left;margin-top:2px;">${escapeHtml(u.user_email || '-')}</div>
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">🕐 ${new Date(u.used_at).toLocaleString('fa-IR')}</div>
+                </div>
+                <button onclick="deleteDiscountUse(${u.id}, '${escapeHtml(code)}')" style="background:var(--danger);color:#fff;border:none;border-radius:5px;padding:6px 10px;cursor:pointer;font-family:inherit;font-size:12px;">🗑️</button>
+            </div>
+        `).join('');
+    } catch (e) {
+        document.getElementById('discountReportList').innerHTML = `<p style="color:var(--danger);text-align:center;">خطا: ${escapeHtml(e.message)}</p>`;
+    }
+}
+
+async function deleteDiscountUse(id, code) {
+    if (!confirm('این رکورد حذف شود؟')) return;
+    try {
+        await supabaseRequest(`discount_uses?id=eq.${id}`, { method: 'DELETE' });
+        showToast('🗑️ حذف شد');
+        showDiscountReport(code);
+    } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function clearDiscountReport(code) {
+    if (!confirm(`همه رکوردهای کد ${code} حذف شوند؟`)) return;
+    try {
+        await supabaseRequest(`discount_uses?code=eq.${encodeURIComponent(code)}`, { method: 'DELETE' });
+        showToast('🗑️ همه حذف شدند');
+        showDiscountReport(code);
+    } catch (e) { showToast('❌ ' + e.message); }
 }
 // ==================== LOBBY ====================
 function togglePreviewMic() {
@@ -1097,9 +1644,7 @@ async function joinMeeting() {
     showToast('⏳ در حال بررسی رمز...');
 
     try {
-        // ===== بررسی رمز =====
         if (myRole === 'teacher') {
-            // مدرس: چک کن اگه کلاس وجود نداره، بساز
             const check = await checkClassroomPassword(roomId, inputPassword);
             if (check.ok && check.isNew) {
                 await createClassroom(roomId, inputPassword, myName);
@@ -1110,7 +1655,6 @@ async function joinMeeting() {
                 throw new Error(check.error || 'رمز اشتباه');
             }
         } else {
-            // دانشجو: رمز رو چک کن
             const check = await checkClassroomPassword(roomId, inputPassword);
             if (!check.ok) throw new Error(check.error);
             if (check.isNew) throw new Error('کلاس پیدا نشد');
@@ -1158,10 +1702,6 @@ async function joinMeeting() {
         } else {
             isMicOn = false;
             isCamOn = false;
-            myPermissions.mic = false;
-            myPermissions.cam = false;
-            myPermissions.whiteboard = false;
-            myPermissions.projector = false;
         }
 
         showMeetingUI();
@@ -1337,7 +1877,6 @@ function handleIncomingData(data, senderId) {
                 }
                 startAttendanceTracking(senderId, data.name, 'student', false);
                 initUserStats(senderId, data.name, 'student');
-                // اجبار mic/cam خاموش
                 setTimeout(() => {
                     sendTo(senderId, { type: 'force-mute' });
                     sendTo(senderId, { type: 'force-camera-off' });
@@ -2237,7 +2776,7 @@ function stopActivityTimer() {
     showToast('⏹️ تایمر متوقف شد');
 }
 
-// ==================== ANNOUNCEMENT ====================
+// ==================== ANNOUNCEMENT (داخل کلاس) ====================
 function openAnnouncement() {
     if (!isPrivileged()) return;
     document.getElementById('announceModal').classList.add('open');
@@ -2299,7 +2838,7 @@ function toggleStatsPanel() {
     p.classList.toggle('open');
     if (p.classList.contains('open')) updateStatsUI();
 }
-setInterval(() => { if (stats.userStats.size > 0) updateStatsUI(); }, 30000);
+setInterval(() => { if (stats.userStats.size > 0 && document.getElementById('statsPanel').classList.contains('open')) updateStatsUI(); }, 30000);
 
 // ==================== PARTICIPANTS ====================
 function toggleParticipantsPanel() {
@@ -2409,8 +2948,6 @@ function updateQualityBars(pid, rtt) {
     el.innerHTML = h;
 }
 async function checkConnectionQuality(pid) {
-    const lp = livekitRoom?.localParticipant;
-    if (!lp) return;
     try {
         const rtt = 0.1;
         qualityCache.set(pid, rtt);
@@ -3422,7 +3959,7 @@ async function leaveMeeting(s) {
     document.getElementById('meeting').classList.remove('active');
     document.getElementById('videos').innerHTML = '';
     document.getElementById('lobby').style.display = 'flex';
-    location.href = location.pathname;
+    loadGlobalAnnouncement();
 }
 window.addEventListener('beforeunload', () => {
     try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {}
@@ -3456,7 +3993,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     initProjector();
     setupEmojiPicker();
 
-    // بررسی لاگین قبلی
     const saved = localStorage.getItem('lroom_user');
     if (saved) {
         try {
