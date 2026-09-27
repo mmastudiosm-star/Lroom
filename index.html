@@ -269,7 +269,7 @@ button{font-family:inherit}
 @keyframes crownGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,215,0,.6))}50%{filter:drop-shadow(0 0 12px rgba(255,215,0,1))}}
 #userBadge .u-name{font-weight:600}
 #userBadge .u-days{color:var(--text-secondary);font-size:11px}
-.user-menu{position:absolute;top:100%;left:0;margin-top:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:8px;min-width:200px;z-index:200;display:none;text-align:right;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.user-menu{position:absolute;top:100%;left:0;margin-top:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:8px;min-width:220px;z-index:200;display:none;text-align:right;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .user-menu.open{display:block}
 .user-menu .menu-item{padding:10px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
 .user-menu .menu-item:hover{background:var(--bg-hover)}
@@ -290,35 +290,16 @@ button{font-family:inherit}
 #waitingRoomOverlay{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#16213e,#0f3460,#1a1a2e);z-index:10000;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
 #waitingRoomOverlay .waiting-spinner{width:60px;height:60px;border:4px solid rgba(138,180,248,.2);border-top-color:#8ab4f8;border-radius:50%;animation:spin 1s linear infinite;margin:20px 0}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ==================== PRICING PLANS ==================== */
-#pricingSection{margin-top:20px;width:100%;max-width:560px}
-#pricingSection h3{font-size:16px;color:var(--accent);margin-bottom:14px;text-align:center}
-.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.pricing-card{background:var(--bg-tertiary);border:2px solid var(--border-color);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.pricing-card:hover{border-color:var(--accent);transform:translateY(-3px)}
-.pricing-card.selected{border-color:var(--success);background:rgba(52,168,83,.15);box-shadow:0 0 20px rgba(52,168,83,.4)}
-.pricing-card.selected::after{content:'✓';position:absolute;top:6px;left:8px;background:var(--success);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
-.pricing-card .pc-duration{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px}
-.pricing-card .pc-price{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:4px}
-.pricing-card .pc-price small{font-size:11px;color:var(--text-secondary);font-weight:400}
-.pricing-card .pc-badge{position:absolute;top:-8px;right:8px;background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px}
-#discountCodeBox{display:flex;gap:8px;margin-bottom:14px}
-#discountCodeBox input{flex:1;padding:11px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:monospace;font-size:14px;text-align:center;letter-spacing:2px;direction:ltr;text-transform:uppercase}
-#discountCodeBox input:focus{outline:none;border-color:var(--warning)}
-#discountCodeBox button{padding:11px 18px;background:var(--warning);color:#202124;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-#discountCodeBox button:hover{opacity:.9}
-#discountStatus{font-size:12px;text-align:center;margin-bottom:10px;min-height:18px}
-#discountStatus.ok{color:var(--success)}
-#discountStatus.err{color:var(--danger)}
-#selectedPlanInfo{background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:14px;text-align:center;font-size:13px;line-height:1.9}
-#selectedPlanInfo b{color:var(--accent)}
-#purchaseBtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--success),#1e8e3e);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-#purchaseBtn:disabled{opacity:.5;cursor:not-allowed}
-#purchaseBtn:hover:not(:disabled){opacity:.9}
-@media (max-width:600px){.pricing-grid{grid-template-columns:1fr}}
-
-/* ==================== ADMIN PANEL ==================== */
+#giftSection{margin-top:20px;width:100%;max-width:560px}
+#giftSection h3{font-size:16px;color:var(--success);margin-bottom:14px;text-align:center}
+#giftCodeBox{display:flex;gap:8px;margin-bottom:14px}
+#giftCodeBox input{flex:1;padding:11px 14px;background:var(--bg-tertiary);border:2px solid var(--success);border-radius:8px;color:var(--text-primary);font-family:monospace;font-size:16px;text-align:center;letter-spacing:2px;direction:ltr;text-transform:uppercase;font-weight:700}
+#giftCodeBox input:focus{outline:none;box-shadow:0 0 12px rgba(52,168,83,.4)}
+#giftCodeBox button{padding:11px 18px;background:var(--success);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+#giftCodeBox button:hover{opacity:.9}
+#giftStatus{font-size:13px;text-align:center;margin-bottom:10px;min-height:20px;font-weight:600}
+#giftStatus.ok{color:var(--success)}
+#giftStatus.err{color:var(--danger)}
 #adminPanelModal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:3000;padding:15px}
 #adminPanelModal.open{display:flex}
 #adminPanelContainer{background:var(--bg-primary);border-radius:16px;width:100%;max-width:1100px;height:92vh;height:92dvh;display:flex;flex-direction:column;overflow:hidden;border:2px solid var(--warning)}
@@ -380,7 +361,8 @@ button{font-family:inherit}
 .admin-empty{text-align:center;color:var(--text-secondary);font-size:13px;padding:30px 10px}
 .role-badge-admin{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124}
 .role-badge-user{padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;background:var(--bg-hover);color:var(--text-secondary)}
-
+#connBanner{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--warning);color:#202124;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9998;box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:90%;text-align:center}
+#connBanner.show{display:block}
 @media (max-width:768px){
 .logo-text{font-size:36px}.logo-icon{width:52px;height:52px;font-size:32px}
 #lobby{gap:12px;padding:15px;justify-content:flex-start;padding-top:calc(80px + env(safe-area-inset-top,0px))}
@@ -399,20 +381,17 @@ button{font-family:inherit}
 .admin-tab{font-size:11px;padding:10px 8px;min-width:auto}
 .admin-user-row{padding:8px}
 .admin-user-avatar{width:34px;height:34px;font-size:13px}
+#giftCodeBox{flex-direction:column}
+#giftCodeBox button{width:100%}
 }
-@media (max-width:600px){
-.auth-box{padding:24px 18px}
-}
+@media (max-width:600px){.auth-box{padding:24px 18px}}
 </style>
 </head>
 <body>
 
 <div id="authScreen">
     <div class="auth-box">
-        <div class="auth-logo">
-            <div class="logo-icon">L</div>
-            <div class="logo-text"><strong>room</strong></div>
-        </div>
+        <div class="auth-logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
         <div class="auth-tabs">
             <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">ورود</button>
             <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">ثبت‌نام</button>
@@ -432,9 +411,9 @@ button{font-family:inherit}
             <input type="email" id="regEmail" required autocomplete="email" />
             <label>رمز عبور</label>
             <input type="password" id="regPassword" minlength="6" required autocomplete="new-password" />
-            <label>🎟️ کد تخفیف (اختیاری)</label>
+            <label>🎁 کد هدیه (اختیاری)</label>
             <input type="text" id="regDiscountCode" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;" />
-            <button type="button" onclick="applyDiscountCode()" style="width:100%;padding:9px;margin-top:6px;background:var(--warning);color:#202124;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">✅ بررسی کد تخفیف</button>
+            <button type="button" onclick="applyDiscountCode()" style="width:100%;padding:9px;margin-top:6px;background:var(--success);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">🎁 بررسی کد هدیه</button>
             <div class="auth-error" id="regError"></div>
             <div class="auth-success" id="regSuccess"></div>
             <button type="submit" class="submit" id="regBtn">ثبت‌نام</button>
@@ -447,56 +426,19 @@ button{font-family:inherit}
     <div class="expired-box">
         <h1>⛔ اعتبار شما تمام شده است</h1>
         <p class="user-name">کاربر گرامی <b id="expUserName">-</b></p>
-        <p style="color:var(--text-secondary);font-size:13px;">برای ادامه استفاده، یکی از پلن‌های زیر را انتخاب کنید:</p>
-
-        <div id="pricingSection">
-            <h3>💳 پلن‌های اشتراک</h3>
-            <div class="pricing-grid" id="pricingGrid">
-                <div class="pricing-card" data-plan="1" data-days="30" data-price="10000" onclick="selectPlan(this)">
-                    <div class="pc-duration">۱ ماهه</div>
-                    <div class="pc-price">۱۰,۰۰۰ <small>تومان</small></div>
-                </div>
-                <div class="pricing-card" data-plan="3" data-days="90" data-price="40000" onclick="selectPlan(this)">
-                    <div class="pc-badge">🔥 محبوب</div>
-                    <div class="pc-duration">۳ ماهه</div>
-                    <div class="pc-price">۴۰,۰۰۰ <small>تومان</small></div>
-                </div>
-                <div class="pricing-card" data-plan="6" data-days="180" data-price="100000" onclick="selectPlan(this)">
-                    <div class="pc-duration">۶ ماهه</div>
-                    <div class="pc-price">۱۰۰,۰۰۰ <small>تومان</small></div>
-                </div>
-                <div class="pricing-card" data-plan="12" data-days="365" data-price="200000" onclick="selectPlan(this)">
-                    <div class="pc-badge">💎 بهترین</div>
-                    <div class="pc-duration">۱ ساله</div>
-                    <div class="pc-price">۲۰۰,۰۰۰ <small>تومان</small></div>
-                </div>
+        <div id="giftSection">
+            <h3>🎁 کد هدیه</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">کد هدیه خود را وارد کنید تا اعتبار به حسابتان اضافه شود:</p>
+            <div id="giftCodeBox">
+                <input type="text" id="expiredDiscountCode" placeholder="کد هدیه..." />
+                <button onclick="checkExpiredDiscount()">🎁 فعال کردن</button>
             </div>
-
-            <div id="discountCodeBox">
-                <input type="text" id="expiredDiscountCode" placeholder="کد تخفیف..." />
-                <button onclick="checkExpiredDiscount()">✅ بررسی</button>
-            </div>
-            <div id="discountStatus"></div>
-
-            <div id="selectedPlanInfo">
-                <div>پلن انتخابی: <b id="selectedPlanText">—</b></div>
-                <div id="discountAppliedRow" style="display:none;color:var(--success);">🎁 تخفیف: <b id="discountAppliedText">—</b></div>
-                <div style="border-top:1px solid var(--border-color);margin-top:8px;padding-top:8px;font-size:15px;">
-                    مبلغ نهایی: <b id="finalPriceText" style="color:var(--success);font-size:18px;">—</b>
-                </div>
-            </div>
-
-            <button id="purchaseBtn" onclick="proceedToPurchase()" disabled>💳 ادامه و پرداخت</button>
-
-            <div class="bale-note" style="margin-top:16px;">
-                <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">
-                    پس از کلیک روی «ادامه و پرداخت»، به پیام‌رسان <b>بله</b> هدایت می‌شوید.<br>
-                    برای هماهنگی بیشتر به آیدی زیر پیام دهید:
-                </div>
-                <div class="bale-id">@sobhan101095</div>
-            </div>
+            <div id="giftStatus"></div>
         </div>
-
+        <div class="bale-note" style="margin-top:20px;">
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">برای دریافت کد هدیه یا خرید اشتراک، به آیدی زیر پیام دهید:</div>
+            <div class="bale-id">@sobhan101095</div>
+        </div>
         <button class="logout-btn" onclick="logout()" style="margin-top:20px;">🚪 خروج از حساب</button>
     </div>
 </div>
@@ -511,6 +453,7 @@ button{font-family:inherit}
     <span class="u-days" id="userBadgeDays"></span>
     <div class="user-menu" id="userMenu">
         <div class="menu-item" onclick="showSubscriptionInfo()">💳 وضعیت اشتراک</div>
+        <div class="menu-item" onclick="openGiftCodeModal()">🎁 وارد کردن کد هدیه</div>
         <div class="menu-item" id="adminMenuBtn" style="display:none;" onclick="openAdminPanel()">👑 پنل مدیریت</div>
         <div class="menu-sep"></div>
         <div class="menu-item" onclick="logout()">🚪 خروج</div>
@@ -768,6 +711,19 @@ button{font-family:inherit}
 <div id="fileUploadModal" class="modal"><div class="modal-content"><h2>📤 آپلود</h2><p>حداکثر ۵MB</p><input type="file" id="fileInput" style="padding:8px;" /><button onclick="uploadFile()">آپلود</button><button class="secondary" onclick="closeModal('fileUploadModal')">لغو</button></div></div>
 <div id="filesPanelModal" class="modal"><div class="modal-content"><h2>📎 فایل‌ها</h2><div id="filesList" style="text-align:right;max-height:400px;overflow-y:auto;"></div><button class="secondary" onclick="closeModal('filesPanelModal')">بستن</button></div></div>
 <div id="passwordModal" class="modal"><div class="modal-content"><h2>🔐 رمز اتاق</h2><p>رمز را وارد کنید.</p><input type="password" id="passwordInput" placeholder="رمز..." /><button onclick="submitPassword()">تأیید</button><button class="secondary" onclick="cancelPassword()">لغو</button></div></div>
+<div id="giftCodeModal" class="modal">
+  <div class="modal-content">
+    <div style="font-size:60px;margin-bottom:12px;">🎁</div>
+    <h2>کد هدیه</h2>
+    <p>کد هدیه خود را وارد کنید تا به اعتبار شما اضافه شود</p>
+    <input type="text" id="giftCodeModalInput" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;font-size:16px;font-weight:700;" />
+    <div id="giftCodeModalStatus" style="font-size:13px;min-height:20px;margin-bottom:10px;font-weight:600;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="secondary" onclick="closeModal('giftCodeModal')" style="flex:1;min-width:100px;">لغو</button>
+      <button onclick="submitGiftCode()" style="flex:1;min-width:100px;background:var(--success);">🎁 فعال کردن</button>
+    </div>
+  </div>
+</div>
 <div id="activityTimerModal" class="modal"><div class="modal-content"><h2>⏳ تایمر فعالیت</h2><p>مدت زمان به دقیقه.</p><input type="number" id="activityMinutes" min="1" max="120" value="5" /><button onclick="startActivityTimer()">شروع</button><button class="secondary" onclick="stopActivityTimer()">توقف</button><button class="secondary" onclick="closeModal('activityTimerModal')">لغو</button></div></div>
 <div id="announceModal" class="modal"><div class="modal-content"><h2>📢 اعلان به همه</h2><p>پیام بالای صفحه ظاهر می‌شود.</p><textarea id="announceText" rows="3" placeholder="متن اعلان..."></textarea><button onclick="sendAnnouncement()">ارسال</button><button class="secondary" onclick="hideAnnouncement(true)">حذف اعلان</button><button class="secondary" onclick="closeModal('announceModal')">لغو</button></div></div>
 <div id="profileModal" class="modal"><div class="modal-content">
@@ -809,44 +765,31 @@ button{font-family:inherit}
 
 <div id="adminPanelModal">
   <div id="adminPanelContainer">
-    <div id="adminPanelHeader">
-      <h2>👑 پنل مدیریت ادمین</h2>
-      <button class="close-btn" onclick="closeAdminPanel()">✕</button>
-    </div>
+    <div id="adminPanelHeader"><h2>👑 پنل مدیریت ادمین</h2><button class="close-btn" onclick="closeAdminPanel()">✕</button></div>
     <div class="admin-tabs">
       <button class="admin-tab active" onclick="switchAdminTab('dashboard')">📊 داشبورد</button>
       <button class="admin-tab" onclick="switchAdminTab('users')">👥 کاربران</button>
-      <button class="admin-tab" onclick="switchAdminTab('discounts')">🎟️ کد تخفیف</button>
+      <button class="admin-tab" onclick="switchAdminTab('discounts')">🎁 کد هدیه</button>
       <button class="admin-tab" onclick="switchAdminTab('announce')">📢 اعلان همگانی</button>
     </div>
     <div id="adminPanelBody">
       <div class="admin-section active" id="adminSec-dashboard">
         <div class="admin-stat-grid" id="adminStatsGrid"></div>
-        <div class="admin-card">
-          <h3>📈 آمار کلی</h3>
-          <div id="adminDashboardInfo"></div>
-        </div>
+        <div class="admin-card"><h3>📈 آمار کلی</h3><div id="adminDashboardInfo"></div></div>
       </div>
       <div class="admin-section" id="adminSec-users">
-        <div class="admin-card">
-          <h3>🔍 جستجو</h3>
-          <input class="admin-input" id="adminUserSearch" placeholder="جستجو بر اساس نام یا ایمیل..." oninput="renderAdminUsers()" />
-        </div>
+        <div class="admin-card"><h3>🔍 جستجو</h3><input class="admin-input" id="adminUserSearch" placeholder="جستجو بر اساس نام یا ایمیل..." oninput="renderAdminUsers()" /></div>
         <div id="adminUsersList"></div>
       </div>
       <div class="admin-section" id="adminSec-discounts">
         <div class="admin-card">
-          <h3>➕ ساخت کد تخفیف جدید</h3>
+          <h3>➕ ساخت کد هدیه جدید</h3>
           <input class="admin-input" id="discCodeInput" placeholder="کد (خالی = خودکار)" style="direction:ltr;text-align:center;font-family:monospace;font-size:16px;letter-spacing:2px;" />
-          <input class="admin-input" type="number" id="discDaysInput" placeholder="تعداد روز اعتبار" value="20" min="1" />
+          <input class="admin-input" type="number" id="discDaysInput" placeholder="تعداد روز هدیه (مثلاً 30)" value="30" min="1" />
           <input class="admin-input" type="number" id="discLimitInput" placeholder="حداکثر تعداد استفاده (خالی = نامحدود)" min="1" />
-          <input class="admin-input" type="number" id="discPercentInput" placeholder="درصد تخفیف (۰ تا ۱۰۰)" min="0" max="100" value="0" />
-          <button class="admin-btn" onclick="createDiscountCode()">🎟️ ساخت کد تخفیف</button>
+          <button class="admin-btn" onclick="createDiscountCode()">🎁 ساخت کد هدیه</button>
         </div>
-        <div class="admin-card">
-          <h3>📋 لیست کدهای تخفیف</h3>
-          <div id="adminDiscountsList"></div>
-        </div>
+        <div class="admin-card"><h3>📋 لیست کدهای هدیه</h3><div id="adminDiscountsList"></div></div>
       </div>
       <div class="admin-section" id="adminSec-announce">
         <div class="admin-card">
@@ -858,10 +801,7 @@ button{font-family:inherit}
             <button class="admin-btn danger" onclick="clearGlobalAnnouncement()">🗑️ حذف اعلان فعال</button>
           </div>
         </div>
-        <div class="admin-card">
-          <h3>📜 تاریخچه اعلان‌ها</h3>
-          <div id="adminAnnounceHistory"></div>
-        </div>
+        <div class="admin-card"><h3>📜 تاریخچه اعلان‌ها</h3><div id="adminAnnounceHistory"></div></div>
       </div>
     </div>
   </div>
@@ -877,6 +817,7 @@ button{font-family:inherit}
 
 <div id="activityTimerDisplay"></div>
 <div id="reactionsContainer"></div>
+<div id="connBanner"></div>
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -945,9 +886,173 @@ let currentScreenShareTrack = null;
 let currentScreenShareIdentity = null;
 let adminActiveAnnouncement = null;
 let realtimeChannel = null;
-let selectedPlan = null;
-let expiredDiscount = null;
 let waitingAudioBlockInterval = null;
+
+// ==================== I18N ====================
+const I18N = {
+    fa: {
+        subtitle: 'پلتفرم کلاس آنلاین و وبینار',
+        roleTeacher: '👨‍🏫 مدرس', roleStudent: '👨‍🎓 دانشجو',
+        sessionCodeTitle: '🔑 کد جلسه اختصاصی شما (این کد را به دانشجویان بدهید)',
+        copySessionCode: '📋 کپی کد جلسه',
+        sessionCodeHint: 'این کد قابل تغییر نیست. دانشجویان با این کد وارد کلاس شما می‌شوند.',
+        joinRoomLabel: '🔑 کد جلسه را از مدرس خود بگیرید و اینجا وارد کنید',
+        joinRoomHint: 'پس از وارد کردن کد، روی «ورود به جلسه» کلیک کنید.',
+        lobbyHint: '💡 کد جلسه خود را برای دانشجویان بفرستید یا کد مدرس را وارد کنید.',
+        joinMeeting: 'ورود به جلسه',
+        subscriptionStatus: '💳 وضعیت اشتراک', enterGiftCode: '🎁 وارد کردن کد هدیه',
+        adminPanelMenu: '👑 پنل مدیریت', logoutMenu: '🚪 خروج',
+        giftCodeTitle: 'کد هدیه', giftCodeDesc: 'کد هدیه خود را وارد کنید تا به اعتبار شما اضافه شود',
+        activateGift: '🎁 فعال کردن', cancel: 'لغو',
+        expiredTitle: '⛔ اعتبار شما تمام شده است', expiredUser: 'کاربر گرامی',
+        giftSectionTitle: '🎁 کد هدیه',
+        giftSectionDesc: 'کد هدیه خود را وارد کنید تا اعتبار به حسابتان اضافه شود:',
+        expiredContact: 'برای دریافت کد هدیه یا خرید اشتراک، به آیدی زیر پیام دهید:',
+        logoutBtn: '🚪 خروج از حساب',
+        btnParticipants: '👥 شرکت‌کننده‌ها',
+        ctrlMic: 'میکروفون', ctrlCam: 'دوربین', ctrlScreen: 'اشتراک صفحه',
+        ctrlWhiteboard: 'تخته سفید', ctrlProjector: 'پروژکتور',
+        ctrlHand: 'دست بلند کردن', ctrlBandwidth: 'کم‌مصرف', ctrlChat: 'چت',
+        panelChat: '💬 چت', chatPublic: 'عمومی', chatPrivate: 'خصوصی',
+        connSlow: '📶 اتصال ضعیف — حالت کم‌مصرف فعال شد',
+        connWait: '⏳ اتصال کمی طول می‌کشد... (اینترنت ضعیف)',
+        connPatience: '⏳ هنوز در حال اتصال... لطفاً صبر کنید',
+        connTooLong: '⏳ اتصال کُند است. منتظر بمانید یا صفحه را رفرش کنید',
+        connReconnect: '🔄 اتصال ضعیف — در حال وصل مجدد...',
+        connConnected: '✅ اتصال برقرار شد', connLost: '⚠️ اتصال قطع شد',
+        langChanged: '🌍 زبان به فارسی تغییر کرد',
+    },
+    en: {
+        subtitle: 'Online Class & Webinar Platform',
+        roleTeacher: '👨‍🏫 Teacher', roleStudent: '👨‍🎓 Student',
+        sessionCodeTitle: '🔑 Your session code (give this to students)',
+        copySessionCode: '📋 Copy session code',
+        sessionCodeHint: 'This code is fixed. Students use it to join your class.',
+        joinRoomLabel: '🔑 Get the session code from your teacher',
+        joinRoomHint: 'After entering the code, click "Join".',
+        lobbyHint: '💡 Send your code to students or enter your teacher\'s code.',
+        joinMeeting: 'Join Meeting',
+        subscriptionStatus: '💳 Subscription status', enterGiftCode: '🎁 Enter gift code',
+        adminPanelMenu: '👑 Admin panel', logoutMenu: '🚪 Logout',
+        giftCodeTitle: 'Gift Code', giftCodeDesc: 'Enter your gift code to add credit',
+        activateGift: '🎁 Activate', cancel: 'Cancel',
+        expiredTitle: '⛔ Your subscription has expired', expiredUser: 'Dear user',
+        giftSectionTitle: '🎁 Gift Code',
+        giftSectionDesc: 'Enter your gift code to add credit:',
+        expiredContact: 'To receive a gift code or purchase, contact:',
+        logoutBtn: '🚪 Logout',
+        btnParticipants: '👥 Participants',
+        ctrlMic: 'Microphone', ctrlCam: 'Camera', ctrlScreen: 'Share screen',
+        ctrlWhiteboard: 'Whiteboard', ctrlProjector: 'Projector',
+        ctrlHand: 'Raise hand', ctrlBandwidth: 'Low bandwidth', ctrlChat: 'Chat',
+        panelChat: '💬 Chat', chatPublic: 'Public', chatPrivate: 'Private',
+        connSlow: '📶 Slow connection — low bandwidth mode on',
+        connWait: '⏳ Connecting... (weak internet)',
+        connPatience: '⏳ Still connecting... please wait',
+        connTooLong: '⏳ Connection is slow. Wait or refresh',
+        connReconnect: '🔄 Weak connection — reconnecting...',
+        connConnected: '✅ Connected', connLost: '⚠️ Connection lost',
+        langChanged: '🌍 Language changed to English',
+    },
+    ar: {
+        subtitle: 'منصة الفصول والندوات عبر الإنترنت',
+        roleTeacher: '👨‍🏫 مدرس', roleStudent: '👨‍🎓 طالب',
+        sessionCodeTitle: '🔑 رمز جلستك (أعطه للطلاب)',
+        copySessionCode: '📋 نسخ الرمز',
+        sessionCodeHint: 'هذا الرمز ثابت. الطلاب يدخلون به.',
+        joinRoomLabel: '🔑 احصل على الرمز من معلمك',
+        joinRoomHint: 'بعد إدخال الرمز، انقر على "انضمام".',
+        lobbyHint: '💡 أرسل رمزك للطلاب أو أدخل رمز معلمك.',
+        joinMeeting: 'الانضمام للاجتماع',
+        subscriptionStatus: '💳 حالة الاشتراك', enterGiftCode: '🎁 إدخال كود الهدية',
+        adminPanelMenu: '👑 لوحة الإدارة', logoutMenu: '🚪 خروج',
+        giftCodeTitle: 'كود الهدية', giftCodeDesc: 'أدخل كود الهدية لإضافة رصيد',
+        activateGift: '🎁 تفعيل', cancel: 'إلغاء',
+        expiredTitle: '⛔ انتهى اشتراكك', expiredUser: 'عزيزي المستخدم',
+        giftSectionTitle: '🎁 كود الهدية',
+        giftSectionDesc: 'أدخل كود الهدية لإضافة رصيد:',
+        expiredContact: 'للحصول على كود أو الشراء، تواصل:',
+        logoutBtn: '🚪 خروج',
+        btnParticipants: '👥 المشاركون',
+        ctrlMic: 'الميكروفون', ctrlCam: 'الكاميرا', ctrlScreen: 'مشاركة الشاشة',
+        ctrlWhiteboard: 'السبورة', ctrlProjector: 'العارض',
+        ctrlHand: 'رفع اليد', ctrlBandwidth: 'استهلاك منخفض', ctrlChat: 'الدردشة',
+        panelChat: '💬 الدردشة', chatPublic: 'عام', chatPrivate: 'خاص',
+        connSlow: '📶 اتصال ضعيف — تم تفعيل الوضع المنخفض',
+        connWait: '⏳ جارٍ الاتصال... (إنترنت ضعيف)',
+        connPatience: '⏳ لا يزال يتصل... انتظر',
+        connTooLong: '⏳ الاتصال بطيء. انتظر أو أعد التحميل',
+        connReconnect: '🔄 اتصال ضعيف — إعادة الاتصال...',
+        connConnected: '✅ تم الاتصال', connLost: '⚠️ انقطع الاتصال',
+        langChanged: '🌍 تم تغيير اللغة إلى العربية',
+    }
+};
+let currentLang = localStorage.getItem('lroom_lang') || 'fa';
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.fa[key] || key; }
+
+function applyLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lroom_lang', lang);
+    const L = I18N[lang] || I18N.fa;
+    const setTxt = (sel, txt) => { const el = document.querySelector(sel); if (el && txt != null) el.textContent = txt; };
+    try {
+        setTxt('.subtitle', L.subtitle);
+        setTxt('#roleBtnTeacher', L.roleTeacher);
+        setTxt('#roleBtnStudent', L.roleStudent);
+        setTxt('#teacherSessionBox .sc-label', L.sessionCodeTitle);
+        setTxt('#studentJoinBox .sj-label', L.joinRoomLabel);
+        setTxt('#studentJoinBox .sj-hint', L.joinRoomHint);
+        setTxt('#lobbyHint', L.lobbyHint);
+        const jb = document.getElementById('joinBtn');
+        if (jb && !jb.disabled) jb.textContent = L.joinMeeting;
+        const menuItems = document.querySelectorAll('#userMenu .menu-item');
+        if (menuItems[0]) menuItems[0].textContent = L.subscriptionStatus;
+        if (menuItems[1]) menuItems[1].textContent = L.enterGiftCode;
+        if (menuItems[2] && menuItems[2].id === 'adminMenuBtn') menuItems[2].textContent = L.adminPanelMenu;
+        if (menuItems[menuItems.length-1]) menuItems[menuItems.length-1].textContent = L.logoutMenu;
+        const gm = document.getElementById('giftCodeModal');
+        if (gm) {
+            const h2 = gm.querySelector('h2'); if (h2) h2.textContent = L.giftCodeTitle;
+            const p = gm.querySelector('p'); if (p) p.textContent = L.giftCodeDesc;
+            const btns = gm.querySelectorAll('button');
+            if (btns[0]) btns[0].textContent = L.cancel;
+            if (btns[1]) btns[1].textContent = L.activateGift;
+        }
+        const expH1 = document.querySelector('.expired-box h1'); if (expH1) expH1.textContent = L.expiredTitle;
+        const expUser = document.querySelector('.expired-box .user-name');
+        if (expUser && expUser.childNodes[0]) expUser.childNodes[0].nodeValue = L.expiredUser + ' ';
+        setTxt('#giftSection h3', L.giftSectionTitle);
+        setTxt('#giftSection > p', L.giftSectionDesc);
+        setTxt('#giftCodeBox button', L.activateGift);
+        setTxt('.logout-btn', L.logoutBtn);
+        document.querySelectorAll('#headerActions button').forEach(b => {
+            const oc = b.getAttribute('onclick') || '';
+            let txt = null;
+            if (oc.includes('toggleParticipantsPanel')) txt = L.btnParticipants;
+            if (txt) {
+                const span = b.querySelector('span');
+                if (span) {
+                    const firstText = Array.from(b.childNodes).find(n => n.nodeType === 3 && n.textContent.trim());
+                    if (firstText) firstText.nodeValue = ' ' + txt + ' ';
+                } else b.textContent = txt;
+            }
+        });
+        const setCtrl = (id, txt) => { const e = document.getElementById(id); if (e) e.title = txt; };
+        setCtrl('btnMic', L.ctrlMic); setCtrl('btnCam', L.ctrlCam);
+        setCtrl('btnScreen', L.ctrlScreen); setCtrl('btnWhiteboard', L.ctrlWhiteboard);
+        setCtrl('btnProjector', L.ctrlProjector); setCtrl('btnHand', L.ctrlHand);
+        setCtrl('btnBandwidth', L.ctrlBandwidth); setCtrl('btnChat', L.ctrlChat);
+        setTxt('#chat .panel-header strong', L.panelChat);
+        const chatTabs = document.querySelectorAll('#chat .chat-tab');
+        if (chatTabs[0]) chatTabs[0].textContent = L.chatPublic;
+        if (chatTabs[1]) chatTabs[1].textContent = L.chatPrivate;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = (lang === 'en') ? 'ltr' : 'rtl';
+    } catch (e) { console.warn('applyLanguage error:', e); }
+}
+function changeLanguage(l) { applyLanguage(l); showToast(t('langChanged')); }
+function showConnBanner(msg) { const b = document.getElementById('connBanner'); if (!b) return; b.textContent = msg; b.classList.add('show'); }
+function hideConnBanner() { const b = document.getElementById('connBanner'); if (b) b.classList.remove('show'); }
 
 // ==================== HELPERS ====================
 function sanitize(r) { return String(r || '').replace(/[^a-zA-Z0-9]/g, '') || 'default'; }
@@ -959,26 +1064,20 @@ function showToast(txt) {
     if (!txt) return;
     const to = document.getElementById('toast');
     if (window._toastTimer) clearTimeout(window._toastTimer);
-    to.textContent = txt;
-    void to.offsetWidth;
-    to.classList.add('show');
+    to.textContent = txt; void to.offsetWidth; to.classList.add('show');
     window._toastTimer = setTimeout(() => to.classList.remove('show'), 3500);
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function hasProjectorAccess() { return myRole === 'teacher' || isCoTeacher || myPermissions.projector; }
 function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
-function changeLanguage(l) { localStorage.setItem('lroom_lang', l); showToast('🌍 زبان تغییر کرد'); }
 function changeDevice(mode) {
     localStorage.setItem('lroom_device', mode);
     document.body.classList.remove('device-phone', 'device-tablet', 'device-laptop');
     if (mode === 'phone') document.body.classList.add('device-phone');
     else if (mode === 'tablet') document.body.classList.add('device-tablet');
     else if (mode === 'laptop') document.body.classList.add('device-laptop');
-    showToast('📱 چیدمان تغییر کرد');
-    setTimeout(() => {
-        if (typeof resizeWhiteboardCanvas === 'function') resizeWhiteboardCanvas();
-        if (typeof resizeProjectorCanvas === 'function') resizeProjectorCanvas();
-    }, 150);
+    showToast('📱');
+    setTimeout(() => { if (typeof resizeWhiteboardCanvas === 'function') resizeWhiteboardCanvas(); if (typeof resizeProjectorCanvas === 'function') resizeProjectorCanvas(); }, 150);
 }
 function toggleTheme() {
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -993,43 +1092,23 @@ function toggleTheme() {
 function startWaitingAudioBlocker() {
     if (waitingAudioBlockInterval) return;
     waitingAudioBlockInterval = setInterval(() => {
-        if (!isWaitingForApproval) {
-            clearInterval(waitingAudioBlockInterval);
-            waitingAudioBlockInterval = null;
-            return;
-        }
-        document.querySelectorAll('audio[data-identity]').forEach(el => {
-            if (!el.muted) el.muted = true;
-            try { el.volume = 0; } catch(e){}
-        });
+        if (!isWaitingForApproval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; return; }
+        document.querySelectorAll('audio[data-identity]').forEach(el => { if (!el.muted) el.muted = true; try { el.volume = 0; } catch(e){} });
         try {
             livekitRoom?.remoteParticipants?.forEach(p => {
                 p.audioTrackPublications?.forEach(pub => {
-                    if (pub.track && !pub.track.isMuted) {
-                        try { pub.track.mediaStreamTrack.enabled = false; } catch(e){}
-                    }
+                    if (pub.track && !pub.track.isMuted) { try { pub.track.mediaStreamTrack.enabled = false; } catch(e){} }
                 });
             });
         } catch(e){}
     }, 300);
 }
 function stopWaitingAudioBlocker() {
-    if (waitingAudioBlockInterval) {
-        clearInterval(waitingAudioBlockInterval);
-        waitingAudioBlockInterval = null;
-    }
-    document.querySelectorAll('audio[data-identity]').forEach(el => {
-        el.muted = false;
-        try { el.volume = 1; } catch(e){}
-        el.play().catch(() => {});
-    });
+    if (waitingAudioBlockInterval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; }
+    document.querySelectorAll('audio[data-identity]').forEach(el => { el.muted = false; try { el.volume = 1; } catch(e){} el.play().catch(() => {}); });
     try {
         livekitRoom?.remoteParticipants?.forEach(p => {
-            p.audioTrackPublications?.forEach(pub => {
-                if (pub.track) {
-                    try { pub.track.mediaStreamTrack.enabled = true; } catch(e){}
-                }
-            });
+            p.audioTrackPublications?.forEach(pub => { if (pub.track) { try { pub.track.mediaStreamTrack.enabled = true; } catch(e){} } });
         });
     } catch(e){}
 }
@@ -1046,8 +1125,7 @@ async function generateLiveKitToken(roomName, identity, name, isTeacher) {
     const enc = new TextEncoder();
     const b64url = (obj) => {
         const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
-        const bytes = enc.encode(str);
-        let binary = '';
+        const bytes = enc.encode(str); let binary = '';
         bytes.forEach(b => binary += String.fromCharCode(b));
         return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     };
@@ -1055,8 +1133,7 @@ async function generateLiveKitToken(roomName, identity, name, isTeacher) {
     const keyData = enc.encode(LIVEKIT_API_SECRET);
     const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(data));
-    const sigBytes = new Uint8Array(sig);
-    let sigBinary = '';
+    const sigBytes = new Uint8Array(sig); let sigBinary = '';
     sigBytes.forEach(b => sigBinary += String.fromCharCode(b));
     const sigB64 = btoa(sigBinary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     return `${data}.${sigB64}`;
@@ -1080,15 +1157,8 @@ function getScreenShareCapture(level) {
 function getScreenSharePublish(level) {
     switch(level) {
         case 'low': return { simulcast: false, screenShareEncoding: { maxBitrate: 600000, maxFramerate: 10 } };
-        case 'high': return { simulcast: true, screenShareEncoding: { maxBitrate: 5000000, maxFramerate: 30 }, screenShareSimulcastLayers: [{ width: 1280, height: 720, encoding: { maxBitrate: 2000000, maxFramerate: 30 } }, { width: 1920, height: 1080, encoding: { maxBitrate: 5000000, maxFramerate: 30 } }] };
-        default: return { simulcast: true, screenShareEncoding: { maxBitrate: 2500000, maxFramerate: 15 }, screenShareSimulcastLayers: [{ width: 1280, height: 720, encoding: { maxBitrate: 1200000, maxFramerate: 15 } }, { width: 1920, height: 1080, encoding: { maxBitrate: 2500000, maxFramerate: 15 } }] };
-    }
-}
-function getProjectorMaxSize(level) {
-    switch(level) {
-        case 'low': return { maxW: 854, maxH: 480, quality: 0.6 };
-        case 'high': return { maxW: 1920, maxH: 1080, quality: 0.92 };
-        default: return { maxW: 1280, maxH: 720, quality: 0.78 };
+        case 'high': return { simulcast: true, screenShareEncoding: { maxBitrate: 5000000, maxFramerate: 30 } };
+        default: return { simulcast: true, screenShareEncoding: { maxBitrate: 2500000, maxFramerate: 15 } };
     }
 }
 function applyQualitySettings() {
@@ -1097,7 +1167,7 @@ function applyQualitySettings() {
     qualitySettings.screenShare = document.getElementById('qScreenShare').value;
     qualitySettings.projector = document.getElementById('qProjector').value;
     broadcast({ type: 'quality-settings', settings: qualitySettings, from: myId });
-    showToast('⚙️ کیفیت به‌روز شد');
+    showToast('⚙️');
 }
 function receiveQualitySettings(settings) {
     if (!settings) return;
@@ -1110,60 +1180,64 @@ function receiveQualitySettings(settings) {
     }
 }
 
-// ==================== PRICING ====================
-function selectPlan(el) {
-    document.querySelectorAll('.pricing-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedPlan = { plan: el.dataset.plan, days: parseInt(el.dataset.days), price: parseInt(el.dataset.price), label: el.querySelector('.pc-duration').textContent };
-    updatePlanInfo();
-    document.getElementById('purchaseBtn').disabled = false;
-    if (expiredDiscount) updatePlanInfo();
-}
-function updatePlanInfo() {
-    if (!selectedPlan) return;
-    document.getElementById('selectedPlanText').textContent = `${selectedPlan.label} - ${selectedPlan.price.toLocaleString('fa-IR')} تومان`;
-    let finalPrice = selectedPlan.price;
-    const discountRow = document.getElementById('discountAppliedRow');
-    if (expiredDiscount) {
-        const discountAmount = Math.round(selectedPlan.price * (expiredDiscount.discount_percent / 100));
-        finalPrice = selectedPlan.price - discountAmount;
-        document.getElementById('discountAppliedText').textContent = `${expiredDiscount.discount_percent}% (${discountAmount.toLocaleString('fa-IR')} تومان کم شد)`;
-        discountRow.style.display = 'block';
-    } else { discountRow.style.display = 'none'; }
-    document.getElementById('finalPriceText').textContent = `${finalPrice.toLocaleString('fa-IR')} تومان`;
+// ==================== GIFT CODE ====================
+async function _applyGiftCodeToUser(code, statusEl) {
+    if (!currentUser) { if (statusEl) { statusEl.textContent = '⚠️'; statusEl.style.color = 'var(--danger)'; } return false; }
+    const { data: disc, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
+    if (error || !disc) { if (statusEl) { statusEl.textContent = '❌'; statusEl.style.color = 'var(--danger)'; } return false; }
+    const usedCount = (disc.used_by || []).length;
+    if (disc.max_uses > 0 && usedCount >= disc.max_uses) { if (statusEl) { statusEl.textContent = '⛔'; statusEl.style.color = 'var(--danger)'; } return false; }
+    if ((disc.used_by || []).includes(currentUser.id)) { if (statusEl) { statusEl.textContent = '⚠️'; statusEl.style.color = 'var(--danger)'; } return false; }
+    const days = Number(disc.days) || 0;
+    if (days < 1) { if (statusEl) { statusEl.textContent = '❌'; statusEl.style.color = 'var(--danger)'; } return false; }
+    if (statusEl) { statusEl.textContent = '⏳...'; statusEl.style.color = 'var(--text-secondary)'; }
+    const { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (!prof) { if (statusEl) { statusEl.textContent = '❌'; statusEl.style.color = 'var(--danger)'; } return false; }
+    const now = new Date();
+    const base = prof.subscription_end && new Date(prof.subscription_end) > now ? new Date(prof.subscription_end) : now;
+    base.setDate(base.getDate() + days);
+    await sb.from('profiles').update({ subscription_end: base.toISOString() }).eq('id', currentUser.id);
+    await sb.from('discount_codes').update({ used_count: usedCount + 1, used_by: [...(disc.used_by || []), currentUser.id] }).eq('id', disc.id);
+    currentUser.subscriptionEnd = base.toISOString();
+    const end = new Date(currentUser.subscriptionEnd);
+    const daysLeft = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
+    const ud = document.getElementById('userBadgeDays'); if (ud) ud.textContent = `(${daysLeft} روز مانده)`;
+    showToast(`🎁 ${days}`);
+    return days;
 }
 async function checkExpiredDiscount() {
     const input = document.getElementById('expiredDiscountCode');
-    const status = document.getElementById('discountStatus');
+    const status = document.getElementById('giftStatus');
     const code = (input.value || '').trim().toUpperCase();
-    status.className = ''; status.textContent = '';
-    if (!code) { status.textContent = '⚠️ کد را وارد کنید'; status.className = 'err'; return; }
-    status.textContent = '⏳ در حال بررسی...';
-    try {
-        const { data: disc, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
-        if (error || !disc) { status.textContent = '❌ کد تخفیف نامعتبر است'; status.className = 'err'; expiredDiscount = null; updatePlanInfo(); return; }
-        if (disc.max_uses > 0 && (disc.used_by || []).length >= disc.max_uses) { status.textContent = '⛔ این کد تخفیف تمام شده است'; status.className = 'err'; expiredDiscount = null; updatePlanInfo(); return; }
-        const percent = disc.discount_percent || (disc.days >= 30 ? 20 : (disc.days >= 10 ? 10 : 5));
-        expiredDiscount = { code: disc.code, days: disc.days, discount_percent: percent, raw: disc };
-        status.textContent = `✅ کد معتبر! ${percent}% تخفیف اعمال شد`;
-        status.className = 'ok';
-        updatePlanInfo();
-        showToast(`🎁 ${percent}% تخفیف اعمال شد`);
-    } catch (e) { status.textContent = '❌ خطا در بررسی کد'; status.className = 'err'; expiredDiscount = null; }
+    status.className = ''; status.textContent = ''; status.style.color = '';
+    if (!code) { status.textContent = '⚠️'; status.style.color = 'var(--danger)'; return; }
+    status.textContent = '⏳...'; status.style.color = 'var(--text-secondary)';
+    const result = await _applyGiftCodeToUser(code, status);
+    if (typeof result === 'number') {
+        status.textContent = `✅ ${result}`;
+        status.className = 'ok'; status.style.color = 'var(--success)';
+        setTimeout(() => { document.getElementById('expiredScreen').style.display = 'none'; checkAndShow(); }, 2000);
+    }
 }
-function proceedToPurchase() {
-    if (!selectedPlan) { showToast('⚠️ ابتدا یک پلن انتخاب کنید'); return; }
-    const finalPrice = expiredDiscount ? selectedPlan.price - Math.round(selectedPlan.price * (expiredDiscount.discount_percent / 100)) : selectedPlan.price;
-    let msg = `📦 درخواست خرید اشتراک Lroom\n\n`;
-    msg += `👤 نام: ${currentUser?.name || '-'}\n`;
-    msg += `📧 ایمیل: ${currentUser?.email || '-'}\n`;
-    msg += `📅 پلن: ${selectedPlan.label}\n`;
-    msg += `💰 مبلغ: ${finalPrice.toLocaleString('fa-IR')} تومان\n`;
-    if (expiredDiscount) msg += `🎁 کد تخفیف: ${expiredDiscount.code} (${expiredDiscount.discount_percent}% تخفیف)\n`;
-    msg += `\nلطفاً برای تکمیل خرید راهنمایی کنید.`;
-    navigator.clipboard.writeText(msg).then(() => showToast('📋 متن سفارش کپی شد')).catch(() => {});
-    const confirmed = confirm(`📦 خلاصه سفارش:\n\nپلن: ${selectedPlan.label}\nمبلغ نهایی: ${finalPrice.toLocaleString('fa-IR')} تومان\n${expiredDiscount ? 'کد تخفیف: ' + expiredDiscount.code + '\n' : ''}\n✅ متن سفارش کپی شد.\nآیا می‌خواهید به پیام‌رسان بله بروید؟`);
-    if (confirmed) { window.open('https://web.bale.ai/', '_blank'); showToast('📤 متن سفارش در بله برای @sobhan101095 بفرستید'); }
+function openGiftCodeModal() {
+    document.getElementById('userMenu').classList.remove('open');
+    document.getElementById('giftCodeModalInput').value = '';
+    const st = document.getElementById('giftCodeModalStatus'); st.textContent = ''; st.style.color = '';
+    document.getElementById('giftCodeModal').classList.add('open');
+    setTimeout(() => document.getElementById('giftCodeModalInput').focus(), 150);
+}
+async function submitGiftCode() {
+    const input = document.getElementById('giftCodeModalInput');
+    const status = document.getElementById('giftCodeModalStatus');
+    const code = (input.value || '').trim().toUpperCase();
+    status.className = ''; status.textContent = ''; status.style.color = '';
+    if (!code) { status.textContent = '⚠️'; status.style.color = 'var(--danger)'; return; }
+    status.textContent = '⏳...'; status.style.color = 'var(--text-secondary)';
+    const result = await _applyGiftCodeToUser(code, status);
+    if (typeof result === 'number') {
+        status.textContent = `✅ ${result}`; status.style.color = 'var(--success)';
+        setTimeout(() => { closeModal('giftCodeModal'); if (currentUser.role !== 'admin') checkAndShow(); }, 1800);
+    }
 }
 
 // ==================== AUTH ====================
@@ -1185,23 +1259,21 @@ async function handleRegister(e) {
     const okEl = document.getElementById('regSuccess');
     const btn = document.getElementById('regBtn');
     errEl.classList.remove('show'); okEl.classList.remove('show');
-    if (password.length < 6) { errEl.textContent = 'رمز عبور باید حداقل ۶ کاراکتر باشد'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳ در حال ثبت‌نام...';
+    if (password.length < 6) { errEl.textContent = '⚠️'; errEl.classList.add('show'); return; }
+    btn.disabled = true; btn.textContent = '⏳...';
     try {
-        let disc = null;
+        let disc = null, discUsedCount = 0;
         if (discCode) {
             const { data: d } = await sb.from('discount_codes').select('*').eq('code', discCode).maybeSingle();
-            if (!d) throw new Error('کد تخفیف نامعتبر است');
-            if (d.max_uses > 0 && d.used_count >= d.max_uses) throw new Error('این کد تخفیف تمام شده است');
+            if (!d) throw new Error('invalid code');
+            discUsedCount = (d.used_by || []).length;
+            if (d.max_uses > 0 && discUsedCount >= d.max_uses) throw new Error('code used up');
             disc = d;
         }
         const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name } } });
-        if (authErr) {
-            if (authErr.message.toLowerCase().includes('email not confirmed')) throw new Error('تأیید ایمیل در Supabase فعال است. باید خاموشش کنی.');
-            throw new Error(authErr.message);
-        }
-        if (!authData.user) throw new Error('خطا در ساخت حساب');
-        if (!authData.session) throw new Error('تأیید ایمیل در Supabase فعال است. در پنل Supabase → Authentication → Providers → Email → Confirm email را خاموش کن.');
+        if (authErr) throw new Error(authErr.message);
+        if (!authData.user) throw new Error('user not created');
+        if (!authData.session) throw new Error('Confirm email must be OFF in Supabase');
         await new Promise(r => setTimeout(r, 1500));
         let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
         if (!prof) {
@@ -1218,14 +1290,14 @@ async function handleRegister(e) {
             const base = prof.subscription_end ? new Date(prof.subscription_end) : new Date();
             base.setDate(base.getDate() + disc.days);
             await sb.from('profiles').update({ subscription_end: base.toISOString() }).eq('id', authData.user.id);
-            await sb.from('discount_codes').update({ used_count: disc.used_count + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id);
+            await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id);
         }
         try { await sb.auth.signOut(); } catch (e) {}
-        okEl.textContent = `✅ ثبت‌نام موفق! ${disc ? `${disc.days} روز اعتبار اضافه شد.` : ''} حالا وارد شوید.`;
+        okEl.textContent = '✅ ' + (disc ? `${disc.days} days added.` : '');
         okEl.classList.add('show');
         setTimeout(() => { switchAuthTab('login'); document.getElementById('loginEmail').value = email; }, 2500);
     } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'خطا در ثبت‌نام');
+        errEl.textContent = '❌ ' + (err.message || 'error');
         errEl.classList.add('show');
     } finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
 }
@@ -1236,44 +1308,42 @@ async function handleLogin(e) {
     const errEl = document.getElementById('loginError');
     const btn = document.getElementById('loginBtn');
     errEl.classList.remove('show');
-    btn.disabled = true; btn.textContent = '⏳ در حال ورود...';
+    btn.disabled = true; btn.textContent = '⏳...';
     try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-            if (error.message.toLowerCase().includes('email not confirmed')) throw new Error('حساب شما تأیید نشده. با ادمین تماس بگیرید.');
-            throw new Error(error.message);
-        }
-        if (!data.user) throw new Error('کاربر یافت نشد');
+        if (error) throw new Error(error.message);
+        if (!data.user) throw new Error('user not found');
         let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
         if (!profile) {
             const endDate = new Date(); endDate.setDate(endDate.getDate() + DEFAULT_SUBSCRIPTION_DAYS);
             await sb.from('profiles').insert({
                 id: data.user.id, email: data.user.email,
-                name: data.user.user_metadata?.name || 'کاربر',
+                name: data.user.user_metadata?.name || 'User',
                 role: data.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user',
                 subscription_end: endDate.toISOString(),
             });
             const r2 = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
             profile = r2.data;
         }
-        if (!profile) throw new Error('خطا در ساخت پروفایل');
+        if (!profile) throw new Error('profile error');
         currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
         checkAndShow();
         initRealtime();
         loadActiveAnnouncement();
     } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'ایمیل یا رمز عبور اشتباه است');
+        errEl.textContent = '❌ ' + (err.message || 'login failed');
         errEl.classList.add('show');
     } finally { btn.disabled = false; btn.textContent = 'ورود'; }
 }
 async function applyDiscountCode() {
     const input = document.getElementById('regDiscountCode'); if (!input) return;
     const code = (input.value || '').trim().toUpperCase();
-    if (!code) return showToast('⚠️ کد را وارد کنید');
+    if (!code) return showToast('⚠️');
     const { data: d, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
-    if (error || !d) return showToast('❌ کد نامعتبر');
-    if (d.max_uses > 0 && d.used_count >= d.max_uses) return showToast('⛔ این کد تمام شده');
-    showToast(`✅ کد معتبر! ${d.days} روز اعتبار`);
+    if (error || !d) return showToast('❌');
+    const usedCount = (d.used_by || []).length;
+    if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔');
+    showToast(`✅ ${d.days}`);
 }
 async function logout() {
     try { await sb.auth.signOut(); } catch (e) {}
@@ -1286,8 +1356,8 @@ async function logout() {
 }
 function copySessionCode() {
     const code = currentUser?.sessionCode;
-    if (!code) return showToast('⚠️ کد جلسه موجود نیست');
-    navigator.clipboard.writeText(code).then(() => showToast('📋 کد جلسه کپی شد: ' + code)).catch(() => prompt('کد جلسه شما:', code));
+    if (!code) return showToast('⚠️');
+    navigator.clipboard.writeText(code).then(() => showToast('📋 ' + code)).catch(() => prompt('Code:', code));
 }
 async function ensureSessionCode() {
     if (currentUser.sessionCode) return currentUser.sessionCode;
@@ -1307,16 +1377,13 @@ function setLobbyRole(role) {
     const btnS = document.getElementById('roleBtnStudent');
     const teacherBox = document.getElementById('teacherSessionBox');
     const studentBox = document.getElementById('studentJoinBox');
-    const hint = document.getElementById('lobbyHint');
     if (role === 'teacher') {
         btnT.classList.add('active'); btnS.classList.remove('active');
         teacherBox.style.display = 'block'; studentBox.style.display = 'none';
-        hint.textContent = '💡 کد جلسه خود را برای دانشجویان بفرستید تا وارد شوند.';
         (async () => { const code = await ensureSessionCode(); const el = document.getElementById('userSessionCodeDisplay'); if (el) el.textContent = code; })();
     } else {
         btnT.classList.remove('active'); btnS.classList.add('active');
         teacherBox.style.display = 'none'; studentBox.style.display = 'block';
-        hint.textContent = '💡 کد جلسه را از مدرس خود بگیرید و وارد کنید.';
     }
 }
 function checkAndShow() {
@@ -1340,14 +1407,8 @@ function checkAndShow() {
     } else {
         document.getElementById('expiredScreen').style.display = 'flex';
         document.getElementById('expUserName').textContent = currentUser.name;
-        selectedPlan = null; expiredDiscount = null;
-        document.querySelectorAll('.pricing-card').forEach(c => c.classList.remove('selected'));
-        const ds = document.getElementById('discountStatus'); if (ds) { ds.textContent = ''; ds.className = ''; }
+        const gs = document.getElementById('giftStatus'); if (gs) { gs.textContent = ''; gs.className = ''; gs.style.color = ''; }
         const inp = document.getElementById('expiredDiscountCode'); if (inp) inp.value = '';
-        const spt = document.getElementById('selectedPlanText'); if (spt) spt.textContent = '—';
-        const fpt = document.getElementById('finalPriceText'); if (fpt) fpt.textContent = '—';
-        const dar = document.getElementById('discountAppliedRow'); if (dar) dar.style.display = 'none';
-        const pb = document.getElementById('purchaseBtn'); if (pb) pb.disabled = true;
     }
 }
 async function startPreview() {
@@ -1379,12 +1440,12 @@ function showSubscriptionInfo() {
     const end = currentUser.subscriptionEnd ? new Date(currentUser.subscriptionEnd) : null;
     const now = new Date();
     const daysLeft = end ? Math.ceil((end - now) / (1000 * 60 * 60 * 24)) : 0;
-    if (currentUser.role === 'admin') alert('👑 شما ادمین هستید و دسترسی نامحدود دارید.');
+    if (currentUser.role === 'admin') alert('👑 Admin');
     else if (daysLeft > 0) {
-        let msg = `✅ اعتبار شما تا ${end.toLocaleDateString('fa-IR')} فعال است.\n\n⏳ ${daysLeft} روز باقی‌مانده.`;
-        if (currentUser.sessionCode) msg += `\n\n🔑 کد جلسه شما: ${currentUser.sessionCode}`;
+        let msg = `✅ ${end.toLocaleDateString('fa-IR')}\n\n⏳ ${daysLeft}`;
+        if (currentUser.sessionCode) msg += `\n\n🔑 ${currentUser.sessionCode}`;
         alert(msg);
-    } else alert(`⛔ اعتبار شما به پایان رسیده.\n\nبرای تمدید، یکی از پلن‌ها را از صفحه اصلی انتخاب کنید.`);
+    } else alert(`⛔ Expired`);
 }
 function togglePreviewMic() {
     const b = document.getElementById('previewMicBtn');
@@ -1399,7 +1460,7 @@ function togglePreviewCam() {
 
 // ==================== ADMIN PANEL ====================
 function isAdminUser() { return currentUser && currentUser.role === 'admin'; }
-function openAdminPanel() { if (!isAdminUser()) { showToast('⛔ فقط ادمین'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
+function openAdminPanel() { if (!isAdminUser()) { showToast('⛔'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
 function closeAdminPanel() { document.getElementById('adminPanelModal').classList.remove('open'); }
 function switchAdminTab(tab) {
     const tabs = ['dashboard','users','discounts','announce'];
@@ -1426,7 +1487,7 @@ async function renderAdminDashboard() {
       <div class="admin-stat-box"><div class="num" style="color:var(--success)">${activeUsers}</div><div class="lbl">✅ فعال</div></div>
       <div class="admin-stat-box"><div class="num" style="color:var(--danger)">${expiredUsers}</div><div class="lbl">⛔ منقضی</div></div>
       <div class="admin-stat-box"><div class="num" style="color:#ffd700">${admins}</div><div class="lbl">👑 ادمین</div></div>
-      <div class="admin-stat-box"><div class="num" style="color:var(--accent)">${allDiscs.length}</div><div class="lbl">🎟️ کد تخفیف</div></div>
+      <div class="admin-stat-box"><div class="num" style="color:var(--accent)">${allDiscs.length}</div><div class="lbl">🎁 کد هدیه</div></div>
       <div class="admin-stat-box"><div class="num" style="color:var(--warning)">${usedDiscounts}</div><div class="lbl">📌 استفاده‌شده</div></div>
     `;
     const totalDays = allUsers.reduce((sum, u) => { if (!u.subscription_end) return sum; const d = Math.ceil((new Date(u.subscription_end) - now) / 86400000); return sum + Math.max(0, d); }, 0);
@@ -1449,11 +1510,7 @@ async function renderAdminUsers() {
         const end = u.subscription_end ? new Date(u.subscription_end) : null;
         const daysLeft = end ? Math.ceil((end - now) / 86400000) : 0;
         const isAdmin = u.role === 'admin';
-        const statusText = isAdmin 
-            ? '👑 ادمین' 
-            : (daysLeft > 0 
-                ? `✅ ${daysLeft} روز مانده (تا ${end.toLocaleDateString('fa-IR')})` 
-                : '⛔ منقضی');
+        const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز مانده (تا ${end.toLocaleDateString('fa-IR')})` : '⛔ منقضی');
         const statusColor = isAdmin ? '#ffd700' : (daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
         return `<div class="admin-user-row">
           <div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div>
@@ -1477,37 +1534,63 @@ async function adminAddDays(userId, days) {
     if (!isAdminUser()) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role').eq('id', userId).single();
     if (!u) return showToast('یافت نشد');
-    if (u.role === 'admin') return showToast('👑 ادمین نیازی ندارد');
+    if (u.role === 'admin') return showToast('👑');
     const now = new Date();
     let base = u.subscription_end && new Date(u.subscription_end) > now ? new Date(u.subscription_end) : now;
     base.setDate(base.getDate() + days);
     await sb.from('profiles').update({ subscription_end: base.toISOString() }).eq('id', userId);
     renderAdminUsers();
-    showToast(days > 0 ? `✅ ${days} روز اضافه شد` : `⚠️ ${Math.abs(days)} روز کم شد`);
 }
 async function adminAddSubscription(userId, days, label) {
     if (!isAdminUser()) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role, name').eq('id', userId).single();
-    if (!u) return showToast('کاربر یافت نشد');
-    if (u.role === 'admin') return showToast('👑 ادمین نیازی به اعتبار ندارد');
-    if (!confirm(`به "${u.name}" پلن ${label} (${days} روز) اضافه شود؟`)) return;
+    if (!u) return showToast('یافت نشد');
+    if (u.role === 'admin') return showToast('👑');
+    if (!confirm(`${u.name} - ${label} (${days})?`)) return;
     const now = new Date();
-    let base = u.subscription_end && new Date(u.subscription_end) > now 
-        ? new Date(u.subscription_end) 
-        : now;
+    let base = u.subscription_end && new Date(u.subscription_end) > now ? new Date(u.subscription_end) : now;
     base.setDate(base.getDate() + days);
     const { error } = await sb.from('profiles').update({ subscription_end: base.toISOString() }).eq('id', userId);
     if (error) return showToast('❌ ' + error.message);
     renderAdminUsers();
-    showToast(`✅ پلن ${label} برای ${u.name} فعال شد تا ${base.toLocaleDateString('fa-IR')}`);
 }
+// ✅ حذف کاربر با error handling کامل
 async function adminDeleteUser(userId, name) {
     if (!isAdminUser()) return;
     if (currentUser.id === userId) return showToast('⛔ نمی‌توانید خودتان را حذف کنید');
-    if (!confirm(`حذف کاربر "${name}"؟`)) return;
-    await sb.from('profiles').delete().eq('id', userId);
-    renderAdminUsers();
-    showToast('🗑️ حذف شد');
+    if (!confirm(`حذف کاربر "${name}"؟ این عمل قابل بازگشت نیست.`)) return;
+    try {
+        const { data, error } = await sb
+            .from('profiles')
+            .delete()
+            .eq('id', userId)
+            .select();
+        
+        if (error) {
+            console.error('Delete error:', error);
+            if (error.code === '42501' || (error.message && error.message.includes('policy'))) {
+                showToast('❌ دسترسی ندارید — RLS جدول profiles را چک کنید');
+            } else {
+                showToast('❌ خطا: ' + error.message);
+            }
+            return;
+        }
+        if (!data || data.length === 0) {
+            console.warn('Delete returned no data — RLS blocked it');
+            showToast('⚠️ حذف نشد — احتمالاً RLS اجازه نمی‌دهد');
+            return;
+        }
+        attendanceLog.delete(userId);
+        remoteParticipants.delete(userId);
+        studentPermissions.delete(userId);
+        stats.userStats.delete(userId);
+        renderAdminUsers();
+        renderAdminDashboard();
+        showToast(`🗑️ "${name}" حذف شد`);
+    } catch (e) {
+        console.error('Delete exception:', e);
+        showToast('❌ خطا: ' + e.message);
+    }
 }
 function generateDiscountCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1520,21 +1603,21 @@ async function createDiscountCode() {
     const codeInput = document.getElementById('discCodeInput');
     const daysInput = document.getElementById('discDaysInput');
     const limitInput = document.getElementById('discLimitInput');
-    const percentInput = document.getElementById('discPercentInput');
     let code = (codeInput.value || '').trim().toUpperCase();
-    const days = parseInt(daysInput.value) || 20;
+    const days = parseInt(daysInput.value) || 30;
     const limit = parseInt(limitInput.value) || 0;
-    const percent = parseInt(percentInput?.value) || 0;
     if (!code) code = generateDiscountCode();
-    if (days < 1) return showToast('⚠️ حداقل ۱ روز');
-    const { error } = await sb.from('discount_codes').insert({ code, days, max_uses: limit || 0, discount_percent: percent, created_by: currentUser.id });
+    if (days < 1) return showToast('⚠️');
+    const { error } = await sb.from('discount_codes').insert({
+        code, days, max_uses: limit || 0, discount_percent: 0, used_count: 0, used_by: [], created_by: currentUser.id
+    });
     if (error) {
-        if (error.code === '23505') return showToast('⚠️ این کد وجود دارد');
+        if (error.code === '23505') return showToast('⚠️');
         return showToast('❌ ' + error.message);
     }
-    codeInput.value = ''; limitInput.value = ''; if (percentInput) percentInput.value = '0';
+    codeInput.value = ''; limitInput.value = '';
     renderAdminDiscounts();
-    showToast(`🎟️ کد ساخته شد: ${code}`);
+    showToast(`🎁 ${code}`);
 }
 async function renderAdminDiscounts() {
     const { data: discs } = await sb.from('discount_codes').select('*').order('created_at', { ascending: false });
@@ -1548,7 +1631,7 @@ async function renderAdminDiscounts() {
         return `<div class="discount-row">
           <div class="discount-code">${escapeHtml(d.code)}</div>
           <div class="discount-info">
-            <div class="di-days">🎁 ${d.days} روز ${d.discount_percent ? `• ${d.discount_percent}% تخفیف` : ''}</div>
+            <div class="di-days">🎁 ${d.days} روز هدیه</div>
             <div class="di-status ${statusClass}">${statusText} • استفاده: ${usedCount}</div>
           </div>
           <div style="display:flex;gap:4px;">
@@ -1558,26 +1641,25 @@ async function renderAdminDiscounts() {
         </div>`;
     }).join('');
 }
-function copyDiscountCode(code) { navigator.clipboard.writeText(code).then(() => showToast('📋 کپی شد')).catch(() => prompt('کد:', code)); }
-async function deleteDiscountCode(code) { if (!isAdminUser()) return; if (!confirm(`حذف کد ${code}؟`)) return; await sb.from('discount_codes').delete().eq('code', code); renderAdminDiscounts(); showToast('🗑️ حذف شد'); }
+function copyDiscountCode(code) { navigator.clipboard.writeText(code).then(() => showToast('📋')).catch(() => prompt('Code:', code)); }
+async function deleteDiscountCode(code) { if (!isAdminUser()) return; if (!confirm(`حذف ${code}?`)) return; await sb.from('discount_codes').delete().eq('code', code); renderAdminDiscounts(); }
 async function sendGlobalAnnouncement() {
     if (!isAdminUser()) return;
     const txt = (document.getElementById('adminAnnounceText').value || '').trim();
-    if (!txt) return showToast('⚠️ متن اعلان را وارد کنید');
+    if (!txt) return showToast('⚠️');
     await sb.from('announcements').update({ is_active: false }).eq('is_active', true);
     const { error } = await sb.from('announcements').insert({ text: txt, from_name: currentUser.name, is_active: true });
     if (error) return showToast('❌ ' + error.message);
     document.getElementById('adminAnnounceText').value = '';
     renderAdminAnnouncements();
-    showToast('📢 ارسال شد');
+    showToast('📢');
 }
 async function clearGlobalAnnouncement() {
     if (!isAdminUser()) return;
-    if (!confirm('حذف اعلان فعال؟')) return;
+    if (!confirm('?')) return;
     await sb.from('announcements').update({ is_active: false }).eq('is_active', true);
     hideGlobalBanner();
     renderAdminAnnouncements();
-    showToast('🗑️ حذف شد');
 }
 async function renderAdminAnnouncements() {
     const { data: anns } = await sb.from('announcements').select('*').order('created_at', { ascending: false }).limit(30);
@@ -1632,68 +1714,83 @@ async function loadActiveAnnouncement() {
 
 // ==================== JOIN ====================
 async function joinMeeting() {
-    if (!currentUser) return showToast('⚠️ ابتدا وارد شوید');
+    if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
     myRole = selectedLobbyRole;
     if (myRole === 'teacher') { const code = await ensureSessionCode(); roomId = sanitize(code); }
     else {
         const studentCode = document.getElementById('joinRoomCode').value.trim();
-        if (!studentCode) return showToast('⚠️ کد جلسه را وارد کنید');
+        if (!studentCode) return showToast('⚠️');
         roomId = sanitize(studentCode);
     }
     const btn = document.getElementById('joinBtn');
-    btn.disabled = true; btn.textContent = '⏳ در حال اتصال...';
-    showToast('⏳ در حال اتصال...');
+    btn.disabled = true; btn.textContent = '⏳...';
+    showToast('⏳...');
     try {
         myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
         teacherId = `teacher-${roomId}`;
         const mediaPromise = startPreview();
         const tokenPromise = generateLiveKitToken(roomId, myId, myName, myRole === 'teacher');
+        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const slowNet = conn && (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g' || conn.effectiveType === '3g' || conn.saveData);
+        const initialRes = slowNet ? { width: 320, height: 180, frameRate: 10 } : { width: 480, height: 270, frameRate: 20 };
+        if (slowNet) showToast(t('connSlow'));
+
         livekitRoom = new LivekitClient.Room({
             adaptiveStream: true, dynacast: true,
-            videoCaptureDefaults: { resolution: { width: 480, height: 270, frameRate: 20 } },
+            videoCaptureDefaults: { resolution: initialRes },
             audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
             publishDefaults: {
                 simulcast: true,
                 videoSimulcastLayers: [
-                    { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 15 } },
-                    { width: 640, height: 360, encoding: { maxBitrate: 500000, maxFramerate: 24 } },
+                    { width: 320, height: 180, encoding: { maxBitrate: 100000, maxFramerate: 10 } },
+                    { width: 640, height: 360, encoding: { maxBitrate: 400000, maxFramerate: 20 } },
                 ],
                 videoCodec: 'vp8', dtx: true, red: true,
                 degradationPreference: 'maintain-framerate',
-                screenShareEncoding: { maxBitrate: 3000000, maxFramerate: 15 },
-                screenShareSimulcastLayers: [
-                    { width: 1280, height: 720, encoding: { maxBitrate: 1500000, maxFramerate: 15 } },
-                    { width: 1920, height: 1080, encoding: { maxBitrate: 3000000, maxFramerate: 15 } },
-                ],
+                screenShareEncoding: { maxBitrate: 1500000, maxFramerate: 10 },
             },
-            connectOptions: { autoSubscribe: true, maxRetries: 3, peerConnectionTimeout: 5000, websocketTimeout: 5000 },
-            reconnectPolicy: { nextRetryDelayInMs: (ctx) => ctx.retryCount < 3 ? 300 : (ctx.retryCount < 8 ? 1500 : 4000) },
+            connectOptions: {
+                autoSubscribe: true, maxRetries: 10,
+                peerConnectionTimeout: 60000, websocketTimeout: 60000,
+                rtcConfig: { iceTransportPolicy: 'all', bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require' },
+            },
+            reconnectPolicy: {
+                nextRetryDelayInMs: (ctx) => ctx.retryCount < 5 ? 500 : (ctx.retryCount < 15 ? 2000 : 5000),
+                maxRetryDelayMs: 10000,
+            },
         });
         setupLiveKitEvents();
         const [, token] = await Promise.all([mediaPromise, tokenPromise]);
-        if (!localStream) { btn.disabled = false; btn.textContent = 'ورود به جلسه'; return showToast('⚠️ دسترسی به دوربین/میکروفون داده نشد'); }
-        showToast('🌐 در حال اتصال به سرور...');
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('اتصال طول کشید')), 12000));
-        await Promise.race([livekitRoom.connect(LIVEKIT_URL, token), timeoutPromise]);
+        if (!localStream) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; return showToast('⚠️'); }
+        showToast('🌐...');
+        let elapsed = 0;
+        const progressInterval = setInterval(() => {
+            elapsed += 3;
+            if (elapsed === 9) showConnBanner(t('connWait'));
+            if (elapsed === 30) showConnBanner(t('connPatience'));
+            if (elapsed === 60) showConnBanner(t('connTooLong'));
+        }, 3000);
+        try {
+            await Promise.race([
+                livekitRoom.connect(LIVEKIT_URL, token),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 90000))
+            ]);
+        } finally { clearInterval(progressInterval); hideConnBanner(); }
         showMeetingUI();
-        showToast('✅ متصل شدید');
+        showToast('✅');
         const lp = livekitRoom.localParticipant;
         if (myRole === 'teacher') {
             (async () => {
                 try {
                     await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone });
-                    isMicOn = true;
-                    localStream.getAudioTracks().forEach(t => t.enabled = true);
-                    updateMicUI();
-                    broadcast({ type: 'mic', on: true });
+                    isMicOn = true; localStream.getAudioTracks().forEach(t => t.enabled = true);
+                    updateMicUI(); broadcast({ type: 'mic', on: true });
                 } catch (e) { console.error('Mic publish:', e); }
                 try {
                     await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera });
-                    isCamOn = true;
-                    localStream.getVideoTracks().forEach(t => t.enabled = true);
-                    updateCamUI();
-                    broadcast({ type: 'cam', on: true });
+                    isCamOn = true; localStream.getVideoTracks().forEach(t => t.enabled = true);
+                    updateCamUI(); broadcast({ type: 'cam', on: true });
                 } catch (e) { console.error('Cam publish:', e); }
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
             })();
@@ -1714,8 +1811,8 @@ async function joinMeeting() {
         }
     } catch (err) {
         console.error('Join error:', err);
-        showToast('❌ ' + (err.message || 'خطای ناشناخته'));
-        btn.disabled = false; btn.textContent = 'ورود به جلسه';
+        showToast('❌ ' + (err.message || 'error'));
+        btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting;
         try { if (livekitRoom) await livekitRoom.disconnect(); } catch (e) {}
         livekitRoom = null;
     }
@@ -1774,18 +1871,11 @@ function setupLiveKitEvents() {
     livekitRoom.on(R.TrackSubscribed, (track, pub, p) => {
         if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { showScreenShareModal(track, p.name || p.identity, p.identity); return; }
         if (track.kind === LivekitClient.Track.Kind.Audio) {
-            const el = track.attach();
-            el.autoplay = true;
-            el.style.display = 'none';
-            el.dataset.identity = p.identity;
-            if (isWaitingForApproval) {
-                el.muted = true;
-                try { el.volume = 0; } catch(e){}
-            }
+            const el = track.attach(); el.autoplay = true; el.style.display = 'none'; el.dataset.identity = p.identity;
+            if (isWaitingForApproval) { el.muted = true; try { el.volume = 0; } catch(e){} }
             document.body.appendChild(el);
         } else {
-            const el = track.attach();
-            el.autoplay = true; el.playsInline = true;
+            const el = track.attach(); el.autoplay = true; el.playsInline = true;
             addRemoteVideo(p.identity, el, p.name || p.identity);
         }
     });
@@ -1808,8 +1898,12 @@ function setupLiveKitEvents() {
         try { handleIncomingData(JSON.parse(new TextDecoder().decode(payload)), p?.identity); } catch (e) {}
     });
     livekitRoom.on(R.Disconnected, () => leaveMeeting(true));
-    livekitRoom.on(R.Reconnecting, () => showToast('🔄 اتصال مجدد...'));
-    livekitRoom.on(R.Reconnected, () => showToast('✅ متصل شد'));
+    livekitRoom.on(R.Reconnecting, () => { showConnBanner(t('connReconnect')); showToast(t('connReconnect')); });
+    livekitRoom.on(R.Reconnected, () => { hideConnBanner(); showToast(t('connConnected')); });
+    livekitRoom.on(R.ConnectionStateChanged, (state) => {
+        if (state === 'disconnected') showConnBanner(t('connLost'));
+        else if (state === 'connected') hideConnBanner();
+    });
 }
 function sendData(data, destinations) {
     if (!livekitRoom) return;
@@ -1826,8 +1920,7 @@ function showScreenShareModal(track, name, identity) {
     const who = document.getElementById('screenShareWho');
     if (!modal || !video) return;
     if (currentScreenShareTrack && currentScreenShareTrack !== track) { try { currentScreenShareTrack.detach().forEach(el => el.remove()); } catch (e) {} }
-    currentScreenShareTrack = track;
-    currentScreenShareIdentity = identity;
+    currentScreenShareTrack = track; currentScreenShareIdentity = identity;
     try { video.srcObject = new MediaStream([track.mediaStreamTrack]); } catch (e) {}
     who.textContent = name || identity || '';
     modal.classList.add('open');
@@ -1851,7 +1944,7 @@ function handleIncomingData(data, senderId) {
             if (myRole === 'teacher' && data.role === 'student' && data.isWaiting) {
                 waitingList.set(senderId, { name: data.name });
                 updateWaitingPanel();
-                showToast(`🚪 ${data.name} در انتظار ورود است`);
+                showToast(`🚪 ${data.name}`);
                 return;
             }
             remoteParticipants.set(senderId, { name: data.name, role: data.role, micOn: data.micOn, camOn: data.camOn, handRaised: false });
@@ -1883,7 +1976,7 @@ function handleIncomingData(data, senderId) {
             isWaitingForApproval = false;
             document.getElementById('waitingRoomOverlay').style.display = 'none';
             stopWaitingAudioBlocker();
-            showToast('✅ به کلاس خوش آمدید');
+            showToast('✅');
             setTimeout(() => { sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false }); }, 300);
             break;
         }
@@ -1891,11 +1984,11 @@ function handleIncomingData(data, senderId) {
             isWaitingForApproval = false;
             document.getElementById('waitingRoomOverlay').style.display = 'none';
             stopWaitingAudioBlocker();
-            showToast('❌ درخواست ورود رد شد');
+            showToast('❌');
             setTimeout(() => leaveMeeting(true), 1500);
             break;
         }
-        case 'quality-settings': receiveQualitySettings(data.settings); if (myRole === 'student') showToast('⚙️ کیفیت تغییر کرد'); break;
+        case 'quality-settings': receiveQualitySettings(data.settings); break;
         case 'request-quality-settings': if (myRole === 'teacher') sendTo(senderId, { type: 'quality-settings', settings: qualitySettings, from: myId }); break;
         case 'permission-request': if (myRole === 'student') showPermissionRequestModal(data.permission); break;
         case 'permission-accepted': {
@@ -1905,7 +1998,6 @@ function handleIncomingData(data, senderId) {
             if (perms.pending) perms.pending[data.permission] = false;
             studentPermissions.set(senderId, perms);
             sendTo(senderId, { type: 'permission-granted', permission: data.permission });
-            showToast(`✅ ${remoteParticipants.get(senderId)?.name || 'دانشجو'} پذیرفت`);
             updatePendingRequestsUI(); updateTeacherPanel();
             break;
         }
@@ -1913,7 +2005,6 @@ function handleIncomingData(data, senderId) {
             if (myRole !== 'teacher' && !isCoTeacher) break;
             const perms = studentPermissions.get(senderId);
             if (perms) { if (perms.pending) perms.pending[data.permission] = false; perms[data.permission] = false; studentPermissions.set(senderId, perms); }
-            showToast(`🚫 ${remoteParticipants.get(senderId)?.name || 'دانشجو'} رد کرد`);
             updatePendingRequestsUI(); updateTeacherPanel();
             break;
         }
@@ -1932,7 +2023,6 @@ function handleIncomingData(data, senderId) {
             const perms = studentPermissions.get(senderId) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: { mic: false, cam: false, whiteboard: false, projector: false } };
             perms.pending[data.permission] = true;
             studentPermissions.set(senderId, perms);
-            showToast(`📩 ${data.name} درخواست ${data.permission}`);
             updatePendingRequestsUI(); updateTeacherPanel();
             break;
         }
@@ -1954,7 +2044,6 @@ function handleIncomingData(data, senderId) {
         case 'coteacher-status':
             if (myRole !== 'student') break;
             isCoTeacher = data.enabled;
-            showToast(isCoTeacher ? '✅ به هم‌مدرس ارتقا یافتید' : '🔒 از هم‌مدرس حذف شدید');
             const b2 = document.getElementById('roleBadge');
             if (isCoTeacher) {
                 b2.textContent = '🎖️ هم‌مدرس'; b2.classList.add('coteacher');
@@ -1973,47 +2062,46 @@ function handleIncomingData(data, senderId) {
             myPermissions[data.permission] = true;
             if (data.permission === 'mic') { const btn = document.getElementById('btnMic'); if (btn) { btn.classList.remove('waiting'); btn.disabled = false; } actuallyToggleMic(); }
             else if (data.permission === 'cam') { const btn = document.getElementById('btnCam'); if (btn) { btn.classList.remove('waiting'); btn.disabled = false; } actuallyToggleCam(); }
-            showToast('✅ تأیید شد');
             break;
-        case 'permission-denied': if (myRole === 'student') { const b = data.permission === 'mic' ? document.getElementById('btnMic') : document.getElementById('btnCam'); if (b) { b.classList.remove('waiting'); b.disabled = false; } showToast('❌ رد شد'); } break;
-        case 'permission-revoked': if (myRole === 'student') { myPermissions[data.permission] = false; showToast('🔒 لغو شد'); updateMicUI(); updateCamUI(); } break;
+        case 'permission-denied': if (myRole === 'student') { const b = data.permission === 'mic' ? document.getElementById('btnMic') : document.getElementById('btnCam'); if (b) { b.classList.remove('waiting'); b.disabled = false; } } break;
+        case 'permission-revoked': if (myRole === 'student') { myPermissions[data.permission] = false; updateMicUI(); updateCamUI(); } break;
         case 'force-mute':
             if (isMicOn) { isMicOn = false; const lp = livekitRoom?.localParticipant; const pub = lp?.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) pub.mute(); }
-            updateMicUI(); updateParticipantsPanel(); showToast('🔇 میکروفون قطع'); broadcast({ type: 'mic', on: false });
+            updateMicUI(); updateParticipantsPanel(); broadcast({ type: 'mic', on: false });
             break;
         case 'force-camera-off':
             if (isCamOn) { isCamOn = false; const lp = livekitRoom?.localParticipant; const pub = lp?.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) pub.mute(); }
-            updateCamUI(); updateParticipantsPanel(); showToast('📹 دوربین خاموش'); broadcast({ type: 'cam', on: false });
+            updateCamUI(); updateParticipantsPanel(); broadcast({ type: 'cam', on: false });
             break;
         case 'kick': document.getElementById('kickReason').textContent = data.reason || '...'; document.getElementById('kickModal').classList.add('open'); break;
         case 'chat': if (data.private) { if (data.to === myId || data.from === myId) displayMessage(data.name, data.message, false, true); } else { displayMessage(data.name, data.message, false, false); const s = stats.userStats.get(senderId); if (s) s.chatMessages++; } break;
         case 'hand':
             remoteParticipants.set(senderId, { ...info, handRaised: data.raised });
             updateHandUI(senderId, data.raised); updateTeacherPanel(); updateParticipantsPanel();
-            if (data.raised) { const s = stats.userStats.get(senderId); if (s) s.handRaises++; if (senderId !== myId) playBell(); showToast('✋ ' + (remoteParticipants.get(senderId)?.name || 'کاربر') + ' دست بلند کرد'); }
+            if (data.raised) { const s = stats.userStats.get(senderId); if (s) s.handRaises++; if (senderId !== myId) playBell(); }
             break;
         case 'mic': remoteParticipants.set(senderId, { ...info, micOn: data.on }); updateRemoteMicUI(senderId, data.on); updateTeacherPanel(); updateParticipantsPanel(); break;
         case 'cam': remoteParticipants.set(senderId, { ...info, camOn: data.on }); updateRemoteCamUI(senderId, data.on); updateParticipantsPanel(); break;
         case 'speaking': updateSpeakingBorder(senderId, data.speaking, false); break;
-        case 'reaction': showFloatingEmoji(data.emoji, data.name || remoteParticipants.get(senderId)?.name || 'کاربر'); const rs = stats.userStats.get(senderId); if (rs) rs.reactions++; break;
+        case 'reaction': showFloatingEmoji(data.emoji, data.name || remoteParticipants.get(senderId)?.name || '?'); const rs = stats.userStats.get(senderId); if (rs) rs.reactions++; break;
         case 'announcement': showAnnouncement(data.text, data.from); break;
         case 'announcement-hide': { const ann = document.getElementById('announcementBanner'); if (ann) ann.style.display = 'none'; break; }
-        case 'activity-timer': if (!isPrivileged()) { runActivityTimer(data.seconds); showToast('⏳ تایمر شروع شد'); } break;
+        case 'activity-timer': if (!isPrivileged()) { runActivityTimer(data.seconds); } break;
         case 'activity-stop': if (!isPrivileged()) { stopActivityTimer(); } break;
-        case 'lock-room': isRoomLocked = data.locked; showToast(data.locked ? '🔒 قفل' : '🔓 باز'); break;
+        case 'lock-room': isRoomLocked = data.locked; break;
         case 'recording-started': document.getElementById('recordingIndicator').classList.add('active'); startFakeRecTimer(); break;
         case 'recording-stopped': document.getElementById('recordingIndicator').classList.remove('active'); stopFakeRecTimer(); break;
-        case 'poll-new': if (myRole === 'student') { currentPoll = data.poll; myPollVote = -1; renderPollForStudent(); document.getElementById('pollPanel').classList.add('open'); showToast('📝 نظرسنجی'); } break;
+        case 'poll-new': if (myRole === 'student') { currentPoll = data.poll; myPollVote = -1; renderPollForStudent(); document.getElementById('pollPanel').classList.add('open'); } break;
         case 'poll-vote': if (isPrivileged()) { pollVotes.set(senderId, data.option); updatePollResults(); } break;
-        case 'poll-close': if (myRole === 'student') { currentPoll = null; document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">بسته شد</p>'; } break;
+        case 'poll-close': if (myRole === 'student') { currentPoll = null; document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">closed</p>'; } break;
         case 'breakout-groups':
             if (myRole === 'student') {
                 breakoutGroups = data.groups; myGroupId = null;
-                for (const [gid, mem] of Object.entries(data.groups || {})) if (mem.find(m => m.id === myId)) { myGroupId = gid; break; }
+                for (const [gid, mem] of Object.entries(data.groups || [])) if (mem.find(m => m.id === myId)) { myGroupId = gid; break; }
                 renderBreakoutForStudent(); document.getElementById('breakoutPanel').classList.add('open'); applyGroupBadges();
             }
             break;
-        case 'cert-received': downloadCertificateImage(data.studentName, data.roomId, data.date); showToast('🎓 گواهی صادر شد'); break;
+        case 'cert-received': downloadCertificateImage(data.studentName, data.roomId, data.date); showToast('🎓'); break;
         case 'file-shared': sharedFiles.push(data.file); updateFilesListUI(); showToast('📎 ' + data.file.name); break;
         case 'wb-open': if (!document.getElementById('whiteboardModal').classList.contains('open')) openWhiteboard(true); break;
         case 'wb-close': if (document.getElementById('whiteboardModal').classList.contains('open')) closeWhiteboard(true); break;
@@ -2038,7 +2126,6 @@ function handleIncomingData(data, senderId) {
             displayProjectorMedia(projCurrentMedia);
             document.getElementById('projectorEmptyState').style.display = 'none';
             if (!document.getElementById('projectorModal').classList.contains('open')) openProjector(true);
-            showToast('📽️ فیلم/عکس جدید - در حال بارگذاری...');
             break;
         case 'proj-state':
             if (isPrivileged() || !projVideo || !projCurrentMedia) break;
@@ -2054,7 +2141,7 @@ function handleIncomingData(data, senderId) {
             if (isPrivileged() || !projVideo || projCurrentMedia?.type !== 'video') break;
             if (data.mediaId && projCurrentMedia.mediaId && data.mediaId !== projCurrentMedia.mediaId) break;
             projVideo.currentTime = data.time || 0;
-            projVideo.play().catch(() => { showToast('🎬 برای پخش ویدیو روی صفحه کلیک کنید'); });
+            projVideo.play().catch(() => {});
             break;
         case 'proj-pause':
             if (isPrivileged() || !projVideo) break;
@@ -2088,22 +2175,22 @@ function updateWaitingPanel() {
     if (!b) return;
     const arr = Array.from(waitingList.entries());
     if (wc) { if (arr.length > 0) { wc.style.display = 'inline-block'; wc.textContent = arr.length; } else wc.style.display = 'none'; }
-    if (arr.length === 0) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:13px;padding:20px">کسی در انتظار نیست</p>'; return; }
+    if (arr.length === 0) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:13px;padding:20px">—</p>'; return; }
     b.innerHTML = arr.map(([id, info]) => `<div class="student-card">
-        <div class="row1"><div class="s-avatar">${escapeHtml((info.name || '?')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(info.name || '?')}</div><div class="s-status">⏳ در انتظار ورود...</div></div></div>
-        <div class="s-actions"><button class="coteacher" onclick="admitUser('${id}')">✅ تأیید</button><button class="kick" onclick="denyUser('${id}')">🚫 رد</button></div>
+        <div class="row1"><div class="s-avatar">${escapeHtml((info.name || '?')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(info.name || '?')}</div></div></div>
+        <div class="s-actions"><button class="coteacher" onclick="admitUser('${id}')">✅</button><button class="kick" onclick="denyUser('${id}')">🚫</button></div>
     </div>`).join('');
 }
-function admitUser(pid) { sendTo(pid, { type: 'admit' }); waitingList.delete(pid); updateWaitingPanel(); showToast('✅ کاربر تأیید شد'); }
-function denyUser(pid) { sendTo(pid, { type: 'deny' }); waitingList.delete(pid); updateWaitingPanel(); showToast('🚫 رد شد'); }
+function admitUser(pid) { sendTo(pid, { type: 'admit' }); waitingList.delete(pid); updateWaitingPanel(); }
+function denyUser(pid) { sendTo(pid, { type: 'deny' }); waitingList.delete(pid); updateWaitingPanel(); }
 function cancelWaiting() { isWaitingForApproval = false; stopWaitingAudioBlocker(); document.getElementById('waitingRoomOverlay').style.display = 'none'; leaveMeeting(true); }
 
 // ==================== PERMISSION ====================
 function showPermissionRequestModal(type) {
     pendingPermissionRequest = type;
     const icon = document.getElementById('permReqIcon'); const title = document.getElementById('permReqTitle'); const desc = document.getElementById('permReqDesc');
-    if (type === 'mic') { icon.textContent = '🎤'; title.textContent = 'درخواست روشن کردن میکروفون'; desc.textContent = 'مدرس می‌خواهد میکروفون شما را روشن کند. آیا موافق هستید؟'; }
-    else { icon.textContent = '📹'; title.textContent = 'درخواست روشن کردن دوربین'; desc.textContent = 'مدرس می‌خواهد دوربین شما را روشن کند. آیا موافق هستید؟'; }
+    if (type === 'mic') { icon.textContent = '🎤'; title.textContent = '🎤'; desc.textContent = '?'; }
+    else { icon.textContent = '📹'; title.textContent = '📹'; desc.textContent = '?'; }
     document.getElementById('permissionRequestModal').classList.add('open');
 }
 function acceptPermissionRequest() {
@@ -2112,7 +2199,6 @@ function acceptPermissionRequest() {
     pendingPermissionRequest = null;
     closeModal('permissionRequestModal');
     sendTo(teacherId, { type: 'permission-accepted', permission: type });
-    showToast('✅ پذیرفته شد');
 }
 function rejectPermissionRequest() {
     if (!pendingPermissionRequest) return;
@@ -2120,7 +2206,6 @@ function rejectPermissionRequest() {
     pendingPermissionRequest = null;
     closeModal('permissionRequestModal');
     sendTo(teacherId, { type: 'permission-rejected', permission: type });
-    showToast('🚫 رد شد');
 }
 
 // ==================== ATTENDANCE ====================
@@ -2128,45 +2213,45 @@ function startAttendanceTracking(pid, name, role, isSelf) { if (!attendanceLog.h
 function updateAttendanceUI() {
     const c = document.getElementById('attendanceList'); if (!c) return;
     const e = Array.from(attendanceLog.values());
-    if (e.length === 0) { c.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:12px;">گزارشی نیست</p>'; return; }
-    c.innerHTML = `<table class="attendance-table"><thead><tr><th>دانشجو</th><th>ورود</th><th>مدت</th><th>وضعیت</th></tr></thead><tbody>${e.map(x => {
+    if (e.length === 0) { c.innerHTML = '—'; return; }
+    c.innerHTML = `<table class="attendance-table"><thead><tr><th>?</th><th>?</th><th>?</th><th>?</th></tr></thead><tbody>${e.map(x => {
         const on = !x.leftAt; const et = x.leftAt || new Date(); const d = Math.floor((et - x.joinedAt) / 1000);
-        return `<tr><td>${escapeHtml(x.name)}${x.isSelf ? ' (شما)' : ''}</td><td>${fmtDT(x.joinedAt)}</td><td>${fmtTime(d)}</td><td><span class="attendance-badge ${on ? 'online' : 'offline'}">${on ? 'آنلاین' : 'آفلاین'}</span></td></tr>`;
+        return `<tr><td>${escapeHtml(x.name)}</td><td>${fmtDT(x.joinedAt)}</td><td>${fmtTime(d)}</td><td><span class="attendance-badge ${on ? 'online' : 'offline'}">${on ? 'online' : 'offline'}</span></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 function toggleAttendancePanel() { document.getElementById('attendancePanel').classList.toggle('open'); updateAttendanceUI(); }
 function exportAttendanceCSV() {
-    const e = Array.from(attendanceLog.values()); if (e.length === 0) return showToast('گزارشی نیست');
+    const e = Array.from(attendanceLog.values()); if (e.length === 0) return showToast('—');
     let csv = 'Name,Role,Joined,Left,Duration,Status\n';
     e.forEach(x => { const et = x.leftAt || new Date(); const d = Math.floor((et - x.joinedAt) / 1000); csv += `"${x.name}","${x.role}","${fmtDT(x.joinedAt)}","${x.leftAt ? fmtDT(x.leftAt) : '-'}","${d}","${x.leftAt ? 'offline' : 'online'}"\n`; });
     const b = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `Lroom-attendance-${roomId}-${Date.now()}.csv`; a.click();
-    setTimeout(() => URL.revokeObjectURL(u), 5000); showToast('⬇️ دانلود شد');
+    setTimeout(() => URL.revokeObjectURL(u), 5000);
 }
-function clearAttendance() { if (!confirm('پاک شود؟')) return; attendanceLog.clear(); startAttendanceTracking(myId, myName, myRole, true); updateAttendanceUI(); }
+function clearAttendance() { if (!confirm('?')) return; attendanceLog.clear(); startAttendanceTracking(myId, myName, myRole, true); updateAttendanceUI(); }
 
 // ==================== POLLS ====================
 function togglePollPanel() { const p = document.getElementById('pollPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) renderPollPanel(); }
 function renderPollPanel() {
     const b = document.getElementById('pollPanelBody'); if (!isPrivileged()) return;
-    if (!currentPoll) b.innerHTML = '<button class="teacher-action-btn" onclick="openPollCreator()">📝 ساخت نظرسنجی</button>';
-    else { b.innerHTML = `<div style="margin-bottom:12px"><h4 style="font-size:14px;margin-bottom:8px">${escapeHtml(currentPoll.question)}</h4><div id="pollResultsContainer"></div></div><button class="teacher-action-btn danger" onclick="closePoll()">✕ بستن</button>`; updatePollResults(); }
+    if (!currentPoll) b.innerHTML = '<button class="teacher-action-btn" onclick="openPollCreator()">📝</button>';
+    else { b.innerHTML = `<div style="margin-bottom:12px"><h4 style="font-size:14px;margin-bottom:8px">${escapeHtml(currentPoll.question)}</h4><div id="pollResultsContainer"></div></div><button class="teacher-action-btn danger" onclick="closePoll()">✕</button>`; updatePollResults(); }
 }
 function openPollCreator() { document.getElementById('pollModal').classList.add('open'); }
 function createPoll() {
     const q = document.getElementById('pollQuestion').value.trim();
     const o = Array.from(document.querySelectorAll('.poll-opt-input')).map(i => i.value.trim()).filter(v => v);
-    if (!q) return showToast('سوال'); if (o.length < 2) return showToast('حداقل دو گزینه');
+    if (!q || o.length < 2) return showToast('⚠️');
     currentPoll = { id: Date.now(), question: q, options: o }; pollVotes.clear();
-    broadcast({ type: 'poll-new', poll: currentPoll }); closeModal('pollModal'); renderPollPanel(); showToast('📝 ساخته شد');
+    broadcast({ type: 'poll-new', poll: currentPoll }); closeModal('pollModal'); renderPollPanel();
 }
-function closePoll() { currentPoll = null; pollVotes.clear(); broadcast({ type: 'poll-close' }); document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">بسته شد</p>'; }
+function closePoll() { currentPoll = null; pollVotes.clear(); broadcast({ type: 'poll-close' }); document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">—</p>'; }
 function renderPollForStudent() {
     const b = document.getElementById('pollPanelBody');
-    if (!currentPoll) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">نظرسنجی فعالی نیست</p>'; return; }
+    if (!currentPoll) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">—</p>'; return; }
     b.innerHTML = `<h4 style="font-size:14px;margin-bottom:12px">${escapeHtml(currentPoll.question)}</h4><div>${currentPoll.options.map((o, i) => `<div class="poll-option ${myPollVote === i ? 'selected' : ''}" onclick="votePoll(${i})"><div class="opt-text">${escapeHtml(o)}</div></div>`).join('')}</div>`;
 }
-function votePoll(idx) { if (myPollVote !== -1) return showToast('قبلاً رای دادید'); myPollVote = idx; document.querySelectorAll('.poll-option').forEach((el, i) => el.classList.toggle('selected', i === idx)); sendTo(teacherId, { type: 'poll-vote', option: idx }); showToast('✅ ثبت شد'); }
+function votePoll(idx) { if (myPollVote !== -1) return; myPollVote = idx; document.querySelectorAll('.poll-option').forEach((el, i) => el.classList.toggle('selected', i === idx)); sendTo(teacherId, { type: 'poll-vote', option: idx }); }
 function updatePollResults() {
     if (!currentPoll) return;
     const r = new Array(currentPoll.options.length).fill(0); pollVotes.forEach(i => { if (i < r.length) r[i]++; });
@@ -2178,20 +2263,20 @@ function updatePollResults() {
 function toggleBreakoutPanel() { const p = document.getElementById('breakoutPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) renderBreakoutPanel(); }
 function renderBreakoutPanel() {
     const b = document.getElementById('breakoutPanelBody'); if (!isPrivileged()) return;
-    if (!breakoutGroups) b.innerHTML = `<p style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">گروه‌بندی خودکار</p><label style="font-size:12px;color:var(--text-secondary)">اعضا در هر گروه</label><input type="number" id="groupSize" value="2" min="2" max="10" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0" /><button class="teacher-action-btn" onclick="createBreakoutGroups()">ساخت گروه‌ها</button>`;
-    else b.innerHTML = renderGroupsList() + `<button class="teacher-action-btn danger" onclick="dissolveBreakoutGroups()" style="margin-top:10px">انحلال</button>`;
+    if (!breakoutGroups) b.innerHTML = `<label style="font-size:12px;color:var(--text-secondary)">👥</label><input type="number" id="groupSize" value="2" min="2" max="10" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0" /><button class="teacher-action-btn" onclick="createBreakoutGroups()">+</button>`;
+    else b.innerHTML = renderGroupsList() + `<button class="teacher-action-btn danger" onclick="dissolveBreakoutGroups()" style="margin-top:10px">✕</button>`;
 }
 function renderBreakoutForStudent() {
     const b = document.getElementById('breakoutPanelBody');
-    if (!breakoutGroups || !myGroupId) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">در گروهی نیستید</p>'; return; }
+    if (!breakoutGroups || !myGroupId) { b.innerHTML = '—'; return; }
     const g = breakoutGroups[myGroupId] || [];
-    b.innerHTML = `<div class="breakout-group"><h5>در گروه: ${myGroupId}</h5><div class="members">${g.map(m => `<div class="member">👤 ${escapeHtml(m.name)}${m.id === myId ? ' (شما)' : ''}</div>`).join('')}</div></div>`;
+    b.innerHTML = `<div class="breakout-group"><h5>${myGroupId}</h5><div class="members">${g.map(m => `<div class="member">👤 ${escapeHtml(m.name)}${m.id === myId ? ' (you)' : ''}</div>`).join('')}</div></div>`;
 }
-function renderGroupsList() { if (!breakoutGroups) return ''; return Object.entries(breakoutGroups).map(([g, m]) => `<div class="breakout-group"><h5>👥 گروه ${g}</h5><div class="members">${m.map(x => `<div class="member">👤 ${escapeHtml(x.name)}</div>`).join('')}</div></div>`).join(''); }
+function renderGroupsList() { if (!breakoutGroups) return ''; return Object.entries(breakoutGroups).map(([g, m]) => `<div class="breakout-group"><h5>👥 ${g}</h5><div class="members">${m.map(x => `<div class="member">👤 ${escapeHtml(x.name)}</div>`).join('')}</div></div>`).join(''); }
 function createBreakoutGroups() {
     const sz = parseInt(document.getElementById('groupSize').value) || 2;
     const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ id: p, name: i.name }); });
-    if (st.length === 0) return showToast('دانشجویی نیست');
+    if (st.length === 0) return;
     for (let i = st.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [st[i], st[j]] = [st[j], st[i]]; }
     breakoutGroups = {}; let g = 1;
     for (let i = 0; i < st.length; i += sz) { breakoutGroups[g] = st.slice(i, i + sz); g++; }
@@ -2202,7 +2287,7 @@ function applyGroupBadges() {
     document.querySelectorAll('.group-badge').forEach(e => e.remove());
     for (const [g, m] of Object.entries(breakoutGroups)) m.forEach(x => {
         const b = x.id === myId ? document.getElementById('video-me') : document.getElementById(`video-${x.id}`);
-        if (b) { const bd = document.createElement('div'); bd.className = 'group-badge'; bd.textContent = `گروه ${g}`; b.appendChild(bd); }
+        if (b) { const bd = document.createElement('div'); bd.className = 'group-badge'; bd.textContent = `${g}`; b.appendChild(bd); }
     });
 }
 function dissolveBreakoutGroups() { breakoutGroups = null; myGroupId = null; broadcast({ type: 'breakout-groups', groups: {} }); document.querySelectorAll('.group-badge').forEach(e => e.remove()); renderBreakoutPanel(); }
@@ -2212,8 +2297,8 @@ function toggleCertPanel() { const p = document.getElementById('certPanel'); p.c
 function renderCertPanel() {
     const b = document.getElementById('certPanelBody');
     const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ id: p, name: i.name }); });
-    if (st.length === 0) { b.innerHTML = '<p style="text-align:center;color:var(--text-secondary)">دانشجویی نیست</p>'; return; }
-    b.innerHTML = `<label style="font-size:12px;color:var(--text-secondary)">انتخاب دانشجو</label><select id="certStudentSelect" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0">${st.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select><button class="teacher-action-btn" onclick="generateCertForStudent()">🎓 دانلود گواهی</button>`;
+    if (st.length === 0) { b.innerHTML = '—'; return; }
+    b.innerHTML = `<select id="certStudentSelect" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0">${st.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select><button class="teacher-action-btn" onclick="generateCertForStudent()">🎓</button>`;
 }
 function generateCertForStudent() {
     const s = document.getElementById('certStudentSelect'); if (!s) return;
@@ -2230,11 +2315,9 @@ function downloadCertificateImage(name, rid, date) {
     x.strokeStyle = '#d4af37'; x.lineWidth = 8; x.strokeRect(40, 40, 1120, 770);
     x.strokeStyle = '#1a73e8'; x.lineWidth = 3; x.strokeRect(60, 60, 1080, 730);
     x.fillStyle = '#1a73e8'; x.font = 'bold 60px Tahoma'; x.textAlign = 'center'; x.fillText('Lroom', 600, 180);
-    x.fillStyle = '#202124'; x.font = 'bold 44px Tahoma'; x.fillText('گواهی‌نامه', 600, 280);
-    x.font = '24px Tahoma'; x.fillStyle = '#5f6368'; x.fillText('به اینجانب', 600, 360);
+    x.fillStyle = '#202124'; x.font = 'bold 44px Tahoma'; x.fillText('Certificate', 600, 280);
     x.fillStyle = '#1a73e8'; x.font = 'bold 52px Tahoma'; x.fillText(name, 600, 440);
-    x.fillStyle = '#5f6368'; x.font = '24px Tahoma'; x.fillText('به پاس شرکت در کلاس اهدا می‌شود', 600, 510);
-    x.font = '22px Tahoma'; x.fillText(`کد: ${rid}`, 600, 570); x.fillText(`تاریخ: ${date}`, 600, 610);
+    x.font = '22px Tahoma'; x.fillText(`${rid}`, 600, 570); x.fillText(`${date}`, 600, 610);
     x.strokeStyle = '#d4af37'; x.beginPath(); x.moveTo(400, 720); x.lineTo(800, 720); x.stroke();
     c.toBlob(bl => { const u = URL.createObjectURL(bl); const a = document.createElement('a'); a.href = u; a.download = `Lroom-Certificate-${name}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000); });
 }
@@ -2244,18 +2327,17 @@ function openFileUpload() { document.getElementById('fileUploadModal').classList
 function openFilesPanel() { updateFilesListUI(); document.getElementById('filesPanelModal').classList.add('open'); }
 function uploadFile() {
     const i = document.getElementById('fileInput'); const f = i.files[0];
-    if (!f) return showToast('فایلی نیست');
-    if (f.size > 5242880) return showToast('بزرگتر از ۵MB');
+    if (!f) return; if (f.size > 5242880) return showToast('⚠️ 5MB');
     const r = new FileReader();
     r.onload = e => {
         const fd = { id: Date.now(), name: f.name, size: f.size, from: myName, data: e.target.result };
-        sharedFiles.push(fd); broadcast({ type: 'file-shared', file: fd }); updateFilesListUI(); closeModal('fileUploadModal'); showToast('📎 اشتراک شد');
+        sharedFiles.push(fd); broadcast({ type: 'file-shared', file: fd }); updateFilesListUI(); closeModal('fileUploadModal');
     };
     r.readAsDataURL(f);
 }
 function updateFilesListUI() {
     const l = document.getElementById('filesList'); if (!l) return;
-    if (sharedFiles.length === 0) { l.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:13px">فایلی نیست</p>'; return; }
+    if (sharedFiles.length === 0) { l.innerHTML = '—'; return; }
     l.innerHTML = sharedFiles.map(f => `<div class="file-item"><div class="file-icon">📎</div><div class="file-info"><div class="file-name">${escapeHtml(f.name)}</div><div class="file-size">${fmtBytes(f.size)} - ${escapeHtml(f.from)}</div></div><button class="file-action" onclick="downloadSharedFile(${f.id})">⬇️</button></div>`).join('');
 }
 function downloadSharedFile(id) { const f = sharedFiles.find(x => x.id === id); if (!f) return; const a = document.createElement('a'); a.href = f.data; a.download = f.name; a.click(); }
@@ -2270,7 +2352,7 @@ function switchChatTab(tab) {
 function updatePrivateRecipientList() {
     const s = document.getElementById('privateRecipientSelect'); if (!s) return;
     const c = s.value; s.innerHTML = '';
-    if (myRole === 'student') s.innerHTML = `<option value="${teacherId}">${escapeHtml(remoteParticipants.get(teacherId)?.name || 'مدرس')}</option>`;
+    if (myRole === 'student') s.innerHTML = `<option value="${teacherId}">${escapeHtml(remoteParticipants.get(teacherId)?.name || 'Teacher')}</option>`;
     else remoteParticipants.forEach((i, p) => { if (i.role === 'student') { const o = document.createElement('option'); o.value = p; o.textContent = i.name; s.appendChild(o); } });
     if (c) s.value = c;
 }
@@ -2279,8 +2361,8 @@ function sendMessage() {
     const i = document.getElementById('msgInput'); const m = i.value.trim(); if (!m) return;
     if (currentChatTab === 'public') { broadcast({ type: 'chat', name: myName, message: m, private: false }); displayMessage(myName, m, true, false); }
     else {
-        const r = document.getElementById('privateRecipientSelect').value; if (!r) return showToast('گیرنده');
-        const n = remoteParticipants.get(r)?.name || 'کاربر';
+        const r = document.getElementById('privateRecipientSelect').value; if (!r) return;
+        const n = remoteParticipants.get(r)?.name || 'User';
         sendTo(r, { type: 'chat', name: myName, message: m, private: true, from: myId, to: r });
         displayMessage(`${myName} → ${n}`, m, true, true);
     }
@@ -2383,7 +2465,7 @@ function startActivityTimer() {
     const mins = parseInt(document.getElementById('activityMinutes').value) || 5;
     activityTimeLeft = mins * 60; closeModal('activityTimerModal');
     broadcast({ type: 'activity-timer', seconds: activityTimeLeft, from: myName });
-    runActivityTimer(activityTimeLeft); showToast('⏳ تایمر شروع شد');
+    runActivityTimer(activityTimeLeft);
 }
 function runActivityTimer(seconds) {
     activityTimeLeft = seconds;
@@ -2393,7 +2475,7 @@ function runActivityTimer(seconds) {
         d.textContent = '⏳ ' + fmtTime(activityTimeLeft);
         d.style.background = 'var(--warning)'; d.style.color = '#202124';
         if (activityTimeLeft <= 10) { d.style.background = 'var(--danger)'; d.style.color = '#fff'; }
-        if (activityTimeLeft <= 0) { clearInterval(activityTimerInterval); activityTimerInterval = null; d.textContent = '⏰ زمان تمام شد!'; showToast('⏰ زمان تمام شد!'); setTimeout(() => d.classList.remove('active'), 5000); return; }
+        if (activityTimeLeft <= 0) { clearInterval(activityTimerInterval); activityTimerInterval = null; d.textContent = '⏰'; setTimeout(() => d.classList.remove('active'), 5000); return; }
         activityTimeLeft--;
     };
     update(); activityTimerInterval = setInterval(update, 1000);
@@ -2402,7 +2484,6 @@ function stopActivityTimer() {
     if (activityTimerInterval) { clearInterval(activityTimerInterval); activityTimerInterval = null; }
     document.getElementById('activityTimerDisplay').classList.remove('active');
     if (isPrivileged()) broadcast({ type: 'activity-stop' });
-    showToast('⏹️ تایمر متوقف شد');
 }
 
 // ==================== ANNOUNCEMENT ====================
@@ -2420,7 +2501,7 @@ function showAnnouncement(text, from) {
         document.body.appendChild(b);
     }
     document.getElementById('announcementText').textContent = '📢 ' + (from ? from + ': ' : '') + text;
-    b.style.display = 'block'; showToast('📢 ' + (from || '') + ': ' + text);
+    b.style.display = 'block';
 }
 function hideAnnouncement(removeAll) { const b = document.getElementById('announcementBanner'); if (b) b.style.display = 'none'; if (removeAll && isPrivileged()) broadcast({ type: 'announcement-hide' }); }
 
@@ -2429,15 +2510,15 @@ function initUserStats(pid, name, role) { if (!stats.userStats.has(pid)) stats.u
 function updateStatsUI() {
     const c = document.getElementById('statsPanelBody'); if (!c) return;
     const all = Array.from(stats.userStats.values());
-    if (all.length === 0) { c.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:12px;">آماری نیست</p>'; return; }
+    if (all.length === 0) { c.innerHTML = '—'; return; }
     const totalTime = Math.floor((Date.now() - classStartTime) / 1000);
-    let html = `<div class="stat-card"><h5>📊 کلاس</h5><div class="stat-row"><span class="label">⏱️ مدت</span><span class="value">${fmtTime(totalTime)}</span></div><div class="stat-row"><span class="label">👥 تعداد</span><span class="value">${all.length}</span></div></div>`;
+    let html = `<div class="stat-card"><h5>📊</h5><div class="stat-row"><span class="label">⏱️</span><span class="value">${fmtTime(totalTime)}</span></div><div class="stat-row"><span class="label">👥</span><span class="value">${all.length}</span></div></div>`;
     all.sort((a, b) => b.speakingTime - a.speakingTime).forEach(s => {
         html += `<div class="stat-card"><h5>${s.isOnline ? '🟢' : '⚫'} ${escapeHtml(s.name)}</h5>
-        <div class="stat-row"><span class="label">🎤 صحبت</span><span class="value">${fmtTime(Math.floor(s.speakingTime))}</span></div>
-        <div class="stat-row"><span class="label">✋ دست</span><span class="value">${s.handRaises}</span></div>
-        <div class="stat-row"><span class="label">💬 پیام</span><span class="value">${s.chatMessages}</span></div>
-        <div class="stat-row"><span class="label">👍 واکنش</span><span class="value">${s.reactions}</span></div></div>`;
+        <div class="stat-row"><span class="label">🎤</span><span class="value">${fmtTime(Math.floor(s.speakingTime))}</span></div>
+        <div class="stat-row"><span class="label">✋</span><span class="value">${s.handRaises}</span></div>
+        <div class="stat-row"><span class="label">💬</span><span class="value">${s.chatMessages}</span></div>
+        <div class="stat-row"><span class="label">👍</span><span class="value">${s.reactions}</span></div></div>`;
     });
     c.innerHTML = html;
 }
@@ -2451,7 +2532,7 @@ function getParticipantList() {
     remoteParticipants.forEach((info, pid) => {
         if (pid === myId) return;
         const perm = studentPermissions.get(pid) || {};
-        list.push({ id: pid, name: info.name || 'کاربر', role: info.role || 'student', isCoTeacher: !!perm.coTeacher, micOn: !!info.micOn, camOn: !!info.camOn, handRaised: !!info.handRaised, isSelf: false });
+        list.push({ id: pid, name: info.name || '?', role: info.role || 'student', isCoTeacher: !!perm.coTeacher, micOn: !!info.micOn, camOn: !!info.camOn, handRaised: !!info.handRaised, isSelf: false });
     });
     list.sort((a, b) => { const rank = r => r.role === 'teacher' ? 0 : (r.isCoTeacher ? 1 : 2); if (rank(a) !== rank(b)) return rank(a) - rank(b); return (a.name || '').localeCompare(b.name || '', 'fa'); });
     return list;
@@ -2461,13 +2542,13 @@ function updateParticipantsPanel() {
     if (!body) return;
     const list = getParticipantList();
     if (cnt) cnt.textContent = list.length;
-    if (list.length === 0) { body.innerHTML = '<p style="text-align:center;color:var(--text-secondary);font-size:13px">کسی نیست</p>'; return; }
+    if (list.length === 0) { body.innerHTML = '—'; return; }
     body.innerHTML = list.map(p => {
         const roleClass = p.role === 'teacher' ? 'teacher' : (p.isCoTeacher ? 'coteacher' : '');
         const roleText = p.role === 'teacher' ? 'مدرس' : (p.isCoTeacher ? 'هم‌مدرس' : 'دانشجو');
         return `<div class="participant-item" onclick="showProfile('${p.id}')">
             <div class="p-avatar ${roleClass}">${escapeHtml((p.name || '?')[0].toUpperCase())}<div class="p-status-dot"></div></div>
-            <div class="p-info"><div class="p-name">${escapeHtml(p.name)}${p.isSelf ? ' (شما)' : ''}${p.handRaised ? ' ✋' : ''}</div><div class="p-role">${roleText}</div></div>
+            <div class="p-info"><div class="p-name">${escapeHtml(p.name)}${p.isSelf ? ' (you)' : ''}${p.handRaised ? ' ✋' : ''}</div><div class="p-role">${roleText}</div></div>
             <div class="p-icons"><span class="${p.micOn ? '' : 'muted'}">${p.micOn ? '🎤' : '🔇'}</span><span class="${p.camOn ? '' : 'muted'}">${p.camOn ? '📹' : '📷'}</span></div>
         </div>`;
     }).join('');
@@ -2475,24 +2556,24 @@ function updateParticipantsPanel() {
 function showProfile(pid) {
     const list = getParticipantList(); const p = list.find(x => x.id === pid); if (!p) return;
     const av = document.getElementById('profileAvatar'); av.textContent = (p.name || '?')[0].toUpperCase();
-    document.getElementById('profileName').textContent = p.name + (p.isSelf ? ' (شما)' : '');
+    document.getElementById('profileName').textContent = p.name + (p.isSelf ? ' (you)' : '');
     const r = document.getElementById('profileRole');
-    r.textContent = p.role === 'teacher' ? '👨‍🏫 مدرس' : (p.isCoTeacher ? '🎖️ هم‌مدرس' : '👨‍🎓 دانشجو');
-    document.getElementById('profileMic').textContent = p.micOn ? 'روشن' : 'خاموش';
-    document.getElementById('profileCam').textContent = p.camOn ? 'روشن' : 'خاموش';
-    document.getElementById('profileHand').textContent = p.handRaised ? 'بالا ✋' : 'پایین';
+    r.textContent = p.role === 'teacher' ? '👨‍🏫' : (p.isCoTeacher ? '🎖️' : '👨‍🎓');
+    document.getElementById('profileMic').textContent = p.micOn ? '✅' : '❌';
+    document.getElementById('profileCam').textContent = p.camOn ? '✅' : '❌';
+    document.getElementById('profileHand').textContent = p.handRaised ? '✋' : '—';
     const att = attendanceLog.get(pid);
     document.getElementById('profileJoin').textContent = att ? fmtDT(att.joinedAt) : '-';
     const actions = document.getElementById('profileActions');
     if (myRole === 'teacher' && p.role === 'student' && !p.isSelf) {
         actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.flexWrap = 'wrap';
         actions.innerHTML = `
-            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherMuteStudent('${pid}');closeModal('profileModal')">🔇 قطع صدا</button>
-            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherCamOffStudent('${pid}');closeModal('profileModal')">📹 قطع دوربین</button>
-            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="if(confirm('اخراج شود؟')){teacherKickStudent('${pid}');closeModal('profileModal')}">🚫 اخراج</button>`;
+            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherMuteStudent('${pid}');closeModal('profileModal')">🔇</button>
+            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherCamOffStudent('${pid}');closeModal('profileModal')">📹</button>
+            <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="if(confirm('?')){teacherKickStudent('${pid}');closeModal('profileModal')}">🚫</button>`;
     } else if (!p.isSelf) {
         actions.style.display = 'flex';
-        actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="startPrivateChat('${pid}');closeModal('profileModal')">💬 پیام خصوصی</button>`;
+        actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="startPrivateChat('${pid}');closeModal('profileModal')">💬</button>`;
     } else { actions.style.display = 'none'; actions.innerHTML = ''; }
     document.getElementById('profileModal').classList.add('open');
 }
@@ -2525,7 +2606,6 @@ async function toggleLowBandwidth() {
             else await vt.applyConstraints(getStudentCamConstraints(qualitySettings.studentCam));
         } catch (e) {}
     }
-    showToast(isLowBandwidth ? '📶 کم‌مصرف فعال' : '📶 حالت عادی');
 }
 
 // ==================== COTEACHER ====================
@@ -2534,7 +2614,6 @@ function toggleCoTeacher(pid) {
     const p = studentPermissions.get(pid); if (!p) return;
     p.coTeacher = !p.coTeacher; studentPermissions.set(pid, p);
     sendTo(pid, { type: 'coteacher-status', enabled: p.coTeacher });
-    showToast((p.coTeacher ? '✅ ' : '🔒 ') + (remoteParticipants.get(pid)?.name || '') + ' هم‌مدرس');
     updateTeacherPanel(); updateParticipantsPanel();
 }
 
@@ -2565,7 +2644,7 @@ function openWhiteboard(s) {
 }
 function closeWhiteboard(s) { document.getElementById('whiteboardModal').classList.remove('open'); if (isPrivileged() && !s) broadcast({ type: 'wb-close' }); }
 function wbStartDraw(e) {
-    if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return showToast('🔒');
+    if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return;
     wbIsDrawing = true;
     const r = wbCanvas.getBoundingClientRect();
     const x = (e.clientX - r.left) * (wbCanvas.width / r.width);
@@ -2599,7 +2678,7 @@ function redrawAllStrokes() {
 function clearCanvasLocal() { if (wbCtx) wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height); }
 function setPenColor(c, b) { wbPenColor = c; document.querySelectorAll('#whiteboardTools .color-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function setPenSize(s, b) { wbPenSize = s; document.querySelectorAll('#whiteboardTools .size-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
-function clearWhiteboard() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (!confirm('پاک شود؟')) return; clearCanvasLocal(); wbStrokes = []; wbCurrentStroke = null; broadcast({ type: 'wb-clear' }); }
+function clearWhiteboard() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (!confirm('?')) return; clearCanvasLocal(); wbStrokes = []; wbCurrentStroke = null; broadcast({ type: 'wb-clear' }); }
 function undoLastStroke() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (wbStrokes.length === 0) return; wbStrokes.pop(); redrawAllStrokes(); broadcast({ type: 'wb-undo' }); }
 
 // ==================== PROJECTOR ====================
@@ -2630,79 +2709,42 @@ function openProjector(s) {
     document.getElementById('projectorModal').classList.add('open');
     setTimeout(() => {
         resizeProjectorCanvas(); redrawProjectorStrokes(); updateProjectorToolsVisibility();
-        const hint = document.getElementById('projectorEmptyHint');
-        if (hasProjectorAccess()) hint.innerHTML = 'فیلم یا عکس خود را آپلود کنید<br><small style="color:var(--warning);font-size:11px;">پیشنهاد: فرمت MP4 (H.264) با حجم کمتر از ۵۰MB</small>';
-        else hint.textContent = 'منتظر آپلود مدرس...';
         document.getElementById('projectorDrawTools').style.display = 'flex';
         document.getElementById('projectorSeekBar').style.display = 'flex';
         if (projCurrentMedia) displayProjectorMedia(projCurrentMedia);
     }, 100);
 }
 function closeProjector(s) { document.getElementById('projectorModal').classList.remove('open'); if (projVideo) projVideo.pause(); }
-
-// ==================== PROJECTOR UPLOAD (Supabase Storage) ====================
 async function loadProjectorFile(e) {
     if (!hasProjectorAccess()) { showToast('🔒'); return; }
     const f = e.target.files[0]; if (!f) return;
-    if (f.size > 52428800) { showToast('❌ بزرگتر از ۵۰MB'); return; }
+    if (f.size > 52428800) { showToast('⚠️ 50MB'); return; }
     const iv = f.type.startsWith('video/'); const ii = f.type.startsWith('image/');
-    if (!iv && !ii) { showToast('❌ فقط فیلم/عکس'); return; }
-    showToast('⏳ در حال آپلود به سرور...');
-    
+    if (!iv && !ii) return;
+    showToast('⏳...');
     try {
         const mediaId = 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         const ext = f.name.split('.').pop() || (iv ? 'mp4' : 'jpg');
         const fileName = `${mediaId}.${ext}`;
-        
-        const { data: upData, error: upErr } = await sb.storage
-            .from(PROJECTOR_BUCKET)
-            .upload(fileName, f, {
-                cacheControl: '3600',
-                upsert: false,
-                contentType: f.type,
-            });
-        
-        if (upErr) {
-            console.error('Upload error:', upErr);
-            throw new Error('خطا در آپلود: ' + upErr.message);
-        }
-        
+        const { error: upErr } = await sb.storage.from(PROJECTOR_BUCKET).upload(fileName, f, { cacheControl: '3600', upsert: false, contentType: f.type });
+        if (upErr) throw new Error(upErr.message);
         const { data: urlData } = sb.storage.from(PROJECTOR_BUCKET).getPublicUrl(fileName);
         const publicUrl = urlData.publicUrl;
-        
-        projCurrentMedia = {
-            type: iv ? 'video' : 'image',
-            name: f.name,
-            data: publicUrl,
-            from: myName,
-            mediaId,
-            storagePath: fileName,
-        };
+        projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: publicUrl, from: myName, mediaId, storagePath: fileName };
         projCurrentState = { isPlaying: false, currentTime: 0, mediaId };
-        
         displayProjectorMedia(projCurrentMedia);
         broadcast({ type: 'proj-media', media: projCurrentMedia, state: projCurrentState });
-        showToast('✅ بارگذاری شد و برای همه پخش می‌شه');
-        
-    } catch (err) {
-        console.error('Projector upload error:', err);
-        showToast('❌ ' + err.message);
-    }
+    } catch (err) { showToast('❌ ' + err.message); }
 }
 function displayProjectorMedia(m) {
     document.getElementById('projectorEmptyState').style.display = 'none';
     if (m.type === 'video') {
         projImage.style.display = 'none';
         projVideo.style.display = 'block';
-        if (projVideo.src !== m.data) {
-            projVideo.src = m.data;
-            projVideo.load();
-        }
+        if (projVideo.src !== m.data) { projVideo.src = m.data; projVideo.load(); }
     } else {
-        projVideo.style.display = 'none';
-        projVideo.pause();
-        projImage.style.display = 'block';
-        projImage.src = m.data;
+        projVideo.style.display = 'none'; projVideo.pause();
+        projImage.style.display = 'block'; projImage.src = m.data;
     }
     redrawProjectorStrokes();
 }
@@ -2726,21 +2768,8 @@ function onProjectorSeekInput(v) { if (hasProjectorAccess()) projIsSeeking = tru
 function onProjectorSeekChange(v) {
     if (!hasProjectorAccess() || !projVideo.duration) return;
     const tt = (v / 100) * projVideo.duration;
-    projVideo.currentTime = tt;
-    projIsSeeking = false;
+    projVideo.currentTime = tt; projIsSeeking = false;
     broadcast({ type: 'proj-state', state: { isPlaying: !projVideo.paused, currentTime: tt, mediaId: projCurrentMedia?.mediaId } });
-}
-function startProjSync() {
-    stopProjSync();
-    if (!hasProjectorAccess()) return;
-    projSyncInterval = setInterval(() => {
-        if (projCurrentMedia && projVideo && projVideo.readyState >= 2 && projCurrentMedia.type === 'video') {
-            projCurrentState.currentTime = projVideo.currentTime;
-            projCurrentState.isPlaying = !projVideo.paused;
-            projCurrentState.mediaId = projCurrentMedia.mediaId;
-            broadcast({ type: 'proj-state', state: projCurrentState });
-        }
-    }, 2000);
 }
 function stopProjSync() { if (projSyncInterval) { clearInterval(projSyncInterval); projSyncInterval = null; } }
 function projStartDraw(e) {
@@ -2778,7 +2807,7 @@ function redrawProjectorStrokes() {
 function setProjPenColor(c, b) { projPenColor = c; document.querySelectorAll('#projectorDrawTools .color-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function setProjPenSize(s, b) { projPenSize = s; document.querySelectorAll('#projectorDrawTools .size-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function undoProjectorStroke() { if (projStrokes.length === 0) return; projStrokes.pop(); redrawProjectorStrokes(); broadcast({ type: 'proj-draw-undo' }); }
-function clearProjectorCanvas() { if (!confirm('پاک شود؟')) return; projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height); projStrokes = []; projCurrentStroke = null; broadcast({ type: 'proj-draw-clear' }); }
+function clearProjectorCanvas() { if (!confirm('?')) return; projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height); projStrokes = []; projCurrentStroke = null; broadcast({ type: 'proj-draw-clear' }); }
 
 // ==================== VIDEOS ====================
 function addMyVideo() {
@@ -2787,7 +2816,7 @@ function addMyVideo() {
     const v = document.createElement('video');
     v.srcObject = localStream; v.autoplay = true; v.muted = true; v.playsInline = true;
     v.setAttribute('playsinline', ''); v.play().catch(() => {});
-    const n = document.createElement('div'); n.className = 'name'; n.textContent = `${myName} (شما)`;
+    const n = document.createElement('div'); n.className = 'name'; n.textContent = `${myName} (you)`;
     const m = document.createElement('div'); m.className = 'mic'; m.id = 'mic-me'; m.textContent = '🎤';
     const q = document.createElement('div'); q.className = 'quality'; q.id = 'quality-me';
     c.appendChild(v); c.appendChild(n); c.appendChild(m); c.appendChild(q);
@@ -2803,8 +2832,7 @@ function addRemoteVideo(pid, videoEl, name) {
     const q = document.createElement('div'); q.className = 'quality'; q.id = `quality-${pid}`;
     c.appendChild(videoEl); c.appendChild(n); c.appendChild(m); c.appendChild(q);
     document.getElementById('videos').appendChild(c);
-    updateParticipantCount();
-    checkConnectionQuality(pid);
+    updateParticipantCount(); checkConnectionQuality(pid);
 }
 function removeVideo(pid) { const c = document.getElementById(`video-${pid}`); if (c) c.remove(); updateParticipantCount(); }
 function showAvatar(pid) {
@@ -2842,7 +2870,7 @@ function updateRemoteMicUI(pid, on) { const m = document.getElementById(`mic-${p
 function updateRemoteCamUI(pid, on) {
     const b = document.getElementById(`video-${pid}`); if (!b) return;
     const v = b.querySelector('video'); let av = b.querySelector('.avatar');
-    if (!on) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; const i = remoteParticipants.get(pid); av.textContent = (i?.name || '؟')[0].toUpperCase(); b.insertBefore(av, b.firstChild); } }
+    if (!on) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; const i = remoteParticipants.get(pid); av.textContent = (i?.name || '?')[0].toUpperCase(); b.insertBefore(av, b.firstChild); } }
     else { if (v) v.style.display = 'block'; if (av) av.remove(); }
 }
 function updateHandUI(pid, r) {
@@ -2878,21 +2906,18 @@ async function actuallyToggleCam() {
 function requestPermission(type) {
     if (myRole !== 'student') return;
     const b = type === 'mic' ? document.getElementById('btnMic') : document.getElementById('btnCam');
-    if (b && b.classList.contains('waiting')) return showToast('⏳ در انتظار...');
+    if (b && b.classList.contains('waiting')) return;
     sendTo(teacherId, { type: 'request-permission', permission: type, name: myName });
     if (b) { b.classList.add('waiting'); b.disabled = true; }
-    showToast('📩 درخواست ارسال شد');
 }
 async function toggleScreen() {
     const lp = livekitRoom?.localParticipant; if (!lp) return;
     if (isSharing) { try { await lp.setScreenShareEnabled(false); } catch (e) {} isSharing = false; document.getElementById('btnScreen').classList.remove('on'); }
     else {
         try {
-            const captureOpts = getScreenShareCapture(qualitySettings.screenShare);
-            const publishOpts = getScreenSharePublish(qualitySettings.screenShare);
-            await lp.setScreenShareEnabled(true, captureOpts, publishOpts);
+            await lp.setScreenShareEnabled(true, getScreenShareCapture(qualitySettings.screenShare), getScreenSharePublish(qualitySettings.screenShare));
             isSharing = true; document.getElementById('btnScreen').classList.add('on');
-        } catch (e) { showToast('❌ لغو شد'); }
+        } catch (e) {}
     }
 }
 
@@ -2903,11 +2928,11 @@ function updateTeacherPanel() {
     const l = document.getElementById('studentsList'); if (!l) return;
     const st = [];
     remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ pid: p, ...i }); });
-    if (st.length === 0) { l.innerHTML = '<p style="padding:20px;text-align:center;color:var(--text-secondary);font-size:12px">دانشجویی نیست</p>'; return; }
+    if (st.length === 0) { l.innerHTML = '—'; return; }
     l.innerHTML = st.map(s => {
         const p = studentPermissions.get(s.pid) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: {} };
         return `<div class="student-card">
-            <div class="row1"><div class="s-avatar ${p.coTeacher ? 'coteacher' : ''}">${escapeHtml((s.name || '؟')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(s.name)}${p.coTeacher ? ' 🎖️' : ''}</div><div class="s-status">${s.handRaised ? '✋' : (s.micOn ? '🎤' : '🔇')}</div></div></div>
+            <div class="row1"><div class="s-avatar ${p.coTeacher ? 'coteacher' : ''}">${escapeHtml((s.name || '?')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(s.name)}${p.coTeacher ? ' 🎖️' : ''}</div><div class="s-status">${s.handRaised ? '✋' : (s.micOn ? '🎤' : '🔇')}</div></div></div>
             <div class="perm-row">
                 <button class="perm-btn ${p.mic ? 'granted' : (p.pending?.mic ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','mic')">🎤</button>
                 <button class="perm-btn ${p.cam ? 'granted' : (p.pending?.cam ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','cam')">📹</button>
@@ -2937,7 +2962,6 @@ function approvePermission(pid, type) {
     if (p && p.pending) p.pending[type] = true;
     if (p) studentPermissions.set(pid, p);
     sendTo(pid, { type: 'permission-request', permission: type });
-    showToast('📤 درخواست ارسال شد');
     updatePendingRequestsUI(); updateTeacherPanel();
 }
 function denyPermission(pid, type) { const p = studentPermissions.get(pid); if (p && p.pending) p.pending[type] = false; studentPermissions.set(pid, p); sendTo(pid, { type: 'permission-denied', permission: type }); updatePendingRequestsUI(); updateTeacherPanel(); }
@@ -2950,14 +2974,14 @@ function toggleStudentPermission(pid, type) {
 }
 function teacherMuteStudent(pid) { sendTo(pid, { type: 'force-mute' }); const i = remoteParticipants.get(pid); if (i) remoteParticipants.set(pid, { ...i, micOn: false }); updateRemoteMicUI(pid, false); updateTeacherPanel(); updateParticipantsPanel(); }
 function teacherCamOffStudent(pid) { sendTo(pid, { type: 'force-camera-off' }); const i = remoteParticipants.get(pid); if (i) remoteParticipants.set(pid, { ...i, camOn: false }); updateRemoteCamUI(pid, false); updateParticipantsPanel(); }
-async function teacherKickStudent(pid) { const i = remoteParticipants.get(pid); if (!i || !confirm(`اخراج ${i.name}?`)) return; sendTo(pid, { type: 'kick', reason: 'مدرس شما را اخراج کرد' }); setTimeout(() => { removeVideo(pid); remoteParticipants.delete(pid); studentPermissions.delete(pid); updateTeacherPanel(); updateParticipantCount(); updateParticipantsPanel(); }, 1500); }
+async function teacherKickStudent(pid) { const i = remoteParticipants.get(pid); if (!i || !confirm('?')) return; sendTo(pid, { type: 'kick', reason: 'kick' }); setTimeout(() => { removeVideo(pid); remoteParticipants.delete(pid); studentPermissions.delete(pid); updateTeacherPanel(); updateParticipantCount(); updateParticipantsPanel(); }, 1500); }
 function muteAllStudents() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.micOn) { sendTo(p, { type: 'force-mute' }); remoteParticipants.set(p, { ...i, micOn: false }); updateRemoteMicUI(p, false); } }); updateTeacherPanel(); updateParticipantsPanel(); }
 function muteAllCameras() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.camOn) { sendTo(p, { type: 'force-camera-off' }); remoteParticipants.set(p, { ...i, camOn: false }); updateRemoteCamUI(p, false); } }); updateParticipantsPanel(); }
 function lockRoom() { isRoomLocked = !isRoomLocked; document.getElementById('lockIcon').textContent = isRoomLocked ? '🔒' : '🔓'; broadcast({ type: 'lock-room', locked: isRoomLocked }); }
 function clearAllHands() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.handRaised) { remoteParticipants.set(p, { ...i, handRaised: false }); updateHandUI(p, false); } }); updateTeacherPanel(); updateParticipantsPanel(); }
 
 // ==================== RECORDING ====================
-async function toggleRecording() { if (myRole !== 'teacher') return showToast('⚠️ فقط مدرس'); if (isRecording) stopRecording(); else await startRecording(); }
+async function toggleRecording() { if (myRole !== 'teacher') return; if (isRecording) stopRecording(); else await startRecording(); }
 async function startRecording() {
     try {
         compositeCanvas = document.createElement('canvas'); compositeCanvas.width = 1280; compositeCanvas.height = 720;
@@ -2979,16 +3003,16 @@ async function startRecording() {
         mediaRecorder.start(1000);
         isRecording = true; recordingStartTime = Date.now();
         document.getElementById('recordingIndicator').classList.add('active');
-        const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️ توقف'; bp.classList.add('recording'); }
+        const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️'; bp.classList.add('recording'); }
         startRecTimer(); broadcast({ type: 'recording-started' });
-    } catch (e) { showToast('❌ ' + e.message); cleanupRec(); }
+    } catch (e) { cleanupRec(); }
 }
 function stopRecording() {
     if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
     try { mediaRecorder.stop(); } catch (e) {}
     isRecording = false;
     document.getElementById('recordingIndicator').classList.remove('active');
-    const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '🎥 شروع ضبط'; bp.classList.remove('recording'); }
+    const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '🎥'; bp.classList.remove('recording'); }
     stopRecTimer(); broadcast({ type: 'recording-stopped' }); cleanupRec();
 }
 function cleanupRec() { if (compositeAnimationId) { cancelAnimationFrame(compositeAnimationId); compositeAnimationId = null; } if (audioContext && audioContext.state !== 'closed') audioContext.close().catch(() => {}); audioContext = null; audioDestination = null; mediaRecorder = null; }
@@ -3035,33 +3059,57 @@ function downloadRecording() {
 }
 function discardRecording() { recordingBlob = null; recordedChunks = []; closeModal('recordingModal'); }
 
-// ==================== PASSWORD MODAL ====================
+// ==================== PASSWORD ====================
 function askForPassword(cb) { document.getElementById('passwordModal').classList.add('open'); document.getElementById('passwordInput').value = ''; window._pendingPasswordResolve = cb; }
 function submitPassword() { const p = document.getElementById('passwordInput').value.trim(); closeModal('passwordModal'); if (window._pendingPasswordResolve) { window._pendingPasswordResolve(p); window._pendingPasswordResolve = null; } }
 function cancelPassword() { closeModal('passwordModal'); window._pendingPasswordResolve = null; leaveMeeting(true); }
 
 // ==================== LINK/LEAVE ====================
-function copyLink() { const u = new URL(location.href); u.searchParams.set('room', roomId); navigator.clipboard.writeText(u.toString()).then(() => showToast('🔗 کپی شد')).catch(() => prompt('Link:', u.toString())); }
+function copyLink() { const u = new URL(location.href); u.searchParams.set('room', roomId); navigator.clipboard.writeText(u.toString()).then(() => showToast('🔗')).catch(() => prompt('Link:', u.toString())); }
+// ✅ leaveMeeting با ریست کامل state و دکمه‌ی ورود
 async function leaveMeeting(s) {
-    if (!s && !confirm('خروج؟')) return;
+    if (!s && !confirm('?')) return;
     if (isRecording) stopRecording();
     if (vadInterval) clearInterval(vadInterval);
     if (classTimerInterval) clearInterval(classTimerInterval);
     if (activityTimerInterval) clearInterval(activityTimerInterval);
     if (qualityCheckInterval) clearInterval(qualityCheckInterval);
     if (waitingAudioBlockInterval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; }
-    stopProjSync();
-    closeScreenShareModal();
+    stopProjSync(); closeScreenShareModal(); hideConnBanner();
     const e = attendanceLog.get(myId); if (e) e.leftAt = new Date();
     broadcast({ type: 'bye', name: myName });
     try { if (livekitRoom) await livekitRoom.disconnect(); } catch (e) {}
     livekitRoom = null;
     isWaitingForApproval = false;
+    // ریست state
+    isMicOn = false; isCamOn = false; isSharing = false; isHandRaised = false;
+    isCoTeacher = false; isLowBandwidth = false; isRoomLocked = false;
+    remoteParticipants.clear();
+    waitingList.clear();
+    studentPermissions.clear();
+    currentPoll = null; pollVotes.clear();
+    breakoutGroups = null; myGroupId = null;
+    projCurrentMedia = null; projStrokes = []; projCurrentStroke = null;
+    wbStrokes = []; wbCurrentStroke = null;
+    // بستن پنل‌ها
+    ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.classList.remove('open');
+    });
+    // بستن مودال‌ها
+    ['whiteboardModal','projectorModal','screenShareModal','giftCodeModal','profileModal','kickModal','recordingModal','passwordModal','activityTimerModal','announceModal'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.classList.remove('open');
+    });
     document.getElementById('waitingRoomOverlay').style.display = 'none';
     document.getElementById('meeting').classList.remove('active');
     document.getElementById('videos').innerHTML = '';
     document.getElementById('lobby').style.display = 'flex';
     const joinInput = document.getElementById('joinRoomCode'); if (joinInput) joinInput.value = '';
+    // ✅ ریست دکمه ورود به جلسه
+    const jb = document.getElementById('joinBtn');
+    if (jb) {
+        jb.disabled = false;
+        jb.textContent = (I18N[currentLang] && I18N[currentLang].joinMeeting) || 'ورود به جلسه';
+    }
     setLobbyRole('teacher');
 }
 window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {} if (localStream) localStream.getTracks().forEach(t => t.stop()); if (isRecording) try { mediaRecorder.stop(); } catch (e) {} });
@@ -3071,6 +3119,7 @@ document.addEventListener('keydown', e => {
         const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector();
         const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal();
         const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel();
+        const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal');
     }
 });
 
@@ -3085,17 +3134,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     changeDevice(dm);
     initWhiteboard(); initProjector(); setupEmojiPicker();
 
+    const savedLang = localStorage.getItem('lroom_lang') || 'fa';
+    const ls = document.getElementById('langSelect'); if (ls) ls.value = savedLang;
+    try { applyLanguage(savedLang); } catch (e) { console.warn('i18n init:', e); }
+
     try {
         const { data: { session } } = await sb.auth.getSession();
         if (session && session.user) {
             let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (!profile) {
-                const endDate = new Date();
-                endDate.setDate(endDate.getDate() + DEFAULT_SUBSCRIPTION_DAYS);
+                const endDate = new Date(); endDate.setDate(endDate.getDate() + DEFAULT_SUBSCRIPTION_DAYS);
                 await sb.from('profiles').insert({
-                    id: session.user.id,
-                    email: session.user.email,
-                    name: session.user.user_metadata?.name || 'کاربر',
+                    id: session.user.id, email: session.user.email,
+                    name: session.user.user_metadata?.name || 'User',
                     role: session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user',
                     subscription_end: endDate.toISOString(),
                 });
@@ -3103,11 +3154,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 profile = r2.data;
             }
             if (profile) {
-                currentUser = {
-                    id: profile.id, email: profile.email, name: profile.name,
-                    role: profile.role, sessionCode: profile.session_code,
-                    subscriptionEnd: profile.subscription_end,
-                };
+                currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
                 checkAndShow();
                 initRealtime();
                 loadActiveAnnouncement();
@@ -3115,7 +3162,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         }
     } catch (e) { console.error('Session check:', e); }
-
     document.getElementById('authScreen').style.display = 'flex';
 });
 </script>
