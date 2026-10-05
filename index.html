@@ -71,7 +71,6 @@ button{font-family:inherit}
 .video-box:fullscreen{background:#000}
 .video-box:fullscreen video{object-fit:contain}
 #btnBlur.on{background:linear-gradient(135deg,var(--accent),#4285f4);color:#202124}
-/* Screen share inline */
 .video-box.screensharing video:not(.ss-video){display:none!important}
 .video-box.screensharing .avatar{display:none!important}
 .video-box.screensharing .ss-video{display:block!important}
@@ -429,8 +428,7 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
-
-<div id="guestJoinScreen">
+  <div id="guestJoinScreen">
   <div class="guest-box">
     <div class="guest-icon">🎓</div>
     <h2>ورود به کلاس</h2>
@@ -898,7 +896,18 @@ const BALE_ID = '@sobhan101095';
 const DEFAULT_SUBSCRIPTION_DAYS = 20;
 const PROJECTOR_BUCKET = 'projector-media';
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ⚠️ Supabase client با تنظیمات بهینه
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+        flowType: 'implicit'
+    },
+    realtime: {
+        params: { eventsPerSecond: 2 }
+    }
+});
 
 let currentUser = null;
 let livekitRoom = null;
@@ -1106,24 +1115,12 @@ function isSlowConnection() {
     try {
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         if (!conn) return false;
-
         const type = conn.effectiveType || '';
-
-        // فقط شبکه‌های واقعاً ضعیف
         if (type === 'slow-2g' || type === '2g') return true;
-
-        // saveData یعنی خود کاربر خواسته کم‌مصرف باشه
         if (conn.saveData) return true;
-
-        // 3G فقط اگه downlink خیلی پایین باشه
         if (type === '3g' && conn.downlink && conn.downlink < 0.8) return true;
-
-        // RTT فقط اگه فاجعه باشه
         if (conn.rtt && conn.rtt > 800) return true;
-
-        // downlink فقط اگه واقعاً زیر 1Mbps باشه
         if (conn.downlink && conn.downlink < 1.0) return true;
-
         return false;
     } catch (e) { return false; }
 }
@@ -1582,7 +1579,9 @@ function updateAdminButtons() { const show = isAdminUser(); const b1 = document.
 function initRealtime() { if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
 async function loadActiveAnnouncement() { const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
-// ✅ اصلاح‌شده: joinMeeting بدون چک خودکار اینترنت
+// ═══════════════════════════════════════════════════════
+// ✅ joinMeeting نهایی — با تمام بهینه‌سازی‌ها
+// ═══════════════════════════════════════════════════════
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
@@ -1608,48 +1607,46 @@ async function joinMeeting() {
 
         const mediaPromise = startPreview();
         const tokenPromise = generateLiveKitToken(roomId, myId, myName, myRole === 'teacher');
-
-        // ✅ همیشه با کیفیت مناسب شروع کن — بدون چک خودکار
         const initialRes = { width: 480, height: 270, frameRate: 15 };
 
         livekitRoom = new LivekitClient.Room({
             adaptiveStream: true,
             dynacast: true,
+            disconnectOnPageLeave: false,
             videoCaptureDefaults: { resolution: initialRes, facingMode: 'user' },
             audioCaptureDefaults: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                sampleRate: 24000
+                echoCancellation: true
             },
             publishDefaults: {
                 simulcast: true,
                 videoSimulcastLayers: [
                     { width: 160, height: 90, encoding: { maxBitrate: 60000, maxFramerate: 8 } },
-                    { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } },
-                    { width: 640, height: 360, encoding: { maxBitrate: 400000, maxFramerate: 20 } }
+                    { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } }
                 ],
                 videoCodec: 'vp8',
                 dtx: true,
-                red: true,
                 degradationPreference: 'maintain-framerate',
                 screenShareEncoding: { maxBitrate: 1200000, maxFramerate: 10 },
             },
             connectOptions: {
                 autoSubscribe: true,
-                maxRetries: 15,
-                peerConnectionTimeout: 120000,
-                websocketTimeout: 120000,
+                maxRetries: 8,
+                peerConnectionTimeout: 30000,
+                websocketTimeout: 30000,
                 rtcConfig: {
                     iceTransportPolicy: 'all',
                     bundlePolicy: 'max-bundle',
                     rtcpMuxPolicy: 'require',
-                    iceCandidatePoolSize: 5
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun.cloudflare.com:3478' }
+                    ]
                 }
             },
             reconnectPolicy: {
-                nextRetryDelayInMs: (ctx) => ctx.retryCount < 8 ? 800 : (ctx.retryCount < 20 ? 2500 : 6000),
-                maxRetryDelayMs: 15000
+                nextRetryDelayInMs: (ctx) => ctx.retryCount < 3 ? 500 : (ctx.retryCount < 10 ? 1500 : 3000),
+                maxRetryDelayMs: 5000
             },
         });
 
@@ -1667,14 +1664,19 @@ async function joinMeeting() {
             elapsed += 3;
             if (elapsed === 9) showConnBanner(t('connWait'));
             if (elapsed === 30) showConnBanner(t('connPatience'));
-            if (elapsed === 60) showConnBanner(t('connTooLong'));
         }, 3000);
 
         try {
             await Promise.race([
                 livekitRoom.connect(LIVEKIT_URL, token),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 120000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 45000))
             ]);
+        } catch (connectErr) {
+            console.warn('⚠️ خطای اتصال:', connectErr);
+            if (connectErr.message.includes('timeout')) {
+                throw new Error('⏱️ اتصال طول کشید. لطفاً اینترنت خود را چک کنید و دوباره تلاش کنید.');
+            }
+            throw connectErr;
         } finally {
             clearInterval(progressInterval);
             hideConnBanner();
@@ -1683,7 +1685,6 @@ async function joinMeeting() {
         showMeetingUI();
         showToast('✅ متصل شدید');
 
-        // ✅ بعد از ۵ ثانیه کیفیت واقعی رو بسنج
         setTimeout(checkRealConnectionQuality, 5000);
 
         const lp = livekitRoom.localParticipant;
@@ -1791,7 +1792,7 @@ function showMeetingUI() {
     updateParticipantsPanel();
     if (!bellAudioCtx) { try { bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
     document.title = `Lroom | ${roomId}`;
-    if (myRole === 'teacher') setTimeout(() => autoAdjustQuality(true), 1200);
+    if (myRole === 'teacher') setTimeout(() => autoAdjustQuality(true), 3000);
 }
 function setupLiveKitEvents() {
     const R = LivekitClient.RoomEvent;
