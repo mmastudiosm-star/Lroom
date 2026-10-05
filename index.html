@@ -71,6 +71,7 @@ button{font-family:inherit}
 .video-box:fullscreen{background:#000}
 .video-box:fullscreen video{object-fit:contain}
 #btnBlur.on{background:linear-gradient(135deg,var(--accent),#4285f4);color:#202124}
+/* Screen share inline */
 .video-box.screensharing video:not(.ss-video){display:none!important}
 .video-box.screensharing .avatar{display:none!important}
 .video-box.screensharing .ss-video{display:block!important}
@@ -428,7 +429,7 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
-  
+
 <div id="guestJoinScreen">
   <div class="guest-box">
     <div class="guest-icon">🎓</div>
@@ -1100,17 +1101,45 @@ function saveWhiteboardAsImage() {
     } catch (e) { showToast('❌ خطا'); }
 }
 
+// ✅ اصلاح‌شده: isSlowConnection ساده و دقیق
 function isSlowConnection() {
     try {
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         if (!conn) return false;
+
         const type = conn.effectiveType || '';
-        if (type === 'slow-2g' || type === '2g' || type === '3g') return true;
+
+        // فقط شبکه‌های واقعاً ضعیف
+        if (type === 'slow-2g' || type === '2g') return true;
+
+        // saveData یعنی خود کاربر خواسته کم‌مصرف باشه
         if (conn.saveData) return true;
-        if (conn.downlink && conn.downlink < 2.5) return true;
-        if (conn.rtt && conn.rtt > 300) return true;
+
+        // 3G فقط اگه downlink خیلی پایین باشه
+        if (type === '3g' && conn.downlink && conn.downlink < 0.8) return true;
+
+        // RTT فقط اگه فاجعه باشه
+        if (conn.rtt && conn.rtt > 800) return true;
+
+        // downlink فقط اگه واقعاً زیر 1Mbps باشه
+        if (conn.downlink && conn.downlink < 1.0) return true;
+
         return false;
     } catch (e) { return false; }
+}
+
+// ✅ جدید: چک کیفیت واقعی بعد از اتصال
+function checkRealConnectionQuality() {
+    if (!livekitRoom || !livekitRoom.engine) return;
+    try {
+        let rtt = 0;
+        if (livekitRoom.engine.client && typeof livekitRoom.engine.client.rtt === 'number') {
+            rtt = livekitRoom.engine.client.rtt;
+        }
+        if (rtt > 600 && !isLowBandwidth) {
+            showToast('📶 اتصال کند است — می‌توانید حالت کم‌مصرف را از دکمه 📶 فعال کنید');
+        }
+    } catch (e) {}
 }
 
 function startWaitingAudioBlocker() {
@@ -1151,10 +1180,18 @@ function getStudentCamConstraints(level) {
     }
 }
 function getScreenShareCapture(level) {
-    return { resolution: { width: 1280, height: 720, frameRate: 10 }, audio: false };
+    switch(level) {
+        case 'low': return { resolution: { width: 1280, height: 720, frameRate: 10 }, audio: true };
+        case 'high': return { resolution: { width: 1920, height: 1080, frameRate: 30 }, audio: true };
+        default: return { resolution: { width: 1920, height: 1080, frameRate: 15 }, audio: true };
+    }
 }
 function getScreenSharePublish(level) {
-    return { simulcast: false, screenShareEncoding: { maxBitrate: 800000, maxFramerate: 10, priority: 'high' } };
+    switch(level) {
+        case 'low': return { simulcast: false, screenShareEncoding: { maxBitrate: 600000, maxFramerate: 10 } };
+        case 'high': return { simulcast: true, screenShareEncoding: { maxBitrate: 5000000, maxFramerate: 30 } };
+        default: return { simulcast: true, screenShareEncoding: { maxBitrate: 2500000, maxFramerate: 15 } };
+    }
 }
 function getActualParticipantCount() { return remoteParticipants.size + 1; }
 function getAutoQualityRules(participantCount) {
@@ -1210,7 +1247,7 @@ function receiveQualitySettings(settings) {
     setTimeout(applyUniformQualityToRemote, 300);
     setTimeout(applyUniformQualityToRemote, 1500);
 }
-  
+
 async function _applyGiftCodeToUser(code, statusEl) {
     if (!currentUser) { if (statusEl) statusEl.textContent = '⚠️'; return false; }
     if (isGuestMode) { if (statusEl) statusEl.textContent = '⚠️ مهمان'; return false; }
@@ -1531,7 +1568,7 @@ async function sendGlobalAnnouncement() {
     renderAdminAnnouncements();
     showToast('📢');
 }
-async function clearGlobalAnnouncement() { if (!isAdminUser()) return; if (!confirm('?')) return; await sb.from('announcements').update({ is_active: false }).eq('is_active', true); hideGlobalBanner(); renderAdminAnnouncements(); }
+async function clearGlobalAnnouncement() { if (!isAdminUser()) return; if (!confirm('حذف اعلان فعال؟')) return; await sb.from('announcements').update({ is_active: false }).eq('is_active', true); hideGlobalBanner(); renderAdminAnnouncements(); }
 async function renderAdminAnnouncements() {
     const { data: anns } = await sb.from('announcements').select('*').order('created_at', { ascending: false }).limit(30);
     const list = document.getElementById('adminAnnounceHistory');
@@ -1545,81 +1582,183 @@ function updateAdminButtons() { const show = isAdminUser(); const b1 = document.
 function initRealtime() { if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
 async function loadActiveAnnouncement() { const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
+// ✅ اصلاح‌شده: joinMeeting بدون چک خودکار اینترنت
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
     myRole = selectedLobbyRole;
     if (isGuestMode) myRole = 'student';
-    if (myRole === 'teacher' && !isGuestMode) { const code = await ensureSessionCode(); roomId = sanitize(code); }
-    else { const studentCode = document.getElementById('joinRoomCode').value.trim(); if (!studentCode) return showToast('⚠️'); roomId = sanitize(studentCode); }
+
+    if (myRole === 'teacher' && !isGuestMode) {
+        const code = await ensureSessionCode();
+        roomId = sanitize(code);
+    } else {
+        const studentCode = document.getElementById('joinRoomCode').value.trim();
+        if (!studentCode) return showToast('⚠️ کد جلسه را وارد کنید');
+        roomId = sanitize(studentCode);
+    }
+
     const btn = document.getElementById('joinBtn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
-    showToast('⏳...');
+    showToast('⏳ در حال اتصال...');
+
     try {
         myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
         teacherId = `teacher-${roomId}`;
+
         const mediaPromise = startPreview();
         const tokenPromise = generateLiveKitToken(roomId, myId, myName, myRole === 'teacher');
-        const slowNet = isSlowConnection();
-        const initialRes = slowNet ? { width: 320, height: 180, frameRate: 10 } : { width: 480, height: 270, frameRate: 15 };
-        if (slowNet) { showToast('📶 اینترنت ضعیف'); isLowBandwidth = true; }
+
+        // ✅ همیشه با کیفیت مناسب شروع کن — بدون چک خودکار
+        const initialRes = { width: 480, height: 270, frameRate: 15 };
 
         livekitRoom = new LivekitClient.Room({
-            adaptiveStream: true, dynacast: false,
+            adaptiveStream: true,
+            dynacast: true,
             videoCaptureDefaults: { resolution: initialRes, facingMode: 'user' },
-            audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, sampleRate: slowNet ? 16000 : 24000 },
+            audioCaptureDefaults: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 24000
+            },
             publishDefaults: {
                 simulcast: true,
-                videoSimulcastLayers: slowNet
-                    ? [{ width: 160, height: 90, encoding: { maxBitrate: 50000, maxFramerate: 8 } }, { width: 320, height: 180, encoding: { maxBitrate: 100000, maxFramerate: 10 } }]
-                    : [{ width: 160, height: 90, encoding: { maxBitrate: 60000, maxFramerate: 8 } }, { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } }, { width: 640, height: 360, encoding: { maxBitrate: 400000, maxFramerate: 20 } }],
-                videoCodec: 'vp8', dtx: true, red: true,
+                videoSimulcastLayers: [
+                    { width: 160, height: 90, encoding: { maxBitrate: 60000, maxFramerate: 8 } },
+                    { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } },
+                    { width: 640, height: 360, encoding: { maxBitrate: 400000, maxFramerate: 20 } }
+                ],
+                videoCodec: 'vp8',
+                dtx: true,
+                red: true,
                 degradationPreference: 'maintain-framerate',
-                screenShareEncoding: { maxBitrate: 800000, maxFramerate: 10 },
+                screenShareEncoding: { maxBitrate: 1200000, maxFramerate: 10 },
             },
             connectOptions: {
-                autoSubscribe: true, maxRetries: 20, peerConnectionTimeout: 150000, websocketTimeout: 150000,
+                autoSubscribe: true,
+                maxRetries: 15,
+                peerConnectionTimeout: 120000,
+                websocketTimeout: 120000,
                 rtcConfig: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-                        { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-                    ],
-                    iceTransportPolicy: 'all', bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require', iceCandidatePoolSize: 5,
-                },
+                    iceTransportPolicy: 'all',
+                    bundlePolicy: 'max-bundle',
+                    rtcpMuxPolicy: 'require',
+                    iceCandidatePoolSize: 5
+                }
             },
-            reconnectPolicy: { nextRetryDelayInMs: (ctx) => ctx.retryCount < 8 ? 800 : (ctx.retryCount < 20 ? 2500 : 6000), maxRetryDelayMs: 15000 },
+            reconnectPolicy: {
+                nextRetryDelayInMs: (ctx) => ctx.retryCount < 8 ? 800 : (ctx.retryCount < 20 ? 2500 : 6000),
+                maxRetryDelayMs: 15000
+            },
         });
+
         setupLiveKitEvents();
+
         const [, token] = await Promise.all([mediaPromise, tokenPromise]);
-        if (!localStream) { if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; } return showToast('⚠️'); }
-        showToast('🌐...');
+        if (!localStream) {
+            if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
+            return showToast('⚠️ دسترسی به دوربین/میکروفون داده نشد');
+        }
+
+        showToast('🌐 در حال اتصال به سرور...');
         let elapsed = 0;
-        const progressInterval = setInterval(() => { elapsed += 3; if (elapsed === 9) showConnBanner(t('connWait')); if (elapsed === 30) showConnBanner(t('connPatience')); if (elapsed === 60) showConnBanner(t('connTooLong')); }, 3000);
-        try { await Promise.race([livekitRoom.connect(LIVEKIT_URL, token), new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 120000))]); }
-        finally { clearInterval(progressInterval); hideConnBanner(); }
+        const progressInterval = setInterval(() => {
+            elapsed += 3;
+            if (elapsed === 9) showConnBanner(t('connWait'));
+            if (elapsed === 30) showConnBanner(t('connPatience'));
+            if (elapsed === 60) showConnBanner(t('connTooLong'));
+        }, 3000);
+
+        try {
+            await Promise.race([
+                livekitRoom.connect(LIVEKIT_URL, token),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 120000))
+            ]);
+        } finally {
+            clearInterval(progressInterval);
+            hideConnBanner();
+        }
+
         showMeetingUI();
-        showToast('✅');
+        showToast('✅ متصل شدید');
+
+        // ✅ بعد از ۵ ثانیه کیفیت واقعی رو بسنج
+        setTimeout(checkRealConnectionQuality, 5000);
+
         const lp = livekitRoom.localParticipant;
+
         if (myRole === 'teacher') {
             (async () => {
-                try { await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); isMicOn = true; localStream.getAudioTracks().forEach(t => t.enabled = true); updateMicUI(); broadcast({ type: 'mic', on: true }); } catch (e) {}
-                try { await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); isCamOn = true; localStream.getVideoTracks().forEach(t => t.enabled = true); updateCamUI(); broadcast({ type: 'cam', on: true }); } catch (e) {}
-                sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
+                try {
+                    await lp.publishTrack(localStream.getAudioTracks()[0], {
+                        name: 'microphone',
+                        source: LivekitClient.Track.Source.Microphone
+                    });
+                    isMicOn = true;
+                    localStream.getAudioTracks().forEach(t => t.enabled = true);
+                    updateMicUI();
+                    broadcast({ type: 'mic', on: true });
+                } catch (e) {}
+
+                try {
+                    await lp.publishTrack(localStream.getVideoTracks()[0], {
+                        name: 'camera',
+                        source: LivekitClient.Track.Source.Camera
+                    });
+                    isCamOn = true;
+                    localStream.getVideoTracks().forEach(t => t.enabled = true);
+                    updateCamUI();
+                    broadcast({ type: 'cam', on: true });
+                } catch (e) {}
+
+                sendData({
+                    type: 'hello',
+                    name: myName,
+                    role: myRole,
+                    micOn: isMicOn,
+                    camOn: isCamOn,
+                    isWaiting: false
+                });
             })();
         } else {
-            isMicOn = false; isCamOn = false;
-            myPermissions.mic = false; myPermissions.cam = false; myPermissions.whiteboard = false; myPermissions.projector = false;
+            isMicOn = false;
+            isCamOn = false;
+            myPermissions.mic = false;
+            myPermissions.cam = false;
+            myPermissions.whiteboard = false;
+            myPermissions.projector = false;
             isWaitingForApproval = true;
             startWaitingAudioBlocker();
             document.getElementById('waitingRoomOverlay').style.display = 'flex';
-            livekitRoom.remoteParticipants.forEach(p => { if (p.identity && p.identity.startsWith('teacher-')) { const el = document.getElementById('waitingTeacherName'); if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity); } });
-            setTimeout(() => { sendData({ type: 'hello', name: myName, role: myRole, micOn: false, camOn: false, isWaiting: true }); }, 100);
+
+            livekitRoom.remoteParticipants.forEach(p => {
+                if (p.identity && p.identity.startsWith('teacher-')) {
+                    const el = document.getElementById('waitingTeacherName');
+                    if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity);
+                }
+            });
+
+            setTimeout(() => {
+                sendData({
+                    type: 'hello',
+                    name: myName,
+                    role: myRole,
+                    micOn: false,
+                    camOn: false,
+                    isWaiting: true
+                });
+            }, 100);
         }
-    } catch (err) { showToast('❌ ' + (err.message || 'خطا')); if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; } try { if (livekitRoom) await livekitRoom.disconnect(); } catch (e) {} livekitRoom = null; }
+
+    } catch (err) {
+        showToast('❌ ' + (err.message || 'خطای اتصال'));
+        if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
+        try { if (livekitRoom) await livekitRoom.disconnect(); } catch (e) {}
+        livekitRoom = null;
+    }
 }
+
 function showMeetingUI() {
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('meeting').classList.add('active');
@@ -1720,10 +1859,11 @@ function removeScreenShareInline(pid) {
     }
     if (spotlightModeActive && spotlightedId === pid) applySpotlightToAll();
 }
+
 function showScreenShareModal(track, name, identity) { showScreenShareInline(identity, track, null, name); }
 function closeScreenShareModal() { }
 function toggleScreenShareFullscreen() { const wrapper = document.getElementById('screenShareWrapper'); if (!wrapper) return; if (!document.fullscreenElement) wrapper.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.().catch(() => {}); }
-  
+
 function handleIncomingData(data, senderId) {
     const info = remoteParticipants.get(senderId) || {};
     switch (data.type) {
@@ -1821,48 +1961,48 @@ function admitUser(pid) { sendTo(pid, { type: 'admit' }); waitingList.delete(pid
 function denyUser(pid) { sendTo(pid, { type: 'deny' }); waitingList.delete(pid); updateWaitingPanel(); }
 function cancelWaiting() { isWaitingForApproval = false; stopWaitingAudioBlocker(); document.getElementById('waitingRoomOverlay').style.display = 'none'; leaveMeeting(true); }
 
-function showPermissionRequestModal(type) { pendingPermissionRequest = type; const icon = document.getElementById('permReqIcon'); const title = document.getElementById('permReqTitle'); const desc = document.getElementById('permReqDesc'); if (type === 'mic') { icon.textContent = '🎤'; title.textContent = '🎤'; desc.textContent = '?'; } else { icon.textContent = '📹'; title.textContent = '📹'; desc.textContent = '?'; } document.getElementById('permissionRequestModal').classList.add('open'); }
+function showPermissionRequestModal(type) { pendingPermissionRequest = type; const icon = document.getElementById('permReqIcon'); const title = document.getElementById('permReqTitle'); const desc = document.getElementById('permReqDesc'); if (type === 'mic') { icon.textContent = '🎤'; title.textContent = '🎤 درخواست روشن کردن میکروفون'; desc.textContent = 'مدرس می‌خواهد میکروفون شما را روشن کند. آیا موافق هستید؟'; } else { icon.textContent = '📹'; title.textContent = '📹 درخواست روشن کردن دوربین'; desc.textContent = 'مدرس می‌خواهد دوربین شما را روشن کند. آیا موافق هستید؟'; } document.getElementById('permissionRequestModal').classList.add('open'); }
 function acceptPermissionRequest() { if (!pendingPermissionRequest) return; const type = pendingPermissionRequest; pendingPermissionRequest = null; closeModal('permissionRequestModal'); sendTo(teacherId, { type: 'permission-accepted', permission: type }); }
 function rejectPermissionRequest() { if (!pendingPermissionRequest) return; const type = pendingPermissionRequest; pendingPermissionRequest = null; closeModal('permissionRequestModal'); sendTo(teacherId, { type: 'permission-rejected', permission: type }); }
 
 function startAttendanceTracking(pid, name, role, isSelf) { if (!attendanceLog.has(pid)) attendanceLog.set(pid, { id: pid, name, role, joinedAt: new Date(), leftAt: null, isSelf }); updateAttendanceUI(); }
-function updateAttendanceUI() { const c = document.getElementById('attendanceList'); if (!c) return; const e = Array.from(attendanceLog.values()); if (e.length === 0) { c.innerHTML = '—'; return; } c.innerHTML = `<table class="attendance-table"><thead><tr><th>?</th><th>?</th><th>?</th><th>?</th></tr></thead><tbody>${e.map(x => { const on = !x.leftAt; const et = x.leftAt || new Date(); const d = Math.floor((et - x.joinedAt) / 1000); return `<tr><td>${escapeHtml(x.name)}</td><td>${fmtDT(x.joinedAt)}</td><td>${fmtTime(d)}</td><td><span class="attendance-badge ${on ? 'online' : 'offline'}">${on ? 'online' : 'offline'}</span></td></tr>`; }).join('')}</tbody></table>`; }
+function updateAttendanceUI() { const c = document.getElementById('attendanceList'); if (!c) return; const e = Array.from(attendanceLog.values()); if (e.length === 0) { c.innerHTML = '—'; return; } c.innerHTML = `<table class="attendance-table"><thead><tr><th>نام</th><th>ورود</th><th>مدت</th><th>وضعیت</th></tr></thead><tbody>${e.map(x => { const on = !x.leftAt; const et = x.leftAt || new Date(); const d = Math.floor((et - x.joinedAt) / 1000); return `<tr><td>${escapeHtml(x.name)}</td><td>${fmtDT(x.joinedAt)}</td><td>${fmtTime(d)}</td><td><span class="attendance-badge ${on ? 'online' : 'offline'}">${on ? 'آنلاین' : 'آفلاین'}</span></td></tr>`; }).join('')}</tbody></table>`; }
 function toggleAttendancePanel() { document.getElementById('attendancePanel').classList.toggle('open'); updateAttendanceUI(); }
 function exportAttendanceCSV() { const e = Array.from(attendanceLog.values()); if (e.length === 0) return showToast('—'); let csv = 'Name,Role,Joined,Left,Duration,Status\n'; e.forEach(x => { const et = x.leftAt || new Date(); const d = Math.floor((et - x.joinedAt) / 1000); csv += `"${x.name}","${x.role}","${fmtDT(x.joinedAt)}","${x.leftAt ? fmtDT(x.leftAt) : '-'}","${d}","${x.leftAt ? 'offline' : 'online'}"\n`; }); const b = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `Lroom-attendance-${roomId}-${Date.now()}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000); }
-function clearAttendance() { if (!confirm('?')) return; attendanceLog.clear(); startAttendanceTracking(myId, myName, myRole, true); updateAttendanceUI(); }
+function clearAttendance() { if (!confirm('پاک کردن گزارش حضور؟')) return; attendanceLog.clear(); startAttendanceTracking(myId, myName, myRole, true); updateAttendanceUI(); }
 
 function togglePollPanel() { const p = document.getElementById('pollPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) renderPollPanel(); }
-function renderPollPanel() { const b = document.getElementById('pollPanelBody'); if (!isPrivileged()) return; if (!currentPoll) b.innerHTML = '<button class="teacher-action-btn" onclick="openPollCreator()">📝</button>'; else { b.innerHTML = `<div style="margin-bottom:12px"><h4 style="font-size:14px;margin-bottom:8px">${escapeHtml(currentPoll.question)}</h4><div id="pollResultsContainer"></div></div><button class="teacher-action-btn danger" onclick="closePoll()">✕</button>`; updatePollResults(); } }
+function renderPollPanel() { const b = document.getElementById('pollPanelBody'); if (!isPrivileged()) return; if (!currentPoll) b.innerHTML = '<button class="teacher-action-btn" onclick="openPollCreator()">📝 ایجاد نظرسنجی جدید</button>'; else { b.innerHTML = `<div style="margin-bottom:12px"><h4 style="font-size:14px;margin-bottom:8px">${escapeHtml(currentPoll.question)}</h4><div id="pollResultsContainer"></div></div><button class="teacher-action-btn danger" onclick="closePoll()">✕ بستن نظرسنجی</button>`; updatePollResults(); } }
 function openPollCreator() { document.getElementById('pollModal').classList.add('open'); }
-function createPoll() { const q = document.getElementById('pollQuestion').value.trim(); const o = Array.from(document.querySelectorAll('.poll-opt-input')).map(i => i.value.trim()).filter(v => v); if (!q || o.length < 2) return showToast('⚠️'); currentPoll = { id: Date.now(), question: q, options: o }; pollVotes.clear(); broadcast({ type: 'poll-new', poll: currentPoll }); closeModal('pollModal'); renderPollPanel(); }
-function closePoll() { currentPoll = null; pollVotes.clear(); broadcast({ type: 'poll-close' }); document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">—</p>'; }
+function createPoll() { const q = document.getElementById('pollQuestion').value.trim(); const o = Array.from(document.querySelectorAll('.poll-opt-input')).map(i => i.value.trim()).filter(v => v); if (!q || o.length < 2) return showToast('⚠️ سوال و حداقل ۲ گزینه'); currentPoll = { id: Date.now(), question: q, options: o }; pollVotes.clear(); broadcast({ type: 'poll-new', poll: currentPoll }); closeModal('pollModal'); renderPollPanel(); }
+function closePoll() { currentPoll = null; pollVotes.clear(); broadcast({ type: 'poll-close' }); document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">نظرسنجی بسته شد</p>'; }
 function renderPollForStudent() { const b = document.getElementById('pollPanelBody'); if (!currentPoll) { b.innerHTML = '—'; return; } b.innerHTML = `<h4 style="font-size:14px;margin-bottom:12px">${escapeHtml(currentPoll.question)}</h4><div>${currentPoll.options.map((o, i) => `<div class="poll-option ${myPollVote === i ? 'selected' : ''}" onclick="votePoll(${i})"><div class="opt-text">${escapeHtml(o)}</div></div>`).join('')}</div>`; }
 function votePoll(idx) { if (myPollVote !== -1) return; myPollVote = idx; document.querySelectorAll('.poll-option').forEach((el, i) => el.classList.toggle('selected', i === idx)); sendTo(teacherId, { type: 'poll-vote', option: idx }); }
 function updatePollResults() { if (!currentPoll) return; const r = new Array(currentPoll.options.length).fill(0); pollVotes.forEach(i => { if (i < r.length) r[i]++; }); const tot = pollVotes.size || 1; const c = document.getElementById('pollResultsContainer'); if (!c) return; c.innerHTML = currentPoll.options.map((o, i) => { const p = Math.round((r[i] / tot) * 100); return `<div class="poll-option"><div class="opt-text">${escapeHtml(o)}</div><div class="opt-bar-container show"><div class="opt-bar" style="width:${p}%"></div></div><div class="opt-count">${r[i]} (${p}%)</div></div>`; }).join(''); }
 
 function toggleBreakoutPanel() { const p = document.getElementById('breakoutPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) renderBreakoutPanel(); }
-function renderBreakoutPanel() { const b = document.getElementById('breakoutPanelBody'); if (!isPrivileged()) return; if (!breakoutGroups) b.innerHTML = `<label style="font-size:12px;color:var(--text-secondary)">👥</label><input type="number" id="groupSize" value="2" min="2" max="10" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0" /><button class="teacher-action-btn" onclick="createBreakoutGroups()">+</button>`; else b.innerHTML = renderGroupsList() + `<button class="teacher-action-btn danger" onclick="dissolveBreakoutGroups()" style="margin-top:10px">✕</button>`; }
-function renderBreakoutForStudent() { const b = document.getElementById('breakoutPanelBody'); if (!breakoutGroups || !myGroupId) { b.innerHTML = '—'; return; } const g = breakoutGroups[myGroupId] || []; b.innerHTML = `<div class="breakout-group"><h5>${myGroupId}</h5><div class="members">${g.map(m => `<div class="member">👤 ${escapeHtml(m.name)}${m.id === myId ? ' (you)' : ''}</div>`).join('')}</div></div>`; }
-function renderGroupsList() { if (!breakoutGroups) return ''; return Object.entries(breakoutGroups).map(([g, m]) => `<div class="breakout-group"><h5>👥 ${g}</h5><div class="members">${m.map(x => `<div class="member">👤 ${escapeHtml(x.name)}</div>`).join('')}</div></div>`).join(''); }
+function renderBreakoutPanel() { const b = document.getElementById('breakoutPanelBody'); if (!isPrivileged()) return; if (!breakoutGroups) b.innerHTML = `<label style="font-size:12px;color:var(--text-secondary)">👥 تعداد هر گروه</label><input type="number" id="groupSize" value="2" min="2" max="10" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0" /><button class="teacher-action-btn" onclick="createBreakoutGroups()">+ ایجاد گروه‌ها</button>`; else b.innerHTML = renderGroupsList() + `<button class="teacher-action-btn danger" onclick="dissolveBreakoutGroups()" style="margin-top:10px">✕ انحلال گروه‌ها</button>`; }
+function renderBreakoutForStudent() { const b = document.getElementById('breakoutPanelBody'); if (!breakoutGroups || !myGroupId) { b.innerHTML = '—'; return; } const g = breakoutGroups[myGroupId] || []; b.innerHTML = `<div class="breakout-group"><h5>گروه ${myGroupId}</h5><div class="members">${g.map(m => `<div class="member">👤 ${escapeHtml(m.name)}${m.id === myId ? ' (شما)' : ''}</div>`).join('')}</div></div>`; }
+function renderGroupsList() { if (!breakoutGroups) return ''; return Object.entries(breakoutGroups).map(([g, m]) => `<div class="breakout-group"><h5>👥 گروه ${g}</h5><div class="members">${m.map(x => `<div class="member">👤 ${escapeHtml(x.name)}</div>`).join('')}</div></div>`).join(''); }
 function createBreakoutGroups() { const sz = parseInt(document.getElementById('groupSize').value) || 2; const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ id: p, name: i.name }); }); if (st.length === 0) return; for (let i = st.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [st[i], st[j]] = [st[j], st[i]]; } breakoutGroups = {}; let g = 1; for (let i = 0; i < st.length; i += sz) { breakoutGroups[g] = st.slice(i, i + sz); g++; } broadcast({ type: 'breakout-groups', groups: breakoutGroups }); renderBreakoutPanel(); applyGroupBadges(); }
-function applyGroupBadges() { if (!breakoutGroups) return; document.querySelectorAll('.group-badge').forEach(e => e.remove()); for (const [g, m] of Object.entries(breakoutGroups)) m.forEach(x => { const b = x.id === myId ? document.getElementById('video-me') : document.getElementById(`video-${x.id}`); if (b) { const bd = document.createElement('div'); bd.className = 'group-badge'; bd.textContent = `${g}`; b.appendChild(bd); } }); }
+function applyGroupBadges() { if (!breakoutGroups) return; document.querySelectorAll('.group-badge').forEach(e => e.remove()); for (const [g, m] of Object.entries(breakoutGroups)) m.forEach(x => { const b = x.id === myId ? document.getElementById('video-me') : document.getElementById(`video-${x.id}`); if (b) { const bd = document.createElement('div'); bd.className = 'group-badge'; bd.textContent = `گروه ${g}`; b.appendChild(bd); } }); }
 function dissolveBreakoutGroups() { breakoutGroups = null; myGroupId = null; broadcast({ type: 'breakout-groups', groups: {} }); document.querySelectorAll('.group-badge').forEach(e => e.remove()); renderBreakoutPanel(); }
 
 function toggleCertPanel() { const p = document.getElementById('certPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) renderCertPanel(); }
-function renderCertPanel() { const b = document.getElementById('certPanelBody'); const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ id: p, name: i.name }); }); if (st.length === 0) { b.innerHTML = '—'; return; } b.innerHTML = `<select id="certStudentSelect" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0">${st.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select><button class="teacher-action-btn" onclick="generateCertForStudent()">🎓</button>`; }
+function renderCertPanel() { const b = document.getElementById('certPanelBody'); const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ id: p, name: i.name }); }); if (st.length === 0) { b.innerHTML = '— هیچ دانشجویی آنلاین نیست'; return; } b.innerHTML = `<select id="certStudentSelect" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);margin:8px 0">${st.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('')}</select><button class="teacher-action-btn" onclick="generateCertForStudent()">🎓 ارسال گواهی</button>`; }
 function generateCertForStudent() { const s = document.getElementById('certStudentSelect'); if (!s) return; const i = remoteParticipants.get(s.value); if (!i) return; const d = new Date().toLocaleDateString('fa-IR'); sendTo(s.value, { type: 'cert-received', studentName: i.name, roomId, date: d }); }
 function downloadCertificateImage(name, rid, date) { const c = document.createElement('canvas'); c.width = 1200; c.height = 850; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 1200, 850); g.addColorStop(0, '#f5f5f5'); g.addColorStop(1, '#ffffff'); x.fillStyle = g; x.fillRect(0, 0, 1200, 850); x.strokeStyle = '#d4af37'; x.lineWidth = 8; x.strokeRect(40, 40, 1120, 770); x.strokeStyle = '#1a73e8'; x.lineWidth = 3; x.strokeRect(60, 60, 1080, 730); x.fillStyle = '#1a73e8'; x.font = 'bold 60px Tahoma'; x.textAlign = 'center'; x.fillText('Lroom', 600, 180); x.fillStyle = '#202124'; x.font = 'bold 44px Tahoma'; x.fillText('Certificate', 600, 280); x.fillStyle = '#1a73e8'; x.font = 'bold 52px Tahoma'; x.fillText(name, 600, 440); x.font = '22px Tahoma'; x.fillText(`${rid}`, 600, 570); x.fillText(`${date}`, 600, 610); x.strokeStyle = '#d4af37'; x.beginPath(); x.moveTo(400, 720); x.lineTo(800, 720); x.stroke(); c.toBlob(bl => { const u = URL.createObjectURL(bl); const a = document.createElement('a'); a.href = u; a.download = `Lroom-Certificate-${name}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000); }); }
 
 function openFileUpload() { document.getElementById('fileUploadModal').classList.add('open'); }
 function openFilesPanel() { updateFilesListUI(); document.getElementById('filesPanelModal').classList.add('open'); }
-function uploadFile() { const i = document.getElementById('fileInput'); const f = i.files[0]; if (!f) return; if (f.size > 5242880) return showToast('⚠️ 5MB'); const r = new FileReader(); r.onload = e => { const fd = { id: Date.now(), name: f.name, size: f.size, from: myName, data: e.target.result }; sharedFiles.push(fd); broadcast({ type: 'file-shared', file: fd }); updateFilesListUI(); closeModal('fileUploadModal'); }; r.readAsDataURL(f); }
-function updateFilesListUI() { const l = document.getElementById('filesList'); if (!l) return; if (sharedFiles.length === 0) { l.innerHTML = '—'; return; } l.innerHTML = sharedFiles.map(f => `<div class="file-item"><div class="file-icon">📎</div><div class="file-info"><div class="file-name">${escapeHtml(f.name)}</div><div class="file-size">${fmtBytes(f.size)} - ${escapeHtml(f.from)}</div></div><button class="file-action" onclick="downloadSharedFile(${f.id})">⬇️</button></div>`).join(''); }
+function uploadFile() { const i = document.getElementById('fileInput'); const f = i.files[0]; if (!f) return; if (f.size > 5242880) return showToast('⚠️ حداکثر ۵MB'); const r = new FileReader(); r.onload = e => { const fd = { id: Date.now(), name: f.name, size: f.size, from: myName, data: e.target.result }; sharedFiles.push(fd); broadcast({ type: 'file-shared', file: fd }); updateFilesListUI(); closeModal('fileUploadModal'); }; r.readAsDataURL(f); }
+function updateFilesListUI() { const l = document.getElementById('filesList'); if (!l) return; if (sharedFiles.length === 0) { l.innerHTML = '— فایلی نیست'; return; } l.innerHTML = sharedFiles.map(f => `<div class="file-item"><div class="file-icon">📎</div><div class="file-info"><div class="file-name">${escapeHtml(f.name)}</div><div class="file-size">${fmtBytes(f.size)} - ${escapeHtml(f.from)}</div></div><button class="file-action" onclick="downloadSharedFile(${f.id})">⬇️</button></div>`).join(''); }
 function downloadSharedFile(id) { const f = sharedFiles.find(x => x.id === id); if (!f) return; const a = document.createElement('a'); a.href = f.data; a.download = f.name; a.click(); }
 
 function switchChatTab(tab) { currentChatTab = tab; document.querySelectorAll('.chat-tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && tab === 'public') || (i === 1 && tab === 'private'))); document.getElementById('privateRecipient').classList.toggle('active', tab === 'private'); if (tab === 'private') updatePrivateRecipientList(); }
-function updatePrivateRecipientList() { const s = document.getElementById('privateRecipientSelect'); if (!s) return; const c = s.value; s.innerHTML = ''; if (myRole === 'student') s.innerHTML = `<option value="${teacherId}">${escapeHtml(remoteParticipants.get(teacherId)?.name || 'Teacher')}</option>`; else remoteParticipants.forEach((i, p) => { if (i.role === 'student') { const o = document.createElement('option'); o.value = p; o.textContent = i.name; s.appendChild(o); } }); if (c) s.value = c; }
+function updatePrivateRecipientList() { const s = document.getElementById('privateRecipientSelect'); if (!s) return; const c = s.value; s.innerHTML = ''; if (myRole === 'student') s.innerHTML = `<option value="${teacherId}">${escapeHtml(remoteParticipants.get(teacherId)?.name || 'مدرس')}</option>`; else remoteParticipants.forEach((i, p) => { if (i.role === 'student') { const o = document.createElement('option'); o.value = p; o.textContent = i.name; s.appendChild(o); } }); if (c) s.value = c; }
 function toggleChat() { document.getElementById('chat').classList.toggle('open'); }
-function sendMessage() { const i = document.getElementById('msgInput'); const m = i.value.trim(); if (!m) return; if (currentChatTab === 'public') { broadcast({ type: 'chat', name: myName, message: m, private: false }); displayMessage(myName, m, true, false); } else { const r = document.getElementById('privateRecipientSelect').value; if (!r) return; const n = remoteParticipants.get(r)?.name || 'User'; sendTo(r, { type: 'chat', name: myName, message: m, private: true, from: myId, to: r }); displayMessage(`${myName} → ${n}`, m, true, true); } const s = stats.userStats.get(myId); if (s) s.chatMessages++; i.value = ''; const ep = document.getElementById('emojiPicker'); if (ep) ep.classList.remove('open'); }
+function sendMessage() { const i = document.getElementById('msgInput'); const m = i.value.trim(); if (!m) return; if (currentChatTab === 'public') { broadcast({ type: 'chat', name: myName, message: m, private: false }); displayMessage(myName, m, true, false); } else { const r = document.getElementById('privateRecipientSelect').value; if (!r) return; const n = remoteParticipants.get(r)?.name || 'کاربر'; sendTo(r, { type: 'chat', name: myName, message: m, private: true, from: myId, to: r }); displayMessage(`${myName} → ${n}`, m, true, true); } const s = stats.userStats.get(myId); if (s) s.chatMessages++; i.value = ''; const ep = document.getElementById('emojiPicker'); if (ep) ep.classList.remove('open'); }
 function displayMessage(name, msg, isSelf, isPriv) { const c = document.getElementById('chatMessages'); const el = document.createElement('div'); el.className = 'msg' + (isSelf ? ' self' : '') + (isPriv ? ' private' : ''); el.innerHTML = '<div class="who"></div><div class="body"></div>'; el.querySelector('.who').textContent = name + (isPriv ? ' 🔒' : ''); el.querySelector('.body').textContent = msg; c.appendChild(el); c.scrollTop = c.scrollHeight; }
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😋','😛','😜','🤪','🤗','🤭','🤫','🤔','😐','😑','😶','😏','😒','🙄','😬','😌','😔','😪','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','😮','😲','😳','🥺','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','😤','😡','😠','🤬','😈','👿','💀','💩','🤡','👻','👽','🤖','👍','👎','👏','🙌','🙏','❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','✅','❌','⭐','🔥','🎉','🎊','🎁','💯','💢','⚠️','🔔','📣','💬','💭'];
@@ -1878,11 +2018,11 @@ function sendReaction(emoji) { broadcast({ type: 'reaction', emoji, from: myId, 
 function showFloatingEmoji(emoji, name) { const c = document.getElementById('reactionsContainer'); const el = document.createElement('div'); el.className = 'float-emoji'; el.innerHTML = `${emoji}<span class="sender">${escapeHtml(name)}</span>`; c.appendChild(el); setTimeout(() => el.remove(), 3100); }
 
 function playBell() { try { if (!bellAudioCtx) bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (bellAudioCtx.state === 'suspended') bellAudioCtx.resume(); const ctx = bellAudioCtx; const now = ctx.currentTime; const notes = [{ freq: 880, time: 0, dur: 0.55 }, { freq: 1174.66, time: 0.18, dur: 0.7 }]; notes.forEach(n => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.value = n.freq; gain.gain.setValueAtTime(0, now + n.time); gain.gain.linearRampToValueAtTime(0.32, now + n.time + 0.02); gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur); osc.connect(gain); gain.connect(ctx.destination); osc.start(now + n.time); osc.stop(now + n.time + n.dur + 0.1); }); } catch (e) {} }
-  
+
 function startClassTimer() { classStartTime = Date.now(); stats.startTime = classStartTime; if (classTimerInterval) clearInterval(classTimerInterval); classTimerInterval = setInterval(() => { const el = document.getElementById('classTimer'); if (el) el.textContent = '⏱️ ' + fmtTime(Math.floor((Date.now() - classStartTime) / 1000)); }, 1000); }
 function openActivityTimer() { if (!isPrivileged()) return; document.getElementById('activityTimerModal').classList.add('open'); }
 function startActivityTimer() { if (!isPrivileged()) return; const mins = parseInt(document.getElementById('activityMinutes').value) || 5; activityTimeLeft = mins * 60; closeModal('activityTimerModal'); broadcast({ type: 'activity-timer', seconds: activityTimeLeft, from: myName }); runActivityTimer(activityTimeLeft); }
-function runActivityTimer(seconds) { activityTimeLeft = seconds; const d = document.getElementById('activityTimerDisplay'); d.classList.add('active'); if (activityTimerInterval) clearInterval(activityTimerInterval); const update = () => { d.textContent = '⏳ ' + fmtTime(activityTimeLeft); d.style.background = 'var(--warning)'; d.style.color = '#202124'; if (activityTimeLeft <= 10) { d.style.background = 'var(--danger)'; d.style.color = '#fff'; } if (activityTimeLeft <= 0) { clearInterval(activityTimerInterval); activityTimerInterval = null; d.textContent = '⏰'; setTimeout(() => d.classList.remove('active'), 5000); return; } activityTimeLeft--; }; update(); activityTimerInterval = setInterval(update, 1000); }
+function runActivityTimer(seconds) { activityTimeLeft = seconds; const d = document.getElementById('activityTimerDisplay'); d.classList.add('active'); if (activityTimerInterval) clearInterval(activityTimerInterval); const update = () => { d.textContent = '⏳ ' + fmtTime(activityTimeLeft); d.style.background = 'var(--warning)'; d.style.color = '#202124'; if (activityTimeLeft <= 10) { d.style.background = 'var(--danger)'; d.style.color = '#fff'; } if (activityTimeLeft <= 0) { clearInterval(activityTimerInterval); activityTimerInterval = null; d.textContent = '⏰ زمان تمام شد'; setTimeout(() => d.classList.remove('active'), 5000); return; } activityTimeLeft--; }; update(); activityTimerInterval = setInterval(update, 1000); }
 function stopActivityTimer() { if (activityTimerInterval) { clearInterval(activityTimerInterval); activityTimerInterval = null; } document.getElementById('activityTimerDisplay').classList.remove('active'); if (isPrivileged()) broadcast({ type: 'activity-stop' }); }
 
 function openAnnouncement() { if (!isPrivileged()) return; document.getElementById('announceModal').classList.add('open'); }
@@ -1891,13 +2031,13 @@ function showAnnouncement(text, from) { let b = document.getElementById('announc
 function hideAnnouncement(removeAll) { const b = document.getElementById('announcementBanner'); if (b) b.style.display = 'none'; if (removeAll && isPrivileged()) broadcast({ type: 'announcement-hide' }); }
 
 function initUserStats(pid, name, role) { if (!stats.userStats.has(pid)) stats.userStats.set(pid, { name, role: role || 'student', speakingTime: 0, handRaises: 0, chatMessages: 0, reactions: 0, joinedAt: Date.now(), isOnline: true }); }
-function updateStatsUI() { const c = document.getElementById('statsPanelBody'); if (!c) return; const all = Array.from(stats.userStats.values()); if (all.length === 0) { c.innerHTML = '—'; return; } const totalTime = Math.floor((Date.now() - classStartTime) / 1000); let html = `<div class="stat-card"><h5>📊</h5><div class="stat-row"><span class="label">⏱️</span><span class="value">${fmtTime(totalTime)}</span></div><div class="stat-row"><span class="label">👥</span><span class="value">${all.length}</span></div></div>`; all.sort((a, b) => b.speakingTime - a.speakingTime).forEach(s => { html += `<div class="stat-card"><h5>${s.isOnline ? '🟢' : '⚫'} ${escapeHtml(s.name)}</h5><div class="stat-row"><span class="label">🎤</span><span class="value">${fmtTime(Math.floor(s.speakingTime))}</span></div><div class="stat-row"><span class="label">✋</span><span class="value">${s.handRaises}</span></div><div class="stat-row"><span class="label">💬</span><span class="value">${s.chatMessages}</span></div><div class="stat-row"><span class="label">👍</span><span class="value">${s.reactions}</span></div></div>`; }); c.innerHTML = html; }
+function updateStatsUI() { const c = document.getElementById('statsPanelBody'); if (!c) return; const all = Array.from(stats.userStats.values()); if (all.length === 0) { c.innerHTML = '—'; return; } const totalTime = Math.floor((Date.now() - classStartTime) / 1000); let html = `<div class="stat-card"><h5>📊 آمار کلی</h5><div class="stat-row"><span class="label">⏱️ زمان کلاس</span><span class="value">${fmtTime(totalTime)}</span></div><div class="stat-row"><span class="label">👥 شرکت‌کنندگان</span><span class="value">${all.length}</span></div></div>`; all.sort((a, b) => b.speakingTime - a.speakingTime).forEach(s => { html += `<div class="stat-card"><h5>${s.isOnline ? '🟢' : '⚫'} ${escapeHtml(s.name)}</h5><div class="stat-row"><span class="label">🎤 زمان صحبت</span><span class="value">${fmtTime(Math.floor(s.speakingTime))}</span></div><div class="stat-row"><span class="label">✋ دست بلند کردن</span><span class="value">${s.handRaises}</span></div><div class="stat-row"><span class="label">💬 پیام‌ها</span><span class="value">${s.chatMessages}</span></div><div class="stat-row"><span class="label">👍 واکنش‌ها</span><span class="value">${s.reactions}</span></div></div>`; }); c.innerHTML = html; }
 function toggleStatsPanel() { const p = document.getElementById('statsPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) updateStatsUI(); }
 
 function toggleParticipantsPanel() { const p = document.getElementById('participantsPanel'); p.classList.toggle('open'); if (p.classList.contains('open')) updateParticipantsPanel(); }
 function getParticipantList() { const list = []; list.push({ id: myId, name: myName, role: myRole, isCoTeacher, micOn: isMicOn, camOn: isCamOn, handRaised: isHandRaised, isSelf: true }); remoteParticipants.forEach((info, pid) => { if (pid === myId) return; const perm = studentPermissions.get(pid) || {}; list.push({ id: pid, name: info.name || '?', role: info.role || 'student', isCoTeacher: !!perm.coTeacher, micOn: !!info.micOn, camOn: !!info.camOn, handRaised: !!info.handRaised, isSelf: false }); }); list.sort((a, b) => { const rank = r => r.role === 'teacher' ? 0 : (r.isCoTeacher ? 1 : 2); if (rank(a) !== rank(b)) return rank(a) - rank(b); return (a.name || '').localeCompare(b.name || '', 'fa'); }); return list; }
-function updateParticipantsPanel() { const body = document.getElementById('participantsListBody'); const cnt = document.getElementById('participantsCount'); if (!body) return; const list = getParticipantList(); if (cnt) cnt.textContent = list.length; if (list.length === 0) { body.innerHTML = '—'; return; } body.innerHTML = list.map(p => { const roleClass = p.role === 'teacher' ? 'teacher' : (p.isCoTeacher ? 'coteacher' : ''); const roleText = p.role === 'teacher' ? 'مدرس' : (p.isCoTeacher ? 'هم‌مدرس' : 'دانشجو'); return `<div class="participant-item" onclick="showProfile('${p.id}')"><div class="p-avatar ${roleClass}">${escapeHtml((p.name || '?')[0].toUpperCase())}<div class="p-status-dot"></div></div><div class="p-info"><div class="p-name">${escapeHtml(p.name)}${p.isSelf ? ' (you)' : ''}${p.handRaised ? ' ✋' : ''}</div><div class="p-role">${roleText}</div></div><div class="p-icons"><span class="${p.micOn ? '' : 'muted'}">${p.micOn ? '🎤' : '🔇'}</span><span class="${p.camOn ? '' : 'muted'}">${p.camOn ? '📹' : '📷'}</span></div></div>`; }).join(''); }
-function showProfile(pid) { const list = getParticipantList(); const p = list.find(x => x.id === pid); if (!p) return; const av = document.getElementById('profileAvatar'); av.textContent = (p.name || '?')[0].toUpperCase(); document.getElementById('profileName').textContent = p.name + (p.isSelf ? ' (you)' : ''); const r = document.getElementById('profileRole'); r.textContent = p.role === 'teacher' ? '👨‍🏫' : (p.isCoTeacher ? '🎖️' : '👨‍🎓'); document.getElementById('profileMic').textContent = p.micOn ? '✅' : '❌'; document.getElementById('profileCam').textContent = p.camOn ? '✅' : '❌'; document.getElementById('profileHand').textContent = p.handRaised ? '✋' : '—'; const att = attendanceLog.get(pid); document.getElementById('profileJoin').textContent = att ? fmtDT(att.joinedAt) : '-'; const actions = document.getElementById('profileActions'); if (myRole === 'teacher' && p.role === 'student' && !p.isSelf) { actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.flexWrap = 'wrap'; actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherMuteStudent('${pid}');closeModal('profileModal')">🔇</button><button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherCamOffStudent('${pid}');closeModal('profileModal')">📹</button><button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="if(confirm('?')){teacherKickStudent('${pid}');closeModal('profileModal')}">🚫</button>`; } else if (!p.isSelf) { actions.style.display = 'flex'; actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="startPrivateChat('${pid}');closeModal('profileModal')">💬</button>`; } else { actions.style.display = 'none'; actions.innerHTML = ''; } document.getElementById('profileModal').classList.add('open'); }
+function updateParticipantsPanel() { const body = document.getElementById('participantsListBody'); const cnt = document.getElementById('participantsCount'); if (!body) return; const list = getParticipantList(); if (cnt) cnt.textContent = list.length; if (list.length === 0) { body.innerHTML = '—'; return; } body.innerHTML = list.map(p => { const roleClass = p.role === 'teacher' ? 'teacher' : (p.isCoTeacher ? 'coteacher' : ''); const roleText = p.role === 'teacher' ? 'مدرس' : (p.isCoTeacher ? 'هم‌مدرس' : 'دانشجو'); return `<div class="participant-item" onclick="showProfile('${p.id}')"><div class="p-avatar ${roleClass}">${escapeHtml((p.name || '?')[0].toUpperCase())}<div class="p-status-dot"></div></div><div class="p-info"><div class="p-name">${escapeHtml(p.name)}${p.isSelf ? ' (شما)' : ''}${p.handRaised ? ' ✋' : ''}</div><div class="p-role">${roleText}</div></div><div class="p-icons"><span class="${p.micOn ? '' : 'muted'}">${p.micOn ? '🎤' : '🔇'}</span><span class="${p.camOn ? '' : 'muted'}">${p.camOn ? '📹' : '📷'}</span></div></div>`; }).join(''); }
+function showProfile(pid) { const list = getParticipantList(); const p = list.find(x => x.id === pid); if (!p) return; const av = document.getElementById('profileAvatar'); av.textContent = (p.name || '?')[0].toUpperCase(); document.getElementById('profileName').textContent = p.name + (p.isSelf ? ' (شما)' : ''); const r = document.getElementById('profileRole'); r.textContent = p.role === 'teacher' ? '👨‍🏫 مدرس' : (p.isCoTeacher ? '🎖️ هم‌مدرس' : '👨‍🎓 دانشجو'); document.getElementById('profileMic').textContent = p.micOn ? '✅' : '❌'; document.getElementById('profileCam').textContent = p.camOn ? '✅' : '❌'; document.getElementById('profileHand').textContent = p.handRaised ? '✋' : '—'; const att = attendanceLog.get(pid); document.getElementById('profileJoin').textContent = att ? fmtDT(att.joinedAt) : '-'; const actions = document.getElementById('profileActions'); if (myRole === 'teacher' && p.role === 'student' && !p.isSelf) { actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.flexWrap = 'wrap'; actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherMuteStudent('${pid}');closeModal('profileModal')">🔇 خاموش کردن میکروفون</button><button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherCamOffStudent('${pid}');closeModal('profileModal')">📹 خاموش کردن دوربین</button><button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="if(confirm('اخراج ${escapeHtml(p.name)}؟')){teacherKickStudent('${pid}');closeModal('profileModal')}">🚫 اخراج</button>`; } else if (!p.isSelf) { actions.style.display = 'flex'; actions.innerHTML = `<button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="startPrivateChat('${pid}');closeModal('profileModal')">💬 چت خصوصی</button>`; } else { actions.style.display = 'none'; actions.innerHTML = ''; } document.getElementById('profileModal').classList.add('open'); }
 function startPrivateChat(pid) { const chat = document.getElementById('chat'); if (!chat.classList.contains('open')) chat.classList.add('open'); switchChatTab('private'); setTimeout(() => { const sel = document.getElementById('privateRecipientSelect'); if (sel) sel.value = pid; document.getElementById('msgInput').focus(); }, 150); }
 
 function updateQualityBars(pid, rtt) { const el = document.getElementById(`quality-${pid}`); if (!el) return; let bars = 0, cls = ''; if (rtt === null) bars = 0; else if (rtt < 0.1) { bars = 4; cls = 'active'; } else if (rtt < 0.2) { bars = 3; cls = 'active'; } else if (rtt < 0.4) { bars = 2; cls = 'medium'; } else { bars = 1; cls = 'poor'; } let h = ''; for (let i = 0; i < 4; i++) h += `<div class="quality-bar ${i < bars ? cls : ''}"></div>`; el.innerHTML = h; }
@@ -1905,6 +2045,7 @@ function checkConnectionQuality(pid) { qualityCache.set(pid, 0.1); updateQuality
 function startQualityCheck() { if (qualityCheckInterval) clearInterval(qualityCheckInterval); qualityCheckInterval = setInterval(() => { remoteParticipants.forEach((_, p) => checkConnectionQuality(p)); }, 5000); }
 
 async function toggleLowBandwidth() { isLowBandwidth = !isLowBandwidth; const btn = document.getElementById('btnBandwidth'); btn.classList.toggle('bandwidth-on', isLowBandwidth); const vt = localStream?.getVideoTracks()[0]; if (vt) { try { if (isLowBandwidth) await vt.applyConstraints({ width: { max: 320 }, height: { max: 180 }, frameRate: { max: 10 } }); else await vt.applyConstraints(getStudentCamConstraints(qualitySettings.studentCam)); } catch (e) {} } }
+
 function toggleCoTeacher(pid) { if (myRole !== 'teacher') return; const p = studentPermissions.get(pid); if (!p) return; p.coTeacher = !p.coTeacher; studentPermissions.set(pid, p); sendTo(pid, { type: 'coteacher-status', enabled: p.coTeacher }); updateTeacherPanel(); updateParticipantsPanel(); }
 
 function initWhiteboard() { wbCanvas = document.getElementById('whiteboardCanvas'); wbCtx = wbCanvas.getContext('2d'); resizeWhiteboardCanvas(); window.addEventListener('resize', resizeWhiteboardCanvas); wbCanvas.addEventListener('mousedown', wbStartDraw); wbCanvas.addEventListener('mousemove', wbDraw); wbCanvas.addEventListener('mouseup', wbEndDraw); wbCanvas.addEventListener('mouseleave', wbEndDraw); wbCanvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; wbStartDraw({ clientX: t.clientX, clientY: t.clientY }); }); wbCanvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; wbDraw({ clientX: t.clientX, clientY: t.clientY }); }); wbCanvas.addEventListener('touchend', e => { e.preventDefault(); wbEndDraw(); }); }
@@ -1919,7 +2060,7 @@ function redrawAllStrokes() { if (!wbCtx) return; wbCtx.clearRect(0, 0, wbCanvas
 function clearCanvasLocal() { if (wbCtx) wbCtx.clearRect(0, 0, wbCanvas.width, wbCanvas.height); }
 function setPenColor(c, b) { wbPenColor = c; document.querySelectorAll('#whiteboardTools .color-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function setPenSize(s, b) { wbPenSize = s; document.querySelectorAll('#whiteboardTools .size-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
-function clearWhiteboard() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (!confirm('?')) return; clearCanvasLocal(); wbStrokes = []; wbCurrentStroke = null; broadcast({ type: 'wb-clear' }); }
+function clearWhiteboard() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (!confirm('پاک کردن تخته سفید؟')) return; clearCanvasLocal(); wbStrokes = []; wbCurrentStroke = null; broadcast({ type: 'wb-clear' }); }
 function undoLastStroke() { if (myRole === 'student' && !isCoTeacher && !myPermissions.whiteboard) return; if (wbStrokes.length === 0) return; wbStrokes.pop(); redrawAllStrokes(); broadcast({ type: 'wb-undo' }); }
 
 function initProjector() { projCanvas = document.getElementById('projectorCanvas'); projCtx = projCanvas.getContext('2d'); projVideo = document.getElementById('projectorVideo'); projImage = document.getElementById('projectorImage'); resizeProjectorCanvas(); window.addEventListener('resize', resizeProjectorCanvas); projVideo.addEventListener('loadedmetadata', () => { document.getElementById('projDuration').textContent = fmtTime(Math.floor(projVideo.duration)); }); projVideo.addEventListener('timeupdate', () => { if (!projIsSeeking && projVideo.duration) { const p = (projVideo.currentTime / projVideo.duration) * 100; document.getElementById('projectorSeek').value = p || 0; document.getElementById('projCurrentTime').textContent = fmtTime(Math.floor(projVideo.currentTime)); } }); projVideo.addEventListener('play', () => { document.getElementById('projPlayBtn').textContent = '⏸️'; }); projVideo.addEventListener('pause', () => { document.getElementById('projPlayBtn').textContent = '▶️'; }); projCanvas.addEventListener('mousedown', projStartDraw); projCanvas.addEventListener('mousemove', projDraw); projCanvas.addEventListener('mouseup', projEndDraw); projCanvas.addEventListener('mouseleave', projEndDraw); projCanvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; projStartDraw({ clientX: t.clientX, clientY: t.clientY }); }); projCanvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; projDraw({ clientX: t.clientX, clientY: t.clientY }); }); projCanvas.addEventListener('touchend', e => { e.preventDefault(); projEndDraw(); }); }
@@ -1927,7 +2068,7 @@ function resizeProjectorCanvas() { if (!projCanvas) return; const w = document.g
 function updateProjectorToolsVisibility() { const tools = document.getElementById('projectorTeacherTools'); const hasAcc = hasProjectorAccess(); tools.style.display = hasAcc ? 'flex' : 'none'; ['projUploadBtn', 'projPlayBtn', 'projBackBtn', 'projFwdBtn', 'projectorSeek'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !hasAcc; }); }
 function openProjector(s) { document.getElementById('projectorModal').classList.add('open'); setTimeout(() => { resizeProjectorCanvas(); redrawProjectorStrokes(); updateProjectorToolsVisibility(); document.getElementById('projectorDrawTools').style.display = 'flex'; document.getElementById('projectorSeekBar').style.display = 'flex'; if (projCurrentMedia) displayProjectorMedia(projCurrentMedia); }, 100); }
 function closeProjector(s) { document.getElementById('projectorModal').classList.remove('open'); if (projVideo) projVideo.pause(); }
-async function loadProjectorFile(e) { if (!hasProjectorAccess()) { showToast('🔒'); return; } const f = e.target.files[0]; if (!f) return; if (f.size > 52428800) { showToast('⚠️ 50MB'); return; } const iv = f.type.startsWith('video/'); const ii = f.type.startsWith('image/'); if (!iv && !ii) return; showToast('⏳...'); try { const mediaId = 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); const ext = f.name.split('.').pop() || (iv ? 'mp4' : 'jpg'); const fileName = `${mediaId}.${ext}`; const { error: upErr } = await sb.storage.from(PROJECTOR_BUCKET).upload(fileName, f, { cacheControl: '3600', upsert: false, contentType: f.type }); if (upErr) throw new Error(upErr.message); const { data: urlData } = sb.storage.from(PROJECTOR_BUCKET).getPublicUrl(fileName); const publicUrl = urlData.publicUrl; projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: publicUrl, from: myName, mediaId, storagePath: fileName }; projCurrentState = { isPlaying: false, currentTime: 0, mediaId }; displayProjectorMedia(projCurrentMedia); broadcast({ type: 'proj-media', media: projCurrentMedia, state: projCurrentState }); } catch (err) { showToast('❌ ' + err.message); } }
+async function loadProjectorFile(e) { if (!hasProjectorAccess()) { showToast('🔒 دسترسی ندارید'); return; } const f = e.target.files[0]; if (!f) return; if (f.size > 52428800) { showToast('⚠️ حداکثر 50MB'); return; } const iv = f.type.startsWith('video/'); const ii = f.type.startsWith('image/'); if (!iv && !ii) return; showToast('⏳ در حال آپلود...'); try { const mediaId = 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); const ext = f.name.split('.').pop() || (iv ? 'mp4' : 'jpg'); const fileName = `${mediaId}.${ext}`; const { error: upErr } = await sb.storage.from(PROJECTOR_BUCKET).upload(fileName, f, { cacheControl: '3600', upsert: false, contentType: f.type }); if (upErr) throw new Error(upErr.message); const { data: urlData } = sb.storage.from(PROJECTOR_BUCKET).getPublicUrl(fileName); const publicUrl = urlData.publicUrl; projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: publicUrl, from: myName, mediaId, storagePath: fileName }; projCurrentState = { isPlaying: false, currentTime: 0, mediaId }; displayProjectorMedia(projCurrentMedia); broadcast({ type: 'proj-media', media: projCurrentMedia, state: projCurrentState }); } catch (err) { showToast('❌ ' + err.message); } }
 function displayProjectorMedia(m) { document.getElementById('projectorEmptyState').style.display = 'none'; if (m.type === 'video') { projImage.style.display = 'none'; projVideo.style.display = 'block'; if (projVideo.src !== m.data) { projVideo.src = m.data; projVideo.load(); } } else { projVideo.style.display = 'none'; projVideo.pause(); projImage.style.display = 'block'; projImage.src = m.data; } redrawProjectorStrokes(); }
 function toggleProjectorPlay() { if (!hasProjectorAccess() || !projCurrentMedia || projCurrentMedia.type !== 'video') return; if (projVideo.paused) { projVideo.play().catch(() => {}); broadcast({ type: 'proj-play', time: projVideo.currentTime || 0, mediaId: projCurrentMedia.mediaId }); } else { projVideo.pause(); broadcast({ type: 'proj-pause', time: projVideo.currentTime || 0, mediaId: projCurrentMedia.mediaId }); } }
 function seekProjectorBy(s) { if (!hasProjectorAccess() || !projVideo.duration) return; const newT = Math.max(0, Math.min(projVideo.duration, projVideo.currentTime + s)); projVideo.currentTime = newT; broadcast({ type: 'proj-state', state: { isPlaying: !projVideo.paused, currentTime: newT, mediaId: projCurrentMedia?.mediaId } }); }
@@ -1942,9 +2083,9 @@ function redrawProjectorStrokes() { if (!projCtx || !projCanvas) return; projCtx
 function setProjPenColor(c, b) { projPenColor = c; document.querySelectorAll('#projectorDrawTools .color-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function setProjPenSize(s, b) { projPenSize = s; document.querySelectorAll('#projectorDrawTools .size-btn').forEach(x => x.classList.remove('active')); if (b) b.classList.add('active'); }
 function undoProjectorStroke() { if (projStrokes.length === 0) return; projStrokes.pop(); redrawProjectorStrokes(); broadcast({ type: 'proj-draw-undo' }); }
-function clearProjectorCanvas() { if (!confirm('?')) return; projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height); projStrokes = []; projCurrentStroke = null; broadcast({ type: 'proj-draw-clear' }); }
+function clearProjectorCanvas() { if (!confirm('پاک کردن نقاشی‌ها؟')) return; projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height); projStrokes = []; projCurrentStroke = null; broadcast({ type: 'proj-draw-clear' }); }
 
-function addMyVideo() { const ex = document.getElementById('video-me'); if (ex) ex.remove(); const c = document.createElement('div'); c.className = 'video-box'; c.id = 'video-me'; const v = document.createElement('video'); v.srcObject = localStream; v.autoplay = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.play().catch(() => {}); const n = document.createElement('div'); n.className = 'name'; n.textContent = `${myName} (you)`; const m = document.createElement('div'); m.className = 'mic'; m.id = 'mic-me'; m.textContent = '🎤'; const q = document.createElement('div'); q.className = 'quality'; q.id = 'quality-me'; c.appendChild(v); c.appendChild(n); c.appendChild(m); c.appendChild(q); c.addEventListener('dblclick', () => toggleVideoFullscreen(c)); c.addEventListener('click', (e) => { if (spotlightModeActive && !e.target.closest('.spotlight-btn')) { if (spotlightedId === myId) { spotlightedId = null; applySpotlightToAll(); broadcast({type:'spotlight-clear'}); } else setSpotlight(myId); } }); document.getElementById('videos').prepend(c); updateParticipantCount(); }
+function addMyVideo() { const ex = document.getElementById('video-me'); if (ex) ex.remove(); const c = document.createElement('div'); c.className = 'video-box'; c.id = 'video-me'; const v = document.createElement('video'); v.srcObject = localStream; v.autoplay = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.play().catch(() => {}); const n = document.createElement('div'); n.className = 'name'; n.textContent = `${myName} (شما)`; const m = document.createElement('div'); m.className = 'mic'; m.id = 'mic-me'; m.textContent = '🎤'; const q = document.createElement('div'); q.className = 'quality'; q.id = 'quality-me'; c.appendChild(v); c.appendChild(n); c.appendChild(m); c.appendChild(q); c.addEventListener('dblclick', () => toggleVideoFullscreen(c)); c.addEventListener('click', (e) => { if (spotlightModeActive && !e.target.closest('.spotlight-btn')) { if (spotlightedId === myId) { spotlightedId = null; applySpotlightToAll(); broadcast({type:'spotlight-clear'}); } else setSpotlight(myId); } }); document.getElementById('videos').prepend(c); updateParticipantCount(); }
 function addRemoteVideo(pid, videoEl, name) { let c = document.getElementById(`video-${pid}`); if (c) { const oldV = c.querySelector('video:not(.ss-video)'); if (oldV) oldV.remove(); c.insertBefore(videoEl, c.firstChild); const n = c.querySelector('.name'); if (n) n.textContent = name; const av = c.querySelector('.avatar'); if (av) av.remove(); return; } c = document.createElement('div'); c.className = 'video-box'; c.id = `video-${pid}`; videoEl.autoplay = true; videoEl.playsInline = true; const n = document.createElement('div'); n.className = 'name'; n.textContent = name; const m = document.createElement('div'); m.className = 'mic'; m.id = `mic-${pid}`; m.textContent = '🎤'; const q = document.createElement('div'); q.className = 'quality'; q.id = `quality-${pid}`; c.appendChild(videoEl); c.appendChild(n); c.appendChild(m); c.appendChild(q); c.addEventListener('dblclick', () => toggleVideoFullscreen(c)); c.addEventListener('click', (e) => { if (spotlightModeActive && !e.target.closest('.spotlight-btn')) { if (spotlightedId === pid) { spotlightedId = null; applySpotlightToAll(); broadcast({type:'spotlight-clear'}); } else setSpotlight(pid); } }); document.getElementById('videos').appendChild(c); updateParticipantCount(); checkConnectionQuality(pid); }
 function removeVideo(pid) { const c = document.getElementById(`video-${pid}`); if (c) c.remove(); updateParticipantCount(); }
 function showAvatar(pid) { const box = pid === 'me' ? document.getElementById('video-me') : document.getElementById(`video-${pid}`); if (!box) return; const v = box.querySelector('video:not(.ss-video)'); if (v) v.style.display = 'none'; let av = box.querySelector('.avatar'); if (!av) { const name = pid === 'me' ? myName : (remoteParticipants.get(pid)?.name || '?'); av = document.createElement('div'); av.className = 'avatar'; av.textContent = name[0].toUpperCase(); box.insertBefore(av, box.firstChild); } }
@@ -1966,37 +2107,37 @@ function requestPermission(type) { if (myRole !== 'student') return; const b = t
 async function forceCameraOff() { if (!isCamOn) return; const lp = livekitRoom?.localParticipant; if (!lp) return; isCamOn = false; try { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.mute(); } catch (e) {} updateCamUI(); updateParticipantsPanel(); broadcast({ type: 'cam', on: false }); }
 async function toggleScreen() {
     const lp = livekitRoom?.localParticipant; if (!lp) return;
-    if (isSharing) { try { await lp.setScreenShareEnabled(false); } catch (e) {} isSharing = false; document.getElementById('btnScreen').classList.remove('on'); removeScreenShareInline(myId); broadcast({ type: 'screen-share-stopped', id: myId }); showToast('🖥️ قطع شد'); }
+    if (isSharing) { try { await lp.setScreenShareEnabled(false); } catch (e) {} isSharing = false; document.getElementById('btnScreen').classList.remove('on'); removeScreenShareInline(myId); broadcast({ type: 'screen-share-stopped', id: myId }); showToast('🖥️ اشتراک قطع شد'); }
     else {
         try {
             await forceCameraOff();
             await lp.setScreenShareEnabled(true, getScreenShareCapture(qualitySettings.screenShare), getScreenSharePublish(qualitySettings.screenShare));
             isSharing = true; document.getElementById('btnScreen').classList.add('on');
             broadcast({ type: 'screen-share-started', id: myId });
-            showToast('🖥️ شروع اشتراک');
-            setTimeout(() => { try { const ssPub = lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare); const tr = ssPub?.track?.mediaStreamTrack; if (tr) { tr.contentHint = 'detail'; tr.applyConstraints({ width: { max: 1280 }, height: { max: 720 }, frameRate: { max: 10 } }).catch(() => {}); } } catch (e) {} }, 300);
+            showToast('🖥️ شروع اشتراک — دوربین خاموش شد');
+            if (getActualParticipantCount() > 25) { const videoTrack = livekitRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShare)?.track; if (videoTrack) { videoTrack.mediaStreamTrack.applyConstraints({ width: 1280, height: 720, frameRate: 10 }).catch(() => {}); } }
         } catch (e) { showToast('❌ ' + (e.message || 'خطا')); }
     }
 }
 
 function toggleTeacherPanel() { document.getElementById('teacherPanel').classList.toggle('open'); }
-function updateTeacherPanel() { if (myRole !== 'teacher' && !isCoTeacher) return; const l = document.getElementById('studentsList'); if (!l) return; const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ pid: p, ...i }); }); if (st.length === 0) { l.innerHTML = '—'; return; } l.innerHTML = st.map(s => { const p = studentPermissions.get(s.pid) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: {} }; return `<div class="student-card"><div class="row1"><div class="s-avatar ${p.coTeacher ? 'coteacher' : ''}">${escapeHtml((s.name || '?')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(s.name)}${p.coTeacher ? ' 🎖️' : ''}</div><div class="s-status">${s.handRaised ? '✋' : (s.micOn ? '🎤' : '🔇')}</div></div></div><div class="perm-row"><button class="perm-btn ${p.mic ? 'granted' : (p.pending?.mic ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','mic')">🎤</button><button class="perm-btn ${p.cam ? 'granted' : (p.pending?.cam ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','cam')">📹</button><button class="perm-btn ${p.whiteboard ? 'granted' : (p.pending?.whiteboard ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','whiteboard')">📝</button><button class="perm-btn ${p.projector ? 'granted' : (p.pending?.projector ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','projector')">📽️</button></div><div class="s-actions"><button class="coteacher" onclick="toggleCoTeacher('${s.pid}')">${p.coTeacher ? '🎖️' : '🎖️+'}</button><button class="warn" onclick="teacherMuteStudent('${s.pid}')">🔇</button><button class="warn" onclick="teacherCamOffStudent('${s.pid}')">📹</button><button class="kick" onclick="teacherKickStudent('${s.pid}')">🚫</button></div></div>`; }).join(''); }
-function updatePendingRequestsUI() { if (myRole !== 'teacher' && !isCoTeacher) return; const c = document.getElementById('pendingRequests'); const l = document.getElementById('pendingRequestsList'); const p = []; studentPermissions.forEach((per, pid) => { if (per.pending) Object.keys(per.pending).forEach(tp => { if (per.pending[tp]) p.push({ peerId: pid, name: remoteParticipants.get(pid)?.name || '?', type: tp }); }); }); if (p.length === 0) { c.classList.remove('active'); return; } c.classList.add('active'); l.innerHTML = p.map(r => `<div class="request-item"><div class="req-info"><div class="req-name">${escapeHtml(r.name)}</div><div class="req-type">${r.type}</div></div><div class="req-actions"><button class="accept" onclick="approvePermission('${r.peerId}','${r.type}')">✓</button><button class="reject" onclick="denyPermission('${r.peerId}','${r.type}')">✕</button></div></div>`).join(''); }
+function updateTeacherPanel() { if (myRole !== 'teacher' && !isCoTeacher) return; const l = document.getElementById('studentsList'); if (!l) return; const st = []; remoteParticipants.forEach((i, p) => { if (i.role === 'student') st.push({ pid: p, ...i }); }); if (st.length === 0) { l.innerHTML = '— هیچ دانشجویی آنلاین نیست'; return; } l.innerHTML = st.map(s => { const p = studentPermissions.get(s.pid) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: {} }; return `<div class="student-card"><div class="row1"><div class="s-avatar ${p.coTeacher ? 'coteacher' : ''}">${escapeHtml((s.name || '?')[0].toUpperCase())}</div><div class="s-info"><div class="s-name">${escapeHtml(s.name)}${p.coTeacher ? ' 🎖️' : ''}</div><div class="s-status">${s.handRaised ? '✋ دست بلند' : (s.micOn ? '🎤 روشن' : '🔇 خاموش')}</div></div></div><div class="perm-row"><button class="perm-btn ${p.mic ? 'granted' : (p.pending?.mic ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','mic')">🎤</button><button class="perm-btn ${p.cam ? 'granted' : (p.pending?.cam ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','cam')">📹</button><button class="perm-btn ${p.whiteboard ? 'granted' : (p.pending?.whiteboard ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','whiteboard')">📝</button><button class="perm-btn ${p.projector ? 'granted' : (p.pending?.projector ? 'pending' : '')}" onclick="toggleStudentPermission('${s.pid}','projector')">📽️</button></div><div class="s-actions"><button class="coteacher" onclick="toggleCoTeacher('${s.pid}')">${p.coTeacher ? '🎖️ هم‌مدرس' : '🎖️+ هم‌مدرس'}</button><button class="warn" onclick="teacherMuteStudent('${s.pid}')">🔇</button><button class="warn" onclick="teacherCamOffStudent('${s.pid}')">📹</button><button class="kick" onclick="teacherKickStudent('${s.pid}')">🚫</button></div></div>`; }).join(''); }
+function updatePendingRequestsUI() { if (myRole !== 'teacher' && !isCoTeacher) return; const c = document.getElementById('pendingRequests'); const l = document.getElementById('pendingRequestsList'); const p = []; studentPermissions.forEach((per, pid) => { if (per.pending) Object.keys(per.pending).forEach(tp => { if (per.pending[tp]) p.push({ peerId: pid, name: remoteParticipants.get(pid)?.name || '?', type: tp }); }); }); if (p.length === 0) { c.classList.remove('active'); return; } c.classList.add('active'); l.innerHTML = p.map(r => `<div class="request-item"><div class="req-info"><div class="req-name">${escapeHtml(r.name)}</div><div class="req-type">${r.type === 'mic' ? '🎤 میکروفون' : r.type === 'cam' ? '📹 دوربین' : r.type === 'whiteboard' ? '📝 تخته' : '📽️ پروژکتور'}</div></div><div class="req-actions"><button class="accept" onclick="approvePermission('${r.peerId}','${r.type}')">✓</button><button class="reject" onclick="denyPermission('${r.peerId}','${r.type}')">✕</button></div></div>`).join(''); }
 function approvePermission(pid, type) { const p = studentPermissions.get(pid); if (p && p[type]) return; if (p && p.pending) p.pending[type] = true; if (p) studentPermissions.set(pid, p); sendTo(pid, { type: 'permission-request', permission: type }); updatePendingRequestsUI(); updateTeacherPanel(); }
 function denyPermission(pid, type) { const p = studentPermissions.get(pid); if (p && p.pending) p.pending[type] = false; studentPermissions.set(pid, p); sendTo(pid, { type: 'permission-denied', permission: type }); updatePendingRequestsUI(); updateTeacherPanel(); }
 function revokePermission(pid, type) { const p = studentPermissions.get(pid); if (!p) return; p[type] = false; studentPermissions.set(pid, p); sendTo(pid, { type: 'permission-revoked', permission: type }); if (type === 'mic') sendTo(pid, { type: 'force-mute' }); else if (type === 'cam') sendTo(pid, { type: 'force-camera-off' }); updateTeacherPanel(); }
 function toggleStudentPermission(pid, type) { const p = studentPermissions.get(pid) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: {} }; if (p[type]) revokePermission(pid, type); else if (p.pending && p.pending[type]) { p.pending[type] = false; studentPermissions.set(pid, p); updatePendingRequestsUI(); updateTeacherPanel(); } else approvePermission(pid, type); }
 function teacherMuteStudent(pid) { sendTo(pid, { type: 'force-mute' }); const i = remoteParticipants.get(pid); if (i) remoteParticipants.set(pid, { ...i, micOn: false }); updateRemoteMicUI(pid, false); updateTeacherPanel(); updateParticipantsPanel(); }
 function teacherCamOffStudent(pid) { sendTo(pid, { type: 'force-camera-off' }); const i = remoteParticipants.get(pid); if (i) remoteParticipants.set(pid, { ...i, camOn: false }); updateRemoteCamUI(pid, false); updateParticipantsPanel(); }
-async function teacherKickStudent(pid) { const i = remoteParticipants.get(pid); if (!i || !confirm('?')) return; sendTo(pid, { type: 'kick', reason: 'kick' }); setTimeout(() => { removeVideo(pid); remoteParticipants.delete(pid); studentPermissions.delete(pid); updateTeacherPanel(); updateParticipantCount(); updateParticipantsPanel(); }, 1500); }
+async function teacherKickStudent(pid) { const i = remoteParticipants.get(pid); if (!i || !confirm(`اخراج ${i.name}؟`)) return; sendTo(pid, { type: 'kick', reason: 'شما توسط مدرس از کلاس اخراج شدید.' }); setTimeout(() => { removeVideo(pid); remoteParticipants.delete(pid); studentPermissions.delete(pid); updateTeacherPanel(); updateParticipantCount(); updateParticipantsPanel(); }, 1500); }
 function muteAllStudents() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.micOn) { sendTo(p, { type: 'force-mute' }); remoteParticipants.set(p, { ...i, micOn: false }); updateRemoteMicUI(p, false); } }); updateTeacherPanel(); updateParticipantsPanel(); }
-function muteAllCameras() { let count = 0; remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.camOn) { sendTo(p, { type: 'force-camera-off' }); remoteParticipants.set(p, { ...i, camOn: false }); updateRemoteCamUI(p, false); count++; } }); updateParticipantsPanel(); if (count > 0) showToast(`📹 ${count} نفر خاموش`); }
+function muteAllCameras() { let count = 0; remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.camOn) { sendTo(p, { type: 'force-camera-off' }); remoteParticipants.set(p, { ...i, camOn: false }); updateRemoteCamUI(p, false); count++; } }); updateParticipantsPanel(); if (count > 0) showToast(`📹 ${count} نفر خاموش شد`); }
 function lockRoom() { isRoomLocked = !isRoomLocked; document.getElementById('lockIcon').textContent = isRoomLocked ? '🔒' : '🔓'; broadcast({ type: 'lock-room', locked: isRoomLocked }); }
 function clearAllHands() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.handRaised) { remoteParticipants.set(p, { ...i, handRaised: false }); updateHandUI(p, false); } }); updateTeacherPanel(); updateParticipantsPanel(); }
 
 async function toggleRecording() { if (myRole !== 'teacher') return; if (isRecording) stopRecording(); else await startRecording(); }
-async function startRecording() { try { compositeCanvas = document.createElement('canvas'); compositeCanvas.width = 1280; compositeCanvas.height = 720; compositeCtx = compositeCanvas.getContext('2d'); const recCtx = new (window.AudioContext || window.webkitAudioContext)(); audioDestination = recCtx.createMediaStreamDestination(); const ma = localStream.getAudioTracks()[0]; if (ma) { const s = recCtx.createMediaStreamSource(new MediaStream([ma])); s.connect(audioDestination); } audioContext = recCtx; const cs = compositeCanvas.captureStream(25); const cmb = new MediaStream([...cs.getVideoTracks(), ...audioDestination.stream.getAudioTracks()]); drawCompositeLoop(); const fmts = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']; for (const f of fmts) if (MediaRecorder.isTypeSupported(f)) { recordingMimeType = f; break; } mediaRecorder = new MediaRecorder(cmb, { mimeType: recordingMimeType, videoBitsPerSecond: 2500000, audioBitsPerSecond: 128000 }); recordedChunks = []; mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); }; mediaRecorder.onstop = () => { recordingBlob = new Blob(recordedChunks, { type: recordingMimeType }); document.getElementById('recordingModal').classList.add('open'); }; mediaRecorder.start(1000); isRecording = true; recordingStartTime = Date.now(); document.getElementById('recordingIndicator').classList.add('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️'; bp.classList.add('recording'); } startRecTimer(); broadcast({ type: 'recording-started' }); } catch (e) { cleanupRec(); } }
-function stopRecording() { if (!mediaRecorder || mediaRecorder.state === 'inactive') return; try { mediaRecorder.stop(); } catch (e) {} isRecording = false; document.getElementById('recordingIndicator').classList.remove('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '🎥'; bp.classList.remove('recording'); } stopRecTimer(); broadcast({ type: 'recording-stopped' }); cleanupRec(); }
+async function startRecording() { try { compositeCanvas = document.createElement('canvas'); compositeCanvas.width = 1280; compositeCanvas.height = 720; compositeCtx = compositeCanvas.getContext('2d'); const recCtx = new (window.AudioContext || window.webkitAudioContext)(); audioDestination = recCtx.createMediaStreamDestination(); const ma = localStream.getAudioTracks()[0]; if (ma) { const s = recCtx.createMediaStreamSource(new MediaStream([ma])); s.connect(audioDestination); } audioContext = recCtx; const cs = compositeCanvas.captureStream(25); const cmb = new MediaStream([...cs.getVideoTracks(), ...audioDestination.stream.getAudioTracks()]); drawCompositeLoop(); const fmts = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']; for (const f of fmts) if (MediaRecorder.isTypeSupported(f)) { recordingMimeType = f; break; } mediaRecorder = new MediaRecorder(cmb, { mimeType: recordingMimeType, videoBitsPerSecond: 2500000, audioBitsPerSecond: 128000 }); recordedChunks = []; mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); }; mediaRecorder.onstop = () => { recordingBlob = new Blob(recordedChunks, { type: recordingMimeType }); document.getElementById('recordingModal').classList.add('open'); }; mediaRecorder.start(1000); isRecording = true; recordingStartTime = Date.now(); document.getElementById('recordingIndicator').classList.add('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️ توقف ضبط'; bp.classList.add('recording'); } startRecTimer(); broadcast({ type: 'recording-started' }); } catch (e) { cleanupRec(); } }
+function stopRecording() { if (!mediaRecorder || mediaRecorder.state === 'inactive') return; try { mediaRecorder.stop(); } catch (e) {} isRecording = false; document.getElementById('recordingIndicator').classList.remove('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '🎥 شروع ضبط'; bp.classList.remove('recording'); } stopRecTimer(); broadcast({ type: 'recording-stopped' }); cleanupRec(); }
 function cleanupRec() { if (compositeAnimationId) { cancelAnimationFrame(compositeAnimationId); compositeAnimationId = null; } if (audioContext && audioContext.state !== 'closed') audioContext.close().catch(() => {}); audioContext = null; audioDestination = null; mediaRecorder = null; }
 function drawCompositeLoop() { if (!compositeCtx || !compositeCanvas) return; const W = compositeCanvas.width, H = compositeCanvas.height; compositeCtx.fillStyle = '#1a1a2e'; compositeCtx.fillRect(0, 0, W, H); const all = []; const mv = document.querySelector('#video-me video:not(.ss-video)'); if (mv && mv.readyState >= 2 && isCamOn) all.push({ video: mv }); remoteParticipants.forEach((i, p) => { const v = document.querySelector(`#video-${p} video:not(.ss-video)`); if (v && v.readyState >= 2 && i.camOn) all.push({ video: v }); }); const n = all.length; if (n === 0) { compositeAnimationId = requestAnimationFrame(drawCompositeLoop); return; } let cols, rows; if (n === 1) { cols = 1; rows = 1; } else if (n === 2) { cols = 2; rows = 1; } else if (n <= 4) { cols = 2; rows = 2; } else if (n <= 6) { cols = 3; rows = 2; } else { cols = 3; rows = 3; } const cw = W / cols, ch = H / rows; all.forEach((item, i) => { const c = i % cols, r = Math.floor(i / cols); const x = c * cw, y = r * ch; const vw = item.video.videoWidth || 16, vh = item.video.videoHeight || 9; const va = vw / vh, ca = cw / ch; let dw, dh, dx, dy; if (va > ca) { dw = cw; dh = cw / va; dx = x; dy = y + (ch - dh) / 2; } else { dh = ch; dw = ch * va; dx = x + (cw - dw) / 2; dy = y; } try { compositeCtx.drawImage(item.video, dx, dy, dw, dh); } catch (e) {} }); compositeCtx.fillStyle = 'rgba(0,0,0,0.6)'; compositeCtx.fillRect(W - 200, 10, 190, 32); compositeCtx.fillStyle = '#ea4335'; compositeCtx.font = 'bold 15px Tahoma'; compositeCtx.textAlign = 'right'; compositeCtx.fillText('🔴 ' + fmtTime(Math.floor((Date.now() - recordingStartTime) / 1000)), W - 15, 32); compositeAnimationId = requestAnimationFrame(drawCompositeLoop); }
 function startRecTimer() { const tt = document.getElementById('recordingTimer'); recordingTimerInterval = setInterval(() => { tt.textContent = fmtTime(Math.floor((Date.now() - recordingStartTime) / 1000)); }, 1000); }
@@ -2011,9 +2152,9 @@ function askForPassword(cb) { document.getElementById('passwordModal').classList
 function submitPassword() { const p = document.getElementById('passwordInput').value.trim(); closeModal('passwordModal'); if (window._pendingPasswordResolve) { window._pendingPasswordResolve(p); window._pendingPasswordResolve = null; } }
 function cancelPassword() { closeModal('passwordModal'); window._pendingPasswordResolve = null; leaveMeeting(true); }
 
-function copyLink() { const u = new URL(location.href); u.searchParams.set('room', roomId); u.searchParams.set('join', '1'); const link = u.toString(); navigator.clipboard.writeText(link).then(() => showToast('🔗 کپی شد')).catch(() => prompt('Link:', link)); }
+function copyLink() { const u = new URL(location.href); u.searchParams.set('room', roomId); u.searchParams.set('join', '1'); const link = u.toString(); navigator.clipboard.writeText(link).then(() => showToast('🔗 لینک کپی شد')).catch(() => prompt('Link:', link)); }
 async function leaveMeeting(s) {
-    if (!s && !confirm('?')) return;
+    if (!s && !confirm('خروج از جلسه؟')) return;
     if (isRecording) stopRecording();
     if (vadInterval) clearInterval(vadInterval);
     if (classTimerInterval) clearInterval(classTimerInterval);
@@ -2041,7 +2182,7 @@ async function leaveMeeting(s) {
     document.getElementById('videos').innerHTML = '';
     document.getElementById('lobby').style.display = 'flex';
     const joinInput = document.getElementById('joinRoomCode'); if (joinInput) joinInput.value = '';
-    const jb = document.getElementById('joinBtn'); if (jb) { jb.disabled = false; jb.textContent = (I18N[currentLang] && I18N[currentLang].joinMeeting) || 'ورود'; }
+    const jb = document.getElementById('joinBtn'); if (jb) { jb.disabled = false; jb.textContent = (I18N[currentLang] && I18N[currentLang].joinMeeting) || 'ورود به جلسه'; }
     setLobbyRole('teacher');
 }
 window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {} if (localStream) localStream.getTracks().forEach(t => t.stop()); if (isRecording) try { mediaRecorder.stop(); } catch (e) {} });
