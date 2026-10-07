@@ -400,18 +400,11 @@ button{font-family:inherit}
 .guest-box button.primary:disabled{opacity:.5;cursor:wait;transform:none}
 .guest-box .back-link{display:inline-block;margin-top:18px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;text-decoration:underline}
 .guest-box .back-link:hover{color:#8ab4f8}
-/* ═══ شمارش معکوس اتصال ═══ */
-#connectOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99998;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;backdrop-filter:blur(10px);padding:20px}
+/* ═══ نوار اتصال ═══ */
+#connectOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:20px}
 #connectOverlay.show{display:flex}
-#connectIcon{font-size:80px;margin-bottom:16px;animation:connectPulse 1.5s ease-in-out infinite}
-@keyframes connectPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-#connectTitle{font-size:20px;color:#9aa0a6;margin-bottom:8px}
-#connectNum{font-size:96px;font-weight:800;color:var(--accent);font-family:monospace;line-height:1;margin:12px 0;text-shadow:0 0 30px rgba(138,180,248,.5);transition:color .3s}
-#connectNum.warning{color:var(--warning)}
-#connectNum.danger{color:var(--danger)}
-#connectSub{font-size:14px;color:#9aa0a6;min-height:20px}
-#connectBar{width:240px;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:24px}
-#connectBarFill{height:100%;background:linear-gradient(90deg,var(--accent),#4285f4);width:0%;transition:width 1s linear;border-radius:3px}
+#connectBar{width:280px;max-width:80vw;height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
+#connectBarFill{height:100%;background:linear-gradient(90deg,var(--accent),#4285f4);width:0%;border-radius:4px;transition:width .3s linear}
 @media (max-width:768px){
 .logo-text{font-size:36px}.logo-icon{width:52px;height:52px;font-size:32px}
 #lobby{gap:12px;padding:15px;justify-content:flex-start;padding-top:calc(80px + env(safe-area-inset-top,0px))}
@@ -435,8 +428,6 @@ button{font-family:inherit}
 .admin-user-avatar{width:34px;height:34px;font-size:13px}
 #giftCodeBox{flex-direction:column}
 #giftCodeBox button{width:100%}
-#connectNum{font-size:72px}
-#connectIcon{font-size:60px}
 #connectBar{width:200px}
 }
 @media (max-width:600px){.auth-box{padding:24px 18px}}
@@ -979,8 +970,8 @@ let spotlightModeActive = false;
 let blurProcessor = null;
 let isBlurEnabled = false;
 
-// ═══ شمارش معکوس اتصال ═══
-let connectCountdownInterval = null;
+// ═══ نوار اتصال ═══
+let connectBarTimer = null;
 
 const DAY_MS = 86400000;
 function addDaysSafe(date, days) { const d = (date instanceof Date) ? date : new Date(date); return new Date(d.getTime() + days * DAY_MS); }
@@ -1045,76 +1036,40 @@ function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
 function changeDevice(mode) { localStorage.setItem('lroom_device', mode); document.body.classList.remove('device-phone', 'device-tablet', 'device-laptop'); if (mode === 'phone') document.body.classList.add('device-phone'); else if (mode === 'tablet') document.body.classList.add('device-tablet'); else if (mode === 'laptop') document.body.classList.add('device-laptop'); showToast('📱'); setTimeout(() => { if (typeof resizeWhiteboardCanvas === 'function') resizeWhiteboardCanvas(); if (typeof resizeProjectorCanvas === 'function') resizeProjectorCanvas(); }, 150); }
 function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.classList.toggle('light-theme', currentTheme === 'light'); localStorage.setItem('lroom_theme', currentTheme); const i = currentTheme === 'light' ? '☀️' : '🌙'; const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i; const t2 = document.getElementById('themeToggleMeeting'); if (t2) t2.textContent = i; }
 
-// ═══ شمارش معکوس اتصال ═══
-function getEstimatedConnectTime() {
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!conn) return 5;
-    const type = conn.effectiveType || '';
-    const downlink = conn.downlink || 10;
-    if (type === 'slow-2g' || type === '2g') return 15;
-    if (type === '3g') return 8;
-    if (type === '4g' && downlink > 5) return 3;
-    return 5;
-}
-function showConnectCountdown(seconds) {
+// ═══ نوار اتصال ═══
+function showConnectCountdown() {
     let el = document.getElementById('connectOverlay');
     if (!el) {
         el = document.createElement('div');
         el.id = 'connectOverlay';
-        el.innerHTML = `
-            <div id="connectIcon">🌐</div>
-            <div id="connectTitle">در حال ورود به کلاس</div>
-            <div id="connectNum">${seconds}</div>
-            <div id="connectSub">لطفاً صبر کنید...</div>
-            <div id="connectBar"><div id="connectBarFill"></div></div>
-        `;
+        el.innerHTML = '<div id="connectBar"><div id="connectBarFill"></div></div>';
         document.body.appendChild(el);
     }
     el.classList.add('show');
-    const numEl = document.getElementById('connectNum');
-    const titleEl = document.getElementById('connectTitle');
-    const subEl = document.getElementById('connectSub');
     const barEl = document.getElementById('connectBarFill');
-    const iconEl = document.getElementById('connectIcon');
-    let remaining = seconds;
-    const total = seconds;
-    numEl.textContent = remaining;
-    numEl.className = '';
     barEl.style.transition = 'none';
     barEl.style.width = '0%';
-    setTimeout(() => { barEl.style.transition = 'width 1s linear'; barEl.style.width = '100%'; }, 50);
-    if (connectCountdownInterval) clearInterval(connectCountdownInterval);
-    const updateStage = () => {
-        const elapsed = total - remaining;
-        if (elapsed === 0) { iconEl.textContent = '📷'; subEl.textContent = 'آماده‌سازی دوربین و میکروفون...'; }
-        if (elapsed === Math.floor(total * 0.3)) { iconEl.textContent = '🌐'; subEl.textContent = 'اتصال به سرور LiveKit...'; }
-        if (elapsed === Math.floor(total * 0.6)) { iconEl.textContent = '🔐'; subEl.textContent = 'احراز هویت و برقراری ارتباط...'; }
-        if (elapsed === Math.floor(total * 0.85)) { iconEl.textContent = '✅'; subEl.textContent = 'تقریباً آماده‌ست...'; }
-    };
-    updateStage();
-    connectCountdownInterval = setInterval(() => {
-        remaining--;
-        if (remaining > 0) {
-            numEl.textContent = remaining;
-            titleEl.textContent = `ورود در ${remaining} ثانیه`;
-            updateStage();
-        } else if (remaining === 0) {
-            numEl.textContent = '...';
-            numEl.className = 'warning';
-            titleEl.textContent = 'چند لحظه دیگر';
-            subEl.textContent = 'اتصال در حال نهایی شدن...';
-            iconEl.textContent = '⏳';
-        } else if (remaining === -3) {
-            numEl.className = 'danger';
-            titleEl.textContent = 'اتصال کند است';
-            subEl.textContent = 'لطفاً صبر کنید یا اینترنت خود را چک کنید';
+    let progress = 0;
+    if (connectBarTimer) clearInterval(connectBarTimer);
+    connectBarTimer = setInterval(() => {
+        if (progress < 90) {
+            progress += Math.random() * 4 + 1.5;
+            if (progress > 90) progress = 90;
+            barEl.style.transition = 'width .4s ease-out';
+            barEl.style.width = progress + '%';
         }
-    }, 1000);
+    }, 200);
 }
 function hideConnectCountdown() {
     const el = document.getElementById('connectOverlay');
-    if (el) el.classList.remove('show');
-    if (connectCountdownInterval) { clearInterval(connectCountdownInterval); connectCountdownInterval = null; }
+    if (!el) return;
+    const barEl = document.getElementById('connectBarFill');
+    if (barEl) {
+        barEl.style.transition = 'width .3s ease-out';
+        barEl.style.width = '100%';
+    }
+    if (connectBarTimer) { clearInterval(connectBarTimer); connectBarTimer = null; }
+    setTimeout(() => { el.classList.remove('show'); }, 350);
 }
 
 function playJoinSound() {
@@ -1666,7 +1621,7 @@ function updateAdminButtons() { const show = isAdminUser(); const b1 = document.
 function initRealtime() { if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
 async function loadActiveAnnouncement() { const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
-// ═══ joinMeeting با شمارش معکوس ═══
+// ═══ joinMeeting با نوار اتصال ═══
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
@@ -1690,8 +1645,8 @@ async function joinMeeting() {
         myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
         teacherId = `teacher-${roomId}`;
         
-        // ✅ شمارش معکوس
-        showConnectCountdown(getEstimatedConnectTime());
+        // نوار اتصال
+        showConnectCountdown();
 
         const mediaPromise = startPreview();
         const tokenPromise = generateLiveKitToken(roomId, myId, myName, myRole === 'teacher');
@@ -1774,7 +1729,7 @@ async function joinMeeting() {
         showMeetingUI();
         showToast('✅ متصل شدید');
         
-        // ✅ پنهان کردن شمارش معکوس
+        // پنهان کردن نوار اتصال
         hideConnectCountdown();
 
         setTimeout(checkRealConnectionQuality, 5000);
@@ -1845,7 +1800,6 @@ async function joinMeeting() {
         }
 
     } catch (err) {
-        // ✅ پنهان کردن شمارش معکوس در خطا
         hideConnectCountdown();
         showToast('❌ ' + (err.message || 'خطای اتصال'));
         if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
@@ -2256,7 +2210,7 @@ async function leaveMeeting(s) {
     if (activityTimerInterval) clearInterval(activityTimerInterval);
     if (qualityCheckInterval) clearInterval(qualityCheckInterval);
     if (waitingAudioBlockInterval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; }
-    if (connectCountdownInterval) { clearInterval(connectCountdownInterval); connectCountdownInterval = null; }
+    if (connectBarTimer) { clearInterval(connectBarTimer); connectBarTimer = null; }
     hideConnectCountdown();
     stopProjSync(); closeScreenShareModal(); hideConnBanner();
     const e = attendanceLog.get(myId); if (e) e.leftAt = new Date();
@@ -2330,3 +2284,4 @@ window.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
+  
