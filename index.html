@@ -400,12 +400,10 @@ button{font-family:inherit}
 .guest-box button.primary:disabled{opacity:.5;cursor:wait;transform:none}
 .guest-box .back-link{display:inline-block;margin-top:18px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;text-decoration:underline}
 .guest-box .back-link:hover{color:#8ab4f8}
-/* ═══ نوار اتصال ═══ */
 #connectOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:20px}
 #connectOverlay.show{display:flex}
 #connectBar{width:280px;max-width:80vw;height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
 #connectBarFill{height:100%;background:linear-gradient(90deg,var(--accent),#4285f4);width:0%;border-radius:4px;transition:width .3s linear}
-/* ═══ مودال دسترسی ═══ */
 #permModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99997;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(10px)}
 #permModal.show{display:flex}
 #permBox{background:var(--bg-secondary);border-radius:16px;padding:24px;max-width:420px;width:100%;text-align:center;border:2px solid var(--warning);max-height:90vh;overflow-y:auto}
@@ -416,6 +414,7 @@ button{font-family:inherit}
 #permBox ol li{margin-bottom:6px}
 #permBox .perm-btns{display:flex;flex-direction:column;gap:8px}
 #permBox button.retry{padding:14px;background:var(--accent);color:#202124;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+#permBox button.retry:disabled{opacity:.6;cursor:wait}
 #permBox button.cancel{padding:12px;background:var(--bg-tertiary);color:var(--text-primary);border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;width:100%}
 @media (max-width:768px){
 .logo-text{font-size:36px}.logo-icon{width:52px;height:52px;font-size:32px}
@@ -850,7 +849,7 @@ button{font-family:inherit}
     <p id="permDesc"></p>
     <div id="permInstructions"></div>
     <div class="perm-btns">
-      <button class="retry" onclick="retryCameraPermission()">🔄 تلاش مجدد</button>
+      <button class="retry" onclick="retryCameraPermission()" id="btnSendPermRequest">📨 ارسال درخواست</button>
       <button class="cancel" onclick="cancelCameraPermission()">بستن</button>
     </div>
   </div>
@@ -934,9 +933,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         detectSessionInUrl: false,
         flowType: 'implicit'
     },
-    realtime: {
-        params: { eventsPerSecond: 2 }
-    }
+    realtime: { params: { eventsPerSecond: 2 } }
 });
 
 let currentUser = null;
@@ -1029,11 +1026,6 @@ function applyLanguage(lang) {
         const expH1 = document.querySelector('.expired-box h1'); if (expH1) expH1.textContent = L.expiredTitle;
         const expUser = document.querySelector('.expired-box .user-name'); if (expUser && expUser.childNodes[0]) expUser.childNodes[0].nodeValue = L.expiredUser + ' ';
         setTxt('#giftSection h3', L.giftSectionTitle); setTxt('#giftSection > p', L.giftSectionDesc); setTxt('#giftCodeBox button', L.activateGift); setTxt('.logout-btn', L.logoutBtn);
-        document.querySelectorAll('#headerActions button').forEach(b => {
-            const oc = b.getAttribute('onclick') || ''; let txt = null;
-            if (oc.includes('toggleParticipantsPanel')) txt = L.btnParticipants;
-            if (txt) { const span = b.querySelector('span'); if (span) { const firstText = Array.from(b.childNodes).find(n => n.nodeType === 3 && n.textContent.trim()); if (firstText) firstText.nodeValue = ' ' + txt + ' '; } else b.textContent = txt; }
-        });
         const setCtrl = (id, txt) => { const e = document.getElementById(id); if (e) e.title = txt; };
         setCtrl('btnMic', L.ctrlMic); setCtrl('btnCam', L.ctrlCam); setCtrl('btnScreen', L.ctrlScreen); setCtrl('btnWhiteboard', L.ctrlWhiteboard); setCtrl('btnProjector', L.ctrlProjector); setCtrl('btnHand', L.ctrlHand); setCtrl('btnBandwidth', L.ctrlBandwidth); setCtrl('btnChat', L.ctrlChat);
         setTxt('#chat .panel-header strong', L.panelChat);
@@ -1059,7 +1051,6 @@ function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
 function changeDevice(mode) { localStorage.setItem('lroom_device', mode); document.body.classList.remove('device-phone', 'device-tablet', 'device-laptop'); if (mode === 'phone') document.body.classList.add('device-phone'); else if (mode === 'tablet') document.body.classList.add('device-tablet'); else if (mode === 'laptop') document.body.classList.add('device-laptop'); showToast('📱'); setTimeout(() => { if (typeof resizeWhiteboardCanvas === 'function') resizeWhiteboardCanvas(); if (typeof resizeProjectorCanvas === 'function') resizeProjectorCanvas(); }, 150); }
 function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dark'; document.body.classList.toggle('light-theme', currentTheme === 'light'); localStorage.setItem('lroom_theme', currentTheme); const i = currentTheme === 'light' ? '☀️' : '🌙'; const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i; const t2 = document.getElementById('themeToggleMeeting'); if (t2) t2.textContent = i; }
 
-// ═══ نوار اتصال ═══
 function showConnectCountdown() {
     let el = document.getElementById('connectOverlay');
     if (!el) {
@@ -1087,15 +1078,12 @@ function hideConnectCountdown() {
     const el = document.getElementById('connectOverlay');
     if (!el) return;
     const barEl = document.getElementById('connectBarFill');
-    if (barEl) {
-        barEl.style.transition = 'width .3s ease-out';
-        barEl.style.width = '100%';
-    }
+    if (barEl) { barEl.style.transition = 'width .3s ease-out'; barEl.style.width = '100%'; }
     if (connectBarTimer) { clearInterval(connectBarTimer); connectBarTimer = null; }
     setTimeout(() => { el.classList.remove('show'); }, 350);
 }
 
-// ═══ مدیریت خطای دسترسی دوربین/میکروفون ═══
+// ═══ مدیریت خطای دسترسی ═══
 function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
     let title = 'دسترسی به دوربین و میکروفون';
     let desc = '';
@@ -1106,7 +1094,15 @@ function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
         if (isIOS) {
             instructions = `<ol><li>به <b>Settings</b> گوشی بروید</li><li>به <b>Safari</b> بروید</li><li>گزینه <b>Camera</b> رو روی <b>Allow</b> بذارید</li><li>گزینه <b>Microphone</b> رو روی <b>Allow</b> بذارید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`;
         } else if (isAndroid) {
-            instructions = `<ol><li>آیکون 🔒 یا 🛈 رو کنار آدرس سایت بزنید</li><li>گزینه <b>Permissions</b> یا <b>دسترسی‌ها</b> رو انتخاب کنید</li><li><b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`;
+            instructions = `
+                <ol>
+                    <li style="color:#fbbc04;font-weight:600;">⚠️ اول دکمه <b>Reset permissions</b> رو بزنید (پایین همین صفحه)</li>
+                    <li>بعد صفحه رو <b>رفرش</b> کنید</li>
+                    <li>وقتی پنجره‌ی مرورگر باز شد، هر دو گزینه <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li>
+                    <li>اگه دوباره این پیام اومد، دکمه <b>📨 ارسال درخواست</b> رو بزنید</li>
+                </ol>
+                <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">💡 اگه Microphone تو لیست نبود، یعنی هنوز درخواست نشده. با Reset + Refresh درست می‌شه.</p>
+            `;
         } else if (isFirefox) {
             instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>گزینه <b>Clear permission</b> رو انتخاب کنید</li><li>صفحه رو <b>رفرش</b> کنید و دسترسی بدید</li></ol>`;
         } else {
@@ -1117,7 +1113,7 @@ function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
         instructions = `<ol><li>مطمئن شوید دوربین روی دستگاه وجود دارد</li><li>اگر دارد، ممکن است توسط برنامه دیگری استفاده شود</li></ol>`;
     } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
         desc = 'دوربین یا میکروفون توسط برنامه دیگری در حال استفاده است.';
-        instructions = `<ol><li>تمام برنامه‌های دیگر (دوربین، واتس‌اپ، اینستاگرام و...) رو ببندید</li><li>مجددا تلاش کنید</li></ol>`;
+        instructions = `<ol><li>تمام برنامه‌های دیگر (دوربین، واتس‌اپ، اینستاگرام و...) رو ببندید</li><li>دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`;
     } else if (errorName === 'SecurityError') {
         desc = 'دسترسی تنها از طریق HTTPS امکان‌پذیر است.';
         instructions = `<ol><li>آدرس سایت باید با <b>https://</b> شروع شود</li><li>از یک مرورگر مدرن استفاده کنید</li></ol>`;
@@ -1133,19 +1129,18 @@ function showPermissionModal(errorName) {
     const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/i.test(ua);
     const isFirefox = /Firefox/i.test(ua);
-    
     const { title, desc, instructions } = getPermissionHelp(errorName, isIOS, isAndroid, isFirefox);
-    
     document.getElementById('permTitle').textContent = title;
     document.getElementById('permDesc').textContent = desc;
     document.getElementById('permInstructions').innerHTML = instructions;
-    
     const icon = document.getElementById('permIcon');
     if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') icon.textContent = '🔒';
     else if (errorName === 'NotFoundError') icon.textContent = '❌';
     else if (errorName === 'NotReadableError') icon.textContent = '⚠️';
     else icon.textContent = '📷';
-    
+    // ریست دکمه
+    const btn = document.getElementById('btnSendPermRequest');
+    if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; }
     document.getElementById('permModal').classList.add('show');
     hideConnectCountdown();
 }
@@ -1155,24 +1150,28 @@ function hidePermissionModal() {
 }
 
 async function retryCameraPermission() {
+    const btn = document.getElementById('btnSendPermRequest');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ارسال...'; }
+    
     hidePermissionModal();
     if (localStream) {
         try { localStream.getTracks().forEach(t => t.stop()); } catch(e){}
         localStream = null;
     }
+    
     showConnectCountdown();
     const ok = await requestMediaPermission();
     if (ok) {
         hideConnectCountdown();
         showToast('✅ دسترسی داده شد');
-        const btn = document.getElementById('joinBtn');
-        if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
-        // دوباره وارد شدن
+        const jbtn = document.getElementById('joinBtn');
+        if (jbtn) { jbtn.disabled = false; jbtn.textContent = I18N[currentLang].joinMeeting; }
         if (!livekitRoom) {
             try { await joinMeeting(); } catch(e) {}
         }
     } else {
         hideConnectCountdown();
+        if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; }
     }
 }
 
@@ -1182,68 +1181,89 @@ function cancelCameraPermission() {
     if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
 }
 
-// ═══ درخواست فوری دسترسی دوربین/میکروفون ═══
+// ═══ درخواست دسترسی — اول میکروفون، بعد دوربین ═══
 async function requestMediaPermission() {
-    if (localStream && localStream.getVideoTracks().length > 0) return true;
+    if (localStream && (localStream.getVideoTracks().length > 0 || localStream.getAudioTracks().length > 0)) return true;
     
     if (localStream) {
         try { localStream.getTracks().forEach(t => t.stop()); } catch(e){}
         localStream = null;
     }
     
-    if (navigator.permissions && navigator.permissions.query) {
-        try {
-            const camState = await navigator.permissions.query({ name: 'camera' });
-            const micState = await navigator.permissions.query({ name: 'microphone' });
-            console.log('📋 Permission state:', { camera: camState.state, microphone: micState.state });
-            if (camState.state === 'denied' || micState.state === 'denied') {
-                showPermissionModal('NotAllowedError');
-                return false;
-            }
-        } catch(e) { /* مرورگر پشتیبانی نمی‌کنه */ }
-    }
+    let audioStream = null;
+    let videoStream = null;
     
-    showToast('🔒 درخواست دسترسی به دوربین و میکروفون...');
-    
-    const tryConstraints = [
-        { video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' }, audio: { echoCancellation: true } },
-        { video: { facingMode: 'user' }, audio: true },
-        { video: true, audio: true },
-        { video: true, audio: false },
-        { video: false, audio: true }
-    ];
-    
-    for (const constraints of tryConstraints) {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia(constraints);
-            localStream.getAudioTracks().forEach(t => t.enabled = false);
-            localStream.getVideoTracks().forEach(t => t.enabled = false);
-            const pv = document.getElementById('previewVideo');
-            if (pv) pv.srcObject = localStream;
-            document.getElementById('previewMicBtn').classList.add('off');
-            document.getElementById('previewCamBtn').classList.add('off');
-            console.log('✅ Permission granted:', constraints);
-            return true;
-        } catch (e) {
-            console.warn('⚠️ getUserMedia attempt failed:', e.name, e.message);
-            if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-                showPermissionModal(e.name);
-                return false;
-            }
-            if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') continue;
-            if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-                showPermissionModal(e.name);
-                return false;
-            }
-            if (e.name === 'SecurityError') {
-                showPermissionModal(e.name);
-                return false;
-            }
+    // 🎤 مرحله ۱: اول فقط میکروفون — پنجره‌ی جداگانه میاد
+    try {
+        showToast('🎤 درخواست دسترسی به میکروفون...');
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log('✅ Microphone permission granted');
+    } catch (e) {
+        console.warn('❌ Microphone failed:', e.name, e.message);
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            showPermissionModal('NotAllowedError');
+            return false;
+        }
+        if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+            showPermissionModal('NotReadableError');
+            return false;
+        }
+        if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+            showToast('⚠️ میکروفونی پیدا نشد — بدون صدا وارد می‌شوید');
         }
     }
     
-    showPermissionModal('NotFoundError');
-    return false;
+    // 📹 مرحله ۲: بعد دوربین — پنجره‌ی جداگانه میاد
+    try {
+        showToast('📹 درخواست دسترسی به دوربین...');
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' } });
+        console.log('✅ Camera permission granted');
+    } catch (e) {
+        console.warn('❌ Camera failed:', e.name, e.message);
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (e2) {
+            if (e2.name === 'NotAllowedError' || e2.name === 'PermissionDeniedError') {
+                if (audioStream) {
+                    localStream = audioStream;
+                    localStream.getAudioTracks().forEach(t => t.enabled = false);
+                    const pv = document.getElementById('previewVideo');
+                    if (pv) pv.srcObject = localStream;
+                    showToast('⚠️ فقط میکروفون فعال شد');
+                    return true;
+                }
+                showPermissionModal('NotAllowedError');
+                return false;
+            }
+            showToast('⚠️ دوربینی پیدا نشد — بدون تصویر وارد می‌شوید');
+        }
+    }
+    
+    // 🔗 ترکیب صدا و تصویر
+    if (audioStream && videoStream) {
+        localStream = new MediaStream([...videoStream.getTracks(), ...audioStream.getTracks()]);
+    } else if (audioStream) {
+        localStream = audioStream;
+    } else if (videoStream) {
+        localStream = videoStream;
+    } else {
+        showPermissionModal('NotFoundError');
+        return false;
+    }
+    
+    localStream.getAudioTracks().forEach(t => t.enabled = false);
+    localStream.getVideoTracks().forEach(t => t.enabled = false);
+    const pv = document.getElementById('previewVideo');
+    if (pv) pv.srcObject = localStream;
+    document.getElementById('previewMicBtn').classList.add('off');
+    document.getElementById('previewCamBtn').classList.add('off');
+    
+    console.log('✅ localStream ready:', {
+        audio: localStream.getAudioTracks().length,
+        video: localStream.getVideoTracks().length
+    });
+    
+    return true;
 }
 
 function playJoinSound() {
@@ -1341,17 +1361,12 @@ function isSlowConnection() {
         return false;
     } catch (e) { return false; }
 }
-
 function checkRealConnectionQuality() {
     if (!livekitRoom || !livekitRoom.engine) return;
     try {
         let rtt = 0;
-        if (livekitRoom.engine.client && typeof livekitRoom.engine.client.rtt === 'number') {
-            rtt = livekitRoom.engine.client.rtt;
-        }
-        if (rtt > 600 && !isLowBandwidth) {
-            showToast('📶 اتصال کند است — می‌توانید حالت کم‌مصرف را از دکمه 📶 فعال کنید');
-        }
+        if (livekitRoom.engine.client && typeof livekitRoom.engine.client.rtt === 'number') rtt = livekitRoom.engine.client.rtt;
+        if (rtt > 600 && !isLowBandwidth) showToast('📶 اتصال کند است — می‌توانید حالت کم‌مصرف را از دکمه 📶 فعال کنید');
     } catch (e) {}
 }
 
@@ -1630,7 +1645,7 @@ function checkAndShow() {
     document.getElementById('expiredScreen').style.display = 'none';
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('guestJoinScreen').style.display = 'none';
-    if (isGuestMode) { document.getElementById('lobby').style.display = 'flex'; document.getElementById('userBadgeName').textContent = currentUser.name + ' (مهمان)'; document.getElementById('userBadgeDays').textContent = ''; document.getElementById('userBadgeCrown').style.display = 'none'; updateAdminButtons(); setLobbyRole('student'); startPreview(); return; }
+    if (isGuestMode) { document.getElementById('lobby').style.display = 'flex'; document.getElementById('userBadgeName').textContent = currentUser.name + ' (مهمان)'; document.getElementById('userBadgeDays').textContent = ''; document.getElementById('userBadgeCrown').style.display = 'none'; updateAdminButtons(); setLobbyRole('student'); return; }
     const isAdmin = currentUser.role === 'admin';
     const end = parseDateSafe(currentUser.subscriptionEnd);
     const isExpired = end && end.getTime() < Date.now();
@@ -1640,23 +1655,13 @@ function checkAndShow() {
         document.getElementById('userBadgeName').textContent = currentUser.name;
         document.getElementById('userBadgeDays').textContent = isAdmin ? '' : `(${daysLeft} روز مانده)`;
         document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
-        updateAdminButtons(); setLobbyRole('teacher'); startPreview();
+        updateAdminButtons(); setLobbyRole('teacher');
     } else {
         document.getElementById('expiredScreen').style.display = 'flex';
         document.getElementById('expUserName').textContent = currentUser.name;
         const gs = document.getElementById('giftStatus'); if (gs) { gs.textContent = ''; gs.className = ''; }
         const inp = document.getElementById('expiredDiscountCode'); if (inp) inp.value = '';
     }
-}
-async function startPreview() {
-    // اگه stream نداریم، سعی نکن — فقط اگه کاربر قبلاً اجازه داده
-    if (localStream) {
-        const pv = document.getElementById('previewVideo');
-        if (pv) pv.srcObject = localStream;
-        document.getElementById('previewMicBtn').classList.add('off');
-        document.getElementById('previewCamBtn').classList.add('off');
-    }
-    // در lobby درخواست نمی‌کنیم — تو joinMeeting درخواست می‌دیم
 }
 function toggleUserMenu() { document.getElementById('userMenu').classList.toggle('open'); }
 document.addEventListener('click', (e) => { const menu = document.getElementById('userMenu'); const badge = document.getElementById('userBadge'); if (menu && badge && !badge.contains(e.target)) menu.classList.remove('open'); });
@@ -1816,7 +1821,6 @@ async function joinMeeting() {
     const btn = document.getElementById('joinBtn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
     
-    // 🔒 اول درخواست دسترسی — همون‌جا از user gesture
     showConnectCountdown();
     const permOk = await requestMediaPermission();
     if (!permOk) {
@@ -1839,29 +1843,22 @@ async function joinMeeting() {
             dynacast: true,
             disconnectOnPageLeave: false,
             videoCaptureDefaults: { resolution: initialRes, facingMode: 'user' },
-            audioCaptureDefaults: {
-                echoCancellation: true
-            },
+            audioCaptureDefaults: { echoCancellation: true },
             publishDefaults: {
                 simulcast: true,
                 videoSimulcastLayers: [
                     { width: 160, height: 90, encoding: { maxBitrate: 60000, maxFramerate: 8 } },
                     { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } }
                 ],
-                videoCodec: 'vp8',
-                dtx: true,
+                videoCodec: 'vp8', dtx: true,
                 degradationPreference: 'maintain-framerate',
                 screenShareEncoding: { maxBitrate: 1200000, maxFramerate: 10 },
             },
             connectOptions: {
-                autoSubscribe: true,
-                maxRetries: 8,
-                peerConnectionTimeout: 30000,
-                websocketTimeout: 30000,
+                autoSubscribe: true, maxRetries: 8,
+                peerConnectionTimeout: 30000, websocketTimeout: 30000,
                 rtcConfig: {
-                    iceTransportPolicy: 'all',
-                    bundlePolicy: 'max-bundle',
-                    rtcpMuxPolicy: 'require',
+                    iceTransportPolicy: 'all', bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
@@ -1869,10 +1866,7 @@ async function joinMeeting() {
                     ]
                 }
             },
-            reconnectPolicy: {
-                nextRetryDelayInMs: (ctx) => ctx.retryCount < 3 ? 500 : (ctx.retryCount < 10 ? 1500 : 3000),
-                maxRetryDelayMs: 5000
-            },
+            reconnectPolicy: { nextRetryDelayInMs: (ctx) => ctx.retryCount < 3 ? 500 : (ctx.retryCount < 10 ? 1500 : 3000), maxRetryDelayMs: 5000 },
         });
 
         setupLiveKitEvents();
@@ -1884,6 +1878,17 @@ async function joinMeeting() {
             showPermissionModal('NotFoundError');
             return;
         }
+
+        const hasVideo = localStream.getVideoTracks().length > 0;
+        const hasAudio = localStream.getAudioTracks().length > 0;
+        if (!hasVideo && !hasAudio) {
+            hideConnectCountdown();
+            if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
+            showPermissionModal('NotFoundError');
+            return;
+        }
+        if (!hasAudio) showToast('⚠️ بدون میکروفون وارد می‌شوید');
+        if (!hasVideo) showToast('⚠️ بدون دوربین وارد می‌شوید');
 
         showToast('🌐 در حال اتصال به سرور...');
         let elapsed = 0;
@@ -1900,9 +1905,7 @@ async function joinMeeting() {
             ]);
         } catch (connectErr) {
             console.warn('⚠️ خطای اتصال:', connectErr);
-            if (connectErr.message.includes('timeout')) {
-                throw new Error('⏱️ اتصال طول کشید. لطفاً اینترنت خود را چک کنید و دوباره تلاش کنید.');
-            }
+            if (connectErr.message.includes('timeout')) throw new Error('⏱️ اتصال طول کشید. لطفاً اینترنت خود را چک کنید و دوباره تلاش کنید.');
             throw connectErr;
         } finally {
             clearInterval(progressInterval);
@@ -1912,51 +1915,24 @@ async function joinMeeting() {
         showMeetingUI();
         showToast('✅ متصل شدید');
         hideConnectCountdown();
-
         setTimeout(checkRealConnectionQuality, 5000);
 
         const lp = livekitRoom.localParticipant;
 
         if (myRole === 'teacher') {
             (async () => {
-                try {
-                    await lp.publishTrack(localStream.getAudioTracks()[0], {
-                        name: 'microphone',
-                        source: LivekitClient.Track.Source.Microphone
-                    });
-                    isMicOn = true;
-                    localStream.getAudioTracks().forEach(t => t.enabled = true);
-                    updateMicUI();
-                    broadcast({ type: 'mic', on: true });
-                } catch (e) {}
-
-                try {
-                    await lp.publishTrack(localStream.getVideoTracks()[0], {
-                        name: 'camera',
-                        source: LivekitClient.Track.Source.Camera
-                    });
-                    isCamOn = true;
-                    localStream.getVideoTracks().forEach(t => t.enabled = true);
-                    updateCamUI();
-                    broadcast({ type: 'cam', on: true });
-                } catch (e) {}
-
-                sendData({
-                    type: 'hello',
-                    name: myName,
-                    role: myRole,
-                    micOn: isMicOn,
-                    camOn: isCamOn,
-                    isWaiting: false
-                });
+                if (localStream.getAudioTracks()[0]) {
+                    try { await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); isMicOn = true; localStream.getAudioTracks().forEach(t => t.enabled = true); updateMicUI(); broadcast({ type: 'mic', on: true }); } catch (e) {}
+                }
+                if (localStream.getVideoTracks()[0]) {
+                    try { await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); isCamOn = true; localStream.getVideoTracks().forEach(t => t.enabled = true); updateCamUI(); broadcast({ type: 'cam', on: true }); } catch (e) {}
+                }
+                sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
             })();
         } else {
-            isMicOn = false;
-            isCamOn = false;
-            myPermissions.mic = false;
-            myPermissions.cam = false;
-            myPermissions.whiteboard = false;
-            myPermissions.projector = false;
+            isMicOn = false; isCamOn = false;
+            myPermissions.mic = false; myPermissions.cam = false;
+            myPermissions.whiteboard = false; myPermissions.projector = false;
             isWaitingForApproval = true;
             startWaitingAudioBlocker();
             document.getElementById('waitingRoomOverlay').style.display = 'flex';
@@ -1967,17 +1943,7 @@ async function joinMeeting() {
                     if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity);
                 }
             });
-
-            setTimeout(() => {
-                sendData({
-                    type: 'hello',
-                    name: myName,
-                    role: myRole,
-                    micOn: false,
-                    camOn: false,
-                    isWaiting: true
-                });
-            }, 100);
+            setTimeout(() => { sendData({ type: 'hello', name: myName, role: myRole, micOn: false, camOn: false, isWaiting: true }); }, 100);
         }
 
     } catch (err) {
@@ -2330,9 +2296,9 @@ function updateHandUI(pid, r) { const c = pid === 'me' ? document.getElementById
 
 function toggleHand() { isHandRaised = !isHandRaised; document.getElementById('btnHand').classList.toggle('on', isHandRaised); broadcast({ type: 'hand', raised: isHandRaised }); updateHandUI('me', isHandRaised); updateParticipantsPanel(); if (isHandRaised) { const s = stats.userStats.get(myId); if (s) s.handRaises++; } }
 async function toggleMic() { if (isPrivileged() || myPermissions.mic) await actuallyToggleMic(); else requestPermission('mic'); }
-async function actuallyToggleMic() { const lp = livekitRoom?.localParticipant; if (!lp) return; isMicOn = !isMicOn; try { if (isMicOn) { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) await pub.unmute(); else await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); } else { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) await pub.mute(); } } catch (e) { isMicOn = !isMicOn; return; } updateMicUI(); updateParticipantsPanel(); broadcast({ type: 'mic', on: isMicOn }); if (!isMicOn) { lastSpeakingState = false; broadcast({ type: 'speaking', speaking: false, from: myId }); updateSpeakingBorder(myId, false, true); } }
+async function actuallyToggleMic() { const lp = livekitRoom?.localParticipant; if (!lp) return; isMicOn = !isMicOn; try { if (isMicOn) { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) await pub.unmute(); else if (localStream?.getAudioTracks()[0]) await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); else { showToast('⚠️ میکروفون در دسترس نیست'); isMicOn = false; return; } } else { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) await pub.mute(); } } catch (e) { isMicOn = !isMicOn; return; } updateMicUI(); updateParticipantsPanel(); broadcast({ type: 'mic', on: isMicOn }); if (!isMicOn) { lastSpeakingState = false; broadcast({ type: 'speaking', speaking: false, from: myId }); updateSpeakingBorder(myId, false, true); } }
 async function toggleCam() { if (isPrivileged() || myPermissions.cam) await actuallyToggleCam(); else requestPermission('cam'); }
-async function actuallyToggleCam() { const lp = livekitRoom?.localParticipant; if (!lp) return; isCamOn = !isCamOn; try { if (isCamOn) { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.unmute(); else await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); } else { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.mute(); } } catch (e) { isCamOn = !isCamOn; return; } updateCamUI(); updateParticipantsPanel(); broadcast({ type: 'cam', on: isCamOn }); if (isCamOn) setTimeout(() => broadcast({ type: 'quality-sync-request', from: myId }), 500); }
+async function actuallyToggleCam() { const lp = livekitRoom?.localParticipant; if (!lp) return; isCamOn = !isCamOn; try { if (isCamOn) { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.unmute(); else if (localStream?.getVideoTracks()[0]) await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); else { showToast('⚠️ دوربین در دسترس نیست'); isCamOn = false; return; } } else { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.mute(); } } catch (e) { isCamOn = !isCamOn; return; } updateCamUI(); updateParticipantsPanel(); broadcast({ type: 'cam', on: isCamOn }); if (isCamOn) setTimeout(() => broadcast({ type: 'quality-sync-request', from: myId }), 500); }
 function requestPermission(type) { if (myRole !== 'student') return; const b = type === 'mic' ? document.getElementById('btnMic') : document.getElementById('btnCam'); if (b && b.classList.contains('waiting')) return; sendTo(teacherId, { type: 'request-permission', permission: type, name: myName }); if (b) { b.classList.add('waiting'); b.disabled = true; } }
 async function forceCameraOff() { if (!isCamOn) return; const lp = livekitRoom?.localParticipant; if (!lp) return; isCamOn = false; try { const pub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (pub) await pub.mute(); } catch (e) {} updateCamUI(); updateParticipantsPanel(); broadcast({ type: 'cam', on: false }); }
 async function toggleScreen() {
@@ -2366,7 +2332,7 @@ function lockRoom() { isRoomLocked = !isRoomLocked; document.getElementById('loc
 function clearAllHands() { remoteParticipants.forEach((i, p) => { if (i.role === 'student' && i.handRaised) { remoteParticipants.set(p, { ...i, handRaised: false }); updateHandUI(p, false); } }); updateTeacherPanel(); updateParticipantsPanel(); }
 
 async function toggleRecording() { if (myRole !== 'teacher') return; if (isRecording) stopRecording(); else await startRecording(); }
-async function startRecording() { try { compositeCanvas = document.createElement('canvas'); compositeCanvas.width = 1280; compositeCanvas.height = 720; compositeCtx = compositeCanvas.getContext('2d'); const recCtx = new (window.AudioContext || window.webkitAudioContext)(); audioDestination = recCtx.createMediaStreamDestination(); const ma = localStream.getAudioTracks()[0]; if (ma) { const s = recCtx.createMediaStreamSource(new MediaStream([ma])); s.connect(audioDestination); } audioContext = recCtx; const cs = compositeCanvas.captureStream(25); const cmb = new MediaStream([...cs.getVideoTracks(), ...audioDestination.stream.getAudioTracks()]); drawCompositeLoop(); const fmts = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']; for (const f of fmts) if (MediaRecorder.isTypeSupported(f)) { recordingMimeType = f; break; } mediaRecorder = new MediaRecorder(cmb, { mimeType: recordingMimeType, videoBitsPerSecond: 2500000, audioBitsPerSecond: 128000 }); recordedChunks = []; mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); }; mediaRecorder.onstop = () => { recordingBlob = new Blob(recordedChunks, { type: recordingMimeType }); document.getElementById('recordingModal').classList.add('open'); }; mediaRecorder.start(1000); isRecording = true; recordingStartTime = Date.now(); document.getElementById('recordingIndicator').classList.add('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️ توقف ضبط'; bp.classList.add('recording'); } startRecTimer(); broadcast({ type: 'recording-started' }); } catch (e) { cleanupRec(); } }
+async function startRecording() { try { compositeCanvas = document.createElement('canvas'); compositeCanvas.width = 1280; compositeCanvas.height = 720; compositeCtx = compositeCanvas.getContext('2d'); const recCtx = new (window.AudioContext || window.webkitAudioContext)(); audioDestination = recCtx.createMediaStreamDestination(); const ma = localStream?.getAudioTracks()[0]; if (ma) { const s = recCtx.createMediaStreamSource(new MediaStream([ma])); s.connect(audioDestination); } audioContext = recCtx; const cs = compositeCanvas.captureStream(25); const cmb = new MediaStream([...cs.getVideoTracks(), ...audioDestination.stream.getAudioTracks()]); drawCompositeLoop(); const fmts = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']; for (const f of fmts) if (MediaRecorder.isTypeSupported(f)) { recordingMimeType = f; break; } mediaRecorder = new MediaRecorder(cmb, { mimeType: recordingMimeType, videoBitsPerSecond: 2500000, audioBitsPerSecond: 128000 }); recordedChunks = []; mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); }; mediaRecorder.onstop = () => { recordingBlob = new Blob(recordedChunks, { type: recordingMimeType }); document.getElementById('recordingModal').classList.add('open'); }; mediaRecorder.start(1000); isRecording = true; recordingStartTime = Date.now(); document.getElementById('recordingIndicator').classList.add('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '⏹️ توقف ضبط'; bp.classList.add('recording'); } startRecTimer(); broadcast({ type: 'recording-started' }); } catch (e) { cleanupRec(); } }
 function stopRecording() { if (!mediaRecorder || mediaRecorder.state === 'inactive') return; try { mediaRecorder.stop(); } catch (e) {} isRecording = false; document.getElementById('recordingIndicator').classList.remove('active'); const bp = document.getElementById('btnRecordPanel'); if (bp) { bp.textContent = '🎥 شروع ضبط'; bp.classList.remove('recording'); } stopRecTimer(); broadcast({ type: 'recording-stopped' }); cleanupRec(); }
 function cleanupRec() { if (compositeAnimationId) { cancelAnimationFrame(compositeAnimationId); compositeAnimationId = null; } if (audioContext && audioContext.state !== 'closed') audioContext.close().catch(() => {}); audioContext = null; audioDestination = null; mediaRecorder = null; }
 function drawCompositeLoop() { if (!compositeCtx || !compositeCanvas) return; const W = compositeCanvas.width, H = compositeCanvas.height; compositeCtx.fillStyle = '#1a1a2e'; compositeCtx.fillRect(0, 0, W, H); const all = []; const mv = document.querySelector('#video-me video:not(.ss-video)'); if (mv && mv.readyState >= 2 && isCamOn) all.push({ video: mv }); remoteParticipants.forEach((i, p) => { const v = document.querySelector(`#video-${p} video:not(.ss-video)`); if (v && v.readyState >= 2 && i.camOn) all.push({ video: v }); }); const n = all.length; if (n === 0) { compositeAnimationId = requestAnimationFrame(drawCompositeLoop); return; } let cols, rows; if (n === 1) { cols = 1; rows = 1; } else if (n === 2) { cols = 2; rows = 1; } else if (n <= 4) { cols = 2; rows = 2; } else if (n <= 6) { cols = 3; rows = 2; } else { cols = 3; rows = 3; } const cw = W / cols, ch = H / rows; all.forEach((item, i) => { const c = i % cols, r = Math.floor(i / cols); const x = c * cw, y = r * ch; const vw = item.video.videoWidth || 16, vh = item.video.videoHeight || 9; const va = vw / vh, ca = cw / ch; let dw, dh, dx, dy; if (va > ca) { dw = cw; dh = cw / va; dx = x; dy = y + (ch - dh) / 2; } else { dh = ch; dw = ch * va; dx = x + (cw - dw) / 2; dy = y; } try { compositeCtx.drawImage(item.video, dx, dy, dw, dh); } catch (e) {} }); compositeCtx.fillStyle = 'rgba(0,0,0,0.6)'; compositeCtx.fillRect(W - 200, 10, 190, 32); compositeCtx.fillStyle = '#ea4335'; compositeCtx.font = 'bold 15px Tahoma'; compositeCtx.textAlign = 'right'; compositeCtx.fillText('🔴 ' + fmtTime(Math.floor((Date.now() - recordingStartTime) / 1000)), W - 15, 32); compositeAnimationId = requestAnimationFrame(drawCompositeLoop); }
