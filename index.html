@@ -495,6 +495,8 @@ button{font-family:inherit}
                 <input type="text" id="regName" required autocomplete="name" />
                 <label>ایمیل</label>
                 <input type="email" id="regEmail" required autocomplete="email" />
+                <label>📱 شماره همراه (اختیاری)</label>
+                <input type="tel" id="regPhone" placeholder="09123456789" dir="ltr" autocomplete="tel" />
                 <label>رمز عبور</label>
                 <input type="password" id="regPassword" minlength="6" required autocomplete="new-password" />
                 <label>🎁 کد هدیه (اختیاری)</label>
@@ -935,7 +937,7 @@ button{font-family:inherit}
         <div class="admin-card"><h3>📈 آمار کلی</h3><div id="adminDashboardInfo"></div></div>
       </div>
       <div class="admin-section" id="adminSec-users">
-        <div class="admin-card"><h3>🔍 جستجو</h3><input class="admin-input" id="adminUserSearch" placeholder="جستجو بر اساس نام یا ایمیل..." oninput="renderAdminUsers()" /></div>
+        <div class="admin-card"><h3>🔍 جستجو</h3><input class="admin-input" id="adminUserSearch" placeholder="جستجو بر اساس نام یا ایمیل یا شماره..." oninput="renderAdminUsers()" /></div>
         <div id="adminUsersList"></div>
       </div>
       <div class="admin-section" id="adminSec-discounts">
@@ -1723,6 +1725,7 @@ async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const phone = (document.getElementById('regPhone')?.value || '').trim();
     const password = document.getElementById('regPassword').value;
     const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
     const errEl = document.getElementById('regError'); const okEl = document.getElementById('regSuccess'); const btn = document.getElementById('regBtn');
@@ -1738,7 +1741,7 @@ async function handleRegister(e) {
         if (!authData.session) throw new Error('Confirm email رو خاموش کن');
         await new Promise(r => setTimeout(r, 1500));
         let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString(), password_plain: password }); const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; }
+        if (!prof) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', phone: phone || null, subscription_end: endDate.toISOString(), password_plain: password }); const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; }
         if (disc && prof) { const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, disc.days); await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', authData.user.id); await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id); }
         try { await sb.auth.signOut(); } catch (e) {}
         okEl.textContent = '✅ ثبت‌نام موفق!' + (disc ? ` ${disc.days} روز اضافه شد.` : '');
@@ -1866,22 +1869,68 @@ async function renderAdminDashboard() {
     const totalDays = allUsers.reduce((sum, u) => sum + calcDaysLeft(u.subscription_end), 0);
     document.getElementById('adminDashboardInfo').innerHTML = `<div class="stat-row"><span class="label">📅 مجموع روزها</span><span class="value">${totalDays} روز</span></div><div class="stat-row"><span class="label">🆕 آخرین</span><span class="value">${allUsers.length ? escapeHtml(allUsers[allUsers.length-1].name) : '-'}</span></div><div class="stat-row"><span class="label">📢 اعلان</span><span class="value">${anns ? 'دارد' : 'ندارد'}</span></div>`;
 }
+
+// ⭐ تابع بهبود یافته نمایش کاربران با شماره و رمز + دکمه کپی
 async function renderAdminUsers() {
     const q = (document.getElementById('adminUserSearch')?.value || '').trim();
     let query = sb.from('profiles').select('*').order('created_at', { ascending: false });
-    if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%`);
+    if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
     const { data: users, error } = await query;
     const list = document.getElementById('adminUsersList');
-    if (error || !users) { list.innerHTML = '<div class="admin-empty">خطا</div>'; return; }
-    if (users.length === 0) { list.innerHTML = '<div class="admin-empty">یافت نشد</div>'; return; }
+    
+    if (error) { 
+        console.error('Admin users error:', error);
+        list.innerHTML = '<div class="admin-empty">خطا: ' + escapeHtml(error.message) + '</div>'; 
+        return; 
+    }
+    if (!users || users.length === 0) { 
+        list.innerHTML = '<div class="admin-empty">کاربری یافت نشد</div>'; 
+        return; 
+    }
+    
     list.innerHTML = users.map(u => {
-        const end = parseDateSafe(u.subscription_end); const daysLeft = calcDaysLeft(u.subscription_end);
+        const end = parseDateSafe(u.subscription_end); 
+        const daysLeft = calcDaysLeft(u.subscription_end);
         const isAdmin = u.role === 'admin';
-        const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز (تا ${end ? end.toLocaleDateString('fa-IR') : '-'})` : '⛔ منقضی');
+        const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز مانده` : '⛔ منقضی');
         const statusColor = isAdmin ? '#ffd700' : (daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
-        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name)} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div><div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div><div class="admin-user-meta">📱 شماره: <b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;">${escapeHtml(u.phone || '—')}</b></div><div class="admin-user-meta">🔑 پسورد: <b style="color:var(--warning);font-family:monospace;user-select:all;">${escapeHtml(u.password_plain || '— ثبت نشده —')}</b></div><div class="admin-user-meta">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد: <b>${escapeHtml(u.session_code)}</b>` : ''}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button><button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
+        
+        // 📱 شماره تلفن با دکمه کپی
+        const phoneDisplay = u.phone 
+            ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b>
+               <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" 
+                       style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
+            : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        
+        // 🔑 رمز عبور با دکمه کپی
+        const passDisplay = u.password_plain 
+            ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b>
+               <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" 
+                       style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
+            : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        
+        return `<div class="admin-user-row">
+            <div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div>
+            <div class="admin-user-info">
+                <div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div>
+                <div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div>
+                <div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div>
+                <div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div>
+                <div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div>
+                <div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div>
+            </div>
+            <div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;">
+                <button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button>
+                <button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button>
+                <button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button>
+                <button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button>
+                <button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button>
+                <button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button>
+            </div>
+        </div>`;
     }).join('');
 }
+
 async function adminAddDays(userId, days) {
     if (!isAdminUser()) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role').eq('id', userId).single();
