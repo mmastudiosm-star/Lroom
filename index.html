@@ -860,7 +860,7 @@ button{font-family:inherit}
     </div>
   </div>
 </div>
-<div id="passwordRecoveryModal" class="modal">
+<div id="passwordRecoveryModal" class="modal" style="z-index:10001;">
   <div class="modal-content">
     <div style="font-size:60px;margin-bottom:12px;">🔐</div>
     <h2>بازیابی رمز عبور</h2>
@@ -1385,51 +1385,76 @@ function cancelCameraPermission() {
     if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
 }
 
+// ═══════════════ نسخه بهبود یافته برای موبایل ═══════════════
 async function requestMediaPermission() {
     if (localStream && (localStream.getVideoTracks().length > 0 || localStream.getAudioTracks().length > 0)) return true;
     if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch(e){} localStream = null; }
-    let audioStream = null;
-    let videoStream = null;
-    try {
-        showToast('🎤 درخواست دسترسی به میکروفون...');
-        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) {
-        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') { showPermissionModal('NotAllowedError'); return false; }
-        if (e.name === 'NotReadableError' || e.name === 'TrackStartError') { showPermissionModal('NotReadableError'); return false; }
-        if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') { showToast('⚠️ میکروفونی پیدا نشد — بدون صدا وارد می‌شوید'); }
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showPermissionModal('SecurityError');
+        return false;
     }
+    
+    let stream = null;
+    
     try {
-        showToast('📹 درخواست دسترسی به دوربین...');
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' } });
+        showToast('🎤📹 درخواست دسترسی به دوربین و میکروفون...');
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true },
+            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, facingMode: 'user' }
+        });
     } catch (e) {
-        try {
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        } catch (e2) {
-            if (e2.name === 'NotAllowedError' || e2.name === 'PermissionDeniedError') {
-                if (audioStream) {
-                    localStream = audioStream;
-                    localStream.getAudioTracks().forEach(t => t.enabled = false);
-                    const pv = document.getElementById('previewVideo');
-                    if (pv) pv.srcObject = localStream;
-                    showToast('⚠️ فقط میکروفون فعال شد');
-                    return true;
-                }
+        console.warn('getUserMedia failed:', e.name, e.message);
+        
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                showToast('⚠️ فقط میکروفون فعال شد');
+            } catch (e2) {
                 showPermissionModal('NotAllowedError');
                 return false;
             }
-            showToast('⚠️ دوربینی پیدا نشد — بدون تصویر وارد می‌شوید');
+        }
+        else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                showToast('⚠️ دوربین پیدا نشد — بدون تصویر وارد می‌شوید');
+            } catch (e2) {
+                if (e2.name === 'NotAllowedError' || e2.name === 'PermissionDeniedError') {
+                    showPermissionModal('NotAllowedError');
+                    return false;
+                }
+                showPermissionModal('NotFoundError');
+                return false;
+            }
+        }
+        else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                showToast('⚠️ دوربین در دسترس نیست — بدون تصویر وارد می‌شوید');
+            } catch (e2) {
+                showPermissionModal('NotReadableError');
+                return false;
+            }
+        }
+        else {
+            showPermissionModal(e.name || 'NotAllowedError');
+            return false;
         }
     }
-    if (audioStream && videoStream) localStream = new MediaStream([...videoStream.getTracks(), ...audioStream.getTracks()]);
-    else if (audioStream) localStream = audioStream;
-    else if (videoStream) localStream = videoStream;
-    else { showPermissionModal('NotFoundError'); return false; }
+    
+    if (!stream) { showPermissionModal('NotFoundError'); return false; }
+    
+    localStream = stream;
     localStream.getAudioTracks().forEach(t => t.enabled = false);
     localStream.getVideoTracks().forEach(t => t.enabled = false);
+    
     const pv = document.getElementById('previewVideo');
-    if (pv) pv.srcObject = localStream;
-    document.getElementById('previewMicBtn').classList.add('off');
-    document.getElementById('previewCamBtn').classList.add('off');
+    if (pv) { pv.srcObject = localStream; pv.play().catch(() => {}); }
+    
+    const pmb = document.getElementById('previewMicBtn'); if (pmb) pmb.classList.add('off');
+    const pcb = document.getElementById('previewCamBtn'); if (pcb) pcb.classList.add('off');
+    
     return true;
 }
 
@@ -1845,8 +1870,7 @@ function showSubscriptionInfo() {
 }
 function togglePreviewMic() { const b = document.getElementById('previewMicBtn'); const tr = localStream?.getAudioTracks()[0]; if (tr) { tr.enabled = !tr.enabled; b.classList.toggle('off', !tr.enabled); b.textContent = tr.enabled ? '🎤' : '🔇'; } }
 function togglePreviewCam() { const b = document.getElementById('previewCamBtn'); const tr = localStream?.getVideoTracks()[0]; if (tr) { tr.enabled = !tr.enabled; b.classList.toggle('off', !tr.enabled); b.textContent = tr.enabled ? '📹' : '📷'; } }
-
-function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
+    function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
 function openAdminPanel() { if (!isAdminUser()) { showToast('⛔'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
 function closeAdminPanel() { document.getElementById('adminPanelModal').classList.remove('open'); }
 function switchAdminTab(tab) {
@@ -1869,68 +1893,29 @@ async function renderAdminDashboard() {
     const totalDays = allUsers.reduce((sum, u) => sum + calcDaysLeft(u.subscription_end), 0);
     document.getElementById('adminDashboardInfo').innerHTML = `<div class="stat-row"><span class="label">📅 مجموع روزها</span><span class="value">${totalDays} روز</span></div><div class="stat-row"><span class="label">🆕 آخرین</span><span class="value">${allUsers.length ? escapeHtml(allUsers[allUsers.length-1].name) : '-'}</span></div><div class="stat-row"><span class="label">📢 اعلان</span><span class="value">${anns ? 'دارد' : 'ندارد'}</span></div>`;
 }
-
-// ⭐ تابع بهبود یافته نمایش کاربران با شماره و رمز + دکمه کپی
 async function renderAdminUsers() {
     const q = (document.getElementById('adminUserSearch')?.value || '').trim();
     let query = sb.from('profiles').select('*').order('created_at', { ascending: false });
     if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
     const { data: users, error } = await query;
     const list = document.getElementById('adminUsersList');
-    
-    if (error) { 
-        console.error('Admin users error:', error);
-        list.innerHTML = '<div class="admin-empty">خطا: ' + escapeHtml(error.message) + '</div>'; 
-        return; 
-    }
-    if (!users || users.length === 0) { 
-        list.innerHTML = '<div class="admin-empty">کاربری یافت نشد</div>'; 
-        return; 
-    }
-    
+    if (error) { console.error('Admin users error:', error); list.innerHTML = '<div class="admin-empty">خطا: ' + escapeHtml(error.message) + '</div>'; return; }
+    if (!users || users.length === 0) { list.innerHTML = '<div class="admin-empty">کاربری یافت نشد</div>'; return; }
     list.innerHTML = users.map(u => {
         const end = parseDateSafe(u.subscription_end); 
         const daysLeft = calcDaysLeft(u.subscription_end);
         const isAdmin = u.role === 'admin';
         const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز مانده` : '⛔ منقضی');
         const statusColor = isAdmin ? '#ffd700' : (daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
-        
-        // 📱 شماره تلفن با دکمه کپی
         const phoneDisplay = u.phone 
-            ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b>
-               <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" 
-                       style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
+            ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
             : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
-        
-        // 🔑 رمز عبور با دکمه کپی
         const passDisplay = u.password_plain 
-            ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b>
-               <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" 
-                       style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
+            ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
             : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
-        
-        return `<div class="admin-user-row">
-            <div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div>
-            <div class="admin-user-info">
-                <div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div>
-                <div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div>
-                <div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div>
-                <div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div>
-                <div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div>
-                <div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div>
-            </div>
-            <div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;">
-                <button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button>
-                <button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button>
-                <button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button>
-                <button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button>
-                <button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button>
-                <button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button>
-            </div>
-        </div>`;
+        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div><div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div><div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div><div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button><button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
     }).join('');
 }
-
 async function adminAddDays(userId, days) {
     if (!isAdminUser()) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role').eq('id', userId).single();
@@ -2018,30 +2003,42 @@ function updateAdminButtons() { const show = isAdminUser(); const b1 = document.
 function initRealtime() { if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
 async function loadActiveAnnouncement() { const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
+// ═══════════════ joinMeeting بهبودیافته (permission اول) ═══════════════
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
     myRole = selectedLobbyRole;
     if (isGuestMode) myRole = 'student';
 
+    let tempRoomId = '';
     if (myRole === 'teacher' && !isGuestMode) {
-        const code = await ensureSessionCode();
-        roomId = sanitize(code);
+        // بعداً از ensureSessionCode می‌گیریم
     } else {
         const studentCode = document.getElementById('joinRoomCode').value.trim();
         if (!studentCode) return showToast('⚠️ کد جلسه را وارد کنید');
-        roomId = sanitize(studentCode);
+        tempRoomId = sanitize(studentCode);
     }
+
+    // ⚡ درخواست مجوز رو بلافاصله شروع کن (user gesture حفظ بشه)
+    const permPromise = requestMediaPermission();
 
     const btn = document.getElementById('joinBtn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
     
     showConnectCountdown();
-    const permOk = await requestMediaPermission();
+    
+    const permOk = await permPromise;
     if (!permOk) {
         hideConnectCountdown();
         if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
         return;
+    }
+    
+    if (myRole === 'teacher' && !isGuestMode) {
+        const code = await ensureSessionCode();
+        roomId = sanitize(code);
+    } else {
+        roomId = tempRoomId;
     }
     
     showToast('⏳ در حال اتصال...');
@@ -2587,65 +2584,4 @@ async function leaveMeeting(s) {
     wbStrokes = []; wbCurrentStroke = null;
     lastAutoApplied = '';
     spotlightedId = null; spotlightModeActive = false; isBlurEnabled = false;
-    ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('open'); });
-    ['whiteboardModal','projectorModal','screenShareModal','giftCodeModal','profileModal','kickModal','recordingModal','passwordModal','activityTimerModal','announceModal'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('open'); });
-    document.getElementById('waitingRoomOverlay').style.display = 'none';
-    document.getElementById('meeting').classList.remove('active');
-    document.getElementById('videos').innerHTML = '';
-    document.getElementById('lobby').style.display = 'flex';
-    const joinInput = document.getElementById('joinRoomCode'); if (joinInput) joinInput.value = '';
-    const jb = document.getElementById('joinBtn'); if (jb) { jb.disabled = false; jb.textContent = (I18N[currentLang] && I18N[currentLang].joinMeeting) || 'ورود به جلسه'; }
-    setLobbyRole('teacher');
-}
-window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {} if (localStream) localStream.getTracks().forEach(t => t.stop()); if (isRecording) try { mediaRecorder.stop(); } catch (e) {} });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { const wb = document.getElementById('whiteboardModal'); if (wb.classList.contains('open')) closeWhiteboard(); const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector(); const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal(); const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel(); const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal'); } });
-
-window.addEventListener('DOMContentLoaded', async () => {
-    document.body.classList.toggle('light-theme', currentTheme === 'light');
-    const i = currentTheme === 'light' ? '☀️' : '🌙';
-    const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i;
-    const t2 = document.getElementById('themeToggleMeeting'); if (t2) t2.textContent = i;
-    const dm = localStorage.getItem('lroom_device') || 'auto';
-    const ds = document.getElementById('deviceSelect'); if (ds) ds.value = dm;
-    changeDevice(dm);
-    initWhiteboard(); initProjector(); setupEmojiPicker();
-    const savedLang = localStorage.getItem('lroom_lang') || 'fa';
-    const ls = document.getElementById('langSelect'); if (ls) ls.value = savedLang;
-    try { applyLanguage(savedLang); } catch (e) {}
-    const urlParams = new URLSearchParams(location.search);
-    const roomFromUrl = urlParams.get('room');
-    const shouldJoin = urlParams.get('join') === '1';
-    try {
-        const { data: { session } } = await sb.auth.getSession();
-        if (session && session.user) {
-            let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-            if (!profile) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name || 'User', role: session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); const r2 = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(); profile = r2.data; }
-            if (profile) {
-                currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
-                isGuestMode = false;
-                checkAndShow(); initRealtime(); loadActiveAnnouncement();
-                const _loader = document.getElementById('appLoader');
-                if (_loader) _loader.style.display = 'none';
-                if (roomFromUrl && shouldJoin && profile.role !== 'admin') {
-                    setTimeout(async () => {
-                        const end = parseDateSafe(profile.subscription_end);
-                        const isExpired = end && end.getTime() < Date.now();
-                        if (isExpired) { showToast('⚠️ اعتبار تمام شده'); return; }
-                        selectedLobbyRole = 'student'; setLobbyRole('student');
-                        document.getElementById('joinRoomCode').value = roomFromUrl;
-                        showToast('🚀 در حال ورود...');
-                        try { await joinMeeting(); } catch(e) {}
-                    }, 800);
-                }
-                return;
-            }
-        }
-    } catch (e) {}
-    if (roomFromUrl && shouldJoin) { showGuestJoinScreen(roomFromUrl); }
-    else { document.getElementById('authScreen').style.display = 'flex'; }
-    const loader = document.getElementById('appLoader');
-    if (loader) loader.style.display = 'none';
-});
-</script>
-</body>
-</html>
+    ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => { const el = document.getElementById(id); if (el)
