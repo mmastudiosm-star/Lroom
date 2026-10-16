@@ -261,7 +261,7 @@ button{font-family:inherit}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:var(--bg-primary)}
 ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:4px}
-#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9999;overflow-y:auto}
+#authScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9999;overflow-y:auto}
 .auth-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
 .auth-logo .logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--danger));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff}
@@ -449,6 +449,30 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
+<script>
+// 🛡️ Fallback: اگه CDN لود نشد، بعد از ۸ ثانیه لودر رو مخفی کن
+setTimeout(function(){
+    var loader = document.getElementById('appLoader');
+    if (loader) loader.style.display = 'none';
+    var auth = document.getElementById('authScreen');
+    var lobby = document.getElementById('lobby');
+    var meeting = document.getElementById('meeting');
+    var guest = document.getElementById('guestJoinScreen');
+    var lobbyOpen = lobby && lobby.style.display === 'flex';
+    var meetingOpen = meeting && meeting.classList.contains('active');
+    var guestOpen = guest && guest.style.display === 'flex';
+    if (!lobbyOpen && !meetingOpen && !guestOpen && auth && auth.style.display === 'none') {
+        auth.style.display = 'flex';
+        // اگه Supabase لود نشده، به کاربر پیام بده
+        if (typeof window.supabase === 'undefined') {
+            var warn = document.createElement('div');
+            warn.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ea4335;color:#fff;padding:12px 20px;border-radius:8px;z-index:999999;font-size:13px;text-align:center;max-width:90%;';
+            warn.textContent = '⚠️ اتصال به سرور برقرار نشد. لطفاً VPN خود را روشن/خاموش کنید و صفحه را رفرش کنید.';
+            document.body.appendChild(warn);
+        }
+    }
+}, 8000);
+</script>
 <div id="appLoader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-primary);z-index:999999;gap:20px;">
     <div class="logo-icon" style="width:80px;height:80px;font-size:50px;border-radius:22px;">L</div>
     <div style="color:var(--text-secondary);font-size:14px;">⏳ در حال بارگذاری...</div>
@@ -465,7 +489,7 @@ button{font-family:inherit}
   </div>
 </div>
 
-<div id="authScreen" style="display:none;">
+<div id="authScreen">
     <div class="auth-box">
         <div class="auth-logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
 
@@ -979,9 +1003,52 @@ button{font-family:inherit}
 <div id="connBanner"></div>
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
+<script>
+// 🛡️ بارگذاری CDN با Fallback چندگانه
+(function(){
+    function loadScript(urls, callback) {
+        if (urls.length === 0) { if (callback) callback(false); return; }
+        var s = document.createElement('script');
+        s.src = urls[0];
+        s.onload = function(){ if (callback) callback(true); };
+        s.onerror = function(){ 
+            console.warn('CDN failed:', urls[0]);
+            loadScript(urls.slice(1), callback); 
+        };
+        document.head.appendChild(s);
+    }
+    window._loadScript = loadScript;
+    
+    // مرحله ۱: Supabase
+    loadScript([
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+        'https://unpkg.com/@supabase/supabase-js@2',
+        'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js'
+    ], function(ok1){
+        console.log('✅ Supabase:', ok1);
+        // مرحله ۲: LiveKit
+        loadScript([
+            'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js',
+            'https://unpkg.com/livekit-client@2.5.7/dist/livekit-client.umd.min.js'
+        ], function(ok2){
+            console.log('✅ LiveKit:', ok2);
+            // مرحله ۳: Track Processors
+            loadScript([
+                'https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js',
+                'https://unpkg.com/@livekit/track-processors@latest/dist/track-processors.umd.min.js'
+            ], function(ok3){
+                console.log('✅ Processors:', ok3);
+                // حالا اسکریپت اصلی رو لود کن
+                var mainScript = document.createElement('script');
+                mainScript.textContent = window._mainAppCode || '';
+                document.body.appendChild(mainScript);
+                // فراخوانی مقداردهی اولیه
+                if (typeof window._appInit === 'function') window._appInit();
+            });
+        });
+    });
+})();
+</script>
 <script>
 const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
@@ -993,16 +1060,8 @@ const BALE_ID = '@sobhan101095';
 const DEFAULT_SUBSCRIPTION_DAYS = 20;
 const PROJECTOR_BUCKET = 'projector-media';
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-        flowType: 'implicit'
-    },
-    realtime: { params: { eventsPerSecond: 2 } }
-});
-
+// متغیرهای global
+let sb = null;
 let currentUser = null;
 let livekitRoom = null;
 let localStream = null;
@@ -1125,6 +1184,7 @@ function switchPhoneTab(tab) {
 }
 async function handlePhoneLogin(e) {
     e.preventDefault();
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
     const phoneRaw = document.getElementById('phoneLoginInput').value;
     const password = document.getElementById('phoneLoginPassword').value;
     const errEl = document.getElementById('phoneLoginError');
@@ -1155,6 +1215,7 @@ async function handlePhoneLogin(e) {
 }
 async function handlePhoneRegister(e) {
     e.preventDefault();
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
     const name = document.getElementById('phoneRegName').value.trim();
     const phoneRaw = document.getElementById('phoneRegInput').value;
     const password = document.getElementById('phoneRegPassword').value;
@@ -1318,7 +1379,7 @@ function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
         if (isIOS) {
             instructions = `<ol><li>به <b>Settings</b> گوشی بروید</li><li>به <b>Safari</b> بروید</li><li>گزینه <b>Camera</b> رو روی <b>Allow</b> بذارید</li><li>گزینه <b>Microphone</b> رو روی <b>Allow</b> بذارید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`;
         } else if (isAndroid) {
-            instructions = `<ol><li style="color:#fbbc04;font-weight:600;">⚠️ اول دکمه <b>Reset permissions</b> رو بزنید (پایین همین صفحه)</li><li>بعد صفحه رو <b>رفرش</b> کنید</li><li>وقتی پنجره‌ی مرورگر باز شد، هر دو گزینه <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>اگه دوباره این پیام اومد، دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol><p style="font-size:12px;color:var(--text-muted);margin-top:8px;">💡 اگه Microphone تو لیست نبود، یعنی هنوز درخواست نشده. با Reset + Refresh درست می‌شه.</p>`;
+            instructions = `<ol><li style="color:#fbbc04;font-weight:600;">⚠️ اول دکمه <b>Reset permissions</b> رو بزنید (پایین همین صفحه)</li><li>بعد صفحه رو <b>رفرش</b> کنید</li><li>وقتی پنجره‌ی مرورگر باز شد، هر دو گزینه <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>اگه دوباره این پیام اومد، دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`;
         } else if (isFirefox) {
             instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>گزینه <b>Clear permission</b> رو انتخاب کنید</li><li>صفحه رو <b>رفرش</b> کنید و دسترسی بدید</li></ol>`;
         } else {
@@ -1385,7 +1446,6 @@ function cancelCameraPermission() {
     if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
 }
 
-// ═══════════════ نسخه بهبود یافته برای موبایل ═══════════════
 async function requestMediaPermission() {
     if (localStream && (localStream.getVideoTracks().length > 0 || localStream.getAudioTracks().length > 0)) return true;
     if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch(e){} localStream = null; }
@@ -1669,6 +1729,7 @@ function receiveQualitySettings(settings) {
 async function _applyGiftCodeToUser(code, statusEl) {
     if (!currentUser) { if (statusEl) statusEl.textContent = '⚠️'; return false; }
     if (isGuestMode) { if (statusEl) statusEl.textContent = '⚠️ مهمان'; return false; }
+    if (!sb) return false;
     const { data: disc, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
     if (error || !disc) { if (statusEl) statusEl.textContent = '❌'; return false; }
     const usedCount = (disc.used_by || []).length;
@@ -1748,6 +1809,7 @@ function switchAuthTab(tab) {
 }
 async function handleRegister(e) {
     e.preventDefault();
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim().toLowerCase();
     const phone = (document.getElementById('regPhone')?.value || '').trim();
@@ -1777,6 +1839,7 @@ async function handleRegister(e) {
 }
 async function handleLogin(e) {
     e.preventDefault();
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
     const errEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
@@ -1796,6 +1859,7 @@ async function handleLogin(e) {
     finally { btn.disabled = false; btn.textContent = 'ورود'; }
 }
 async function applyDiscountCode(inputId) {
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
     const id = inputId || 'regDiscountCode';
     const input = document.getElementById(id);
     if (!input) return;
@@ -1809,7 +1873,7 @@ async function applyDiscountCode(inputId) {
 }
 async function logout() {
     if (isGuestMode) { localStorage.removeItem('lroom_guest_name'); isGuestMode = false; guestName = ''; currentUser = null; if (livekitRoom) { try { livekitRoom.disconnect(); } catch(e){} } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); return; }
-    try { await sb.auth.signOut(); } catch (e) {}
+    try { if (sb) await sb.auth.signOut(); } catch (e) {}
     sessionStorage.removeItem('lroom_admin_auth');
     currentUser = null;
     if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} }
@@ -1821,6 +1885,7 @@ function copySessionCode() { const code = currentUser?.sessionCode; if (!code) r
 async function ensureSessionCode() {
     if (!currentUser || isGuestMode) return null;
     if (currentUser.sessionCode) return currentUser.sessionCode;
+    if (!sb) return String(1000 + Math.floor(Math.random() * 9000));
     let code;
     for (let i = 0; i < 10; i++) { code = String(1000 + Math.floor(Math.random() * 9000)); const { data } = await sb.from('profiles').select('id').eq('session_code', code).maybeSingle(); if (!data) break; }
     await sb.from('profiles').update({ session_code: code }).eq('id', currentUser.id);
@@ -1870,7 +1935,9 @@ function showSubscriptionInfo() {
 }
 function togglePreviewMic() { const b = document.getElementById('previewMicBtn'); const tr = localStream?.getAudioTracks()[0]; if (tr) { tr.enabled = !tr.enabled; b.classList.toggle('off', !tr.enabled); b.textContent = tr.enabled ? '🎤' : '🔇'; } }
 function togglePreviewCam() { const b = document.getElementById('previewCamBtn'); const tr = localStream?.getVideoTracks()[0]; if (tr) { tr.enabled = !tr.enabled; b.classList.toggle('off', !tr.enabled); b.textContent = tr.enabled ? '📹' : '📷'; } }
-    function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
+</script>
+<script>
+function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
 function openAdminPanel() { if (!isAdminUser()) { showToast('⛔'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
 function closeAdminPanel() { document.getElementById('adminPanelModal').classList.remove('open'); }
 function switchAdminTab(tab) {
@@ -1881,6 +1948,7 @@ function switchAdminTab(tab) {
     if (tab === 'dashboard') renderAdminDashboard(); else if (tab === 'users') renderAdminUsers(); else if (tab === 'discounts') renderAdminDiscounts(); else if (tab === 'announce') renderAdminAnnouncements();
 }
 async function renderAdminDashboard() {
+    if (!sb) return;
     const { data: users } = await sb.from('profiles').select('*');
     const { data: discs } = await sb.from('discount_codes').select('*');
     const { data: anns } = await sb.from('announcements').select('*').eq('is_active', true).maybeSingle();
@@ -1894,6 +1962,7 @@ async function renderAdminDashboard() {
     document.getElementById('adminDashboardInfo').innerHTML = `<div class="stat-row"><span class="label">📅 مجموع روزها</span><span class="value">${totalDays} روز</span></div><div class="stat-row"><span class="label">🆕 آخرین</span><span class="value">${allUsers.length ? escapeHtml(allUsers[allUsers.length-1].name) : '-'}</span></div><div class="stat-row"><span class="label">📢 اعلان</span><span class="value">${anns ? 'دارد' : 'ندارد'}</span></div>`;
 }
 async function renderAdminUsers() {
+    if (!sb) return;
     const q = (document.getElementById('adminUserSearch')?.value || '').trim();
     let query = sb.from('profiles').select('*').order('created_at', { ascending: false });
     if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
@@ -1917,7 +1986,7 @@ async function renderAdminUsers() {
     }).join('');
 }
 async function adminAddDays(userId, days) {
-    if (!isAdminUser()) return;
+    if (!isAdminUser() || !sb) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role').eq('id', userId).single();
     if (!u) return showToast('یافت نشد');
     if (u.role === 'admin') return showToast('👑');
@@ -1926,7 +1995,7 @@ async function adminAddDays(userId, days) {
     renderAdminUsers();
 }
 async function adminAddSubscription(userId, days, label) {
-    if (!isAdminUser()) return;
+    if (!isAdminUser() || !sb) return;
     const { data: u } = await sb.from('profiles').select('subscription_end, role, name').eq('id', userId).single();
     if (!u) return showToast('یافت نشد');
     if (u.role === 'admin') return showToast('👑');
@@ -1937,7 +2006,7 @@ async function adminAddSubscription(userId, days, label) {
     renderAdminUsers();
 }
 async function adminDeleteUser(userId, name) {
-    if (!isAdminUser()) return;
+    if (!isAdminUser() || !sb) return;
     if (currentUser.id === userId) return showToast('⛔ خودتان');
     if (!confirm(`حذف "${name}"؟`)) return;
     try {
@@ -1951,7 +2020,7 @@ async function adminDeleteUser(userId, name) {
 }
 function generateDiscountCode() { const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = 'LROOM-'; for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)]; return code; }
 async function createDiscountCode() {
-    if (!isAdminUser()) return;
+    if (!isAdminUser() || !sb) return;
     const codeInput = document.getElementById('discCodeInput'); const daysInput = document.getElementById('discDaysInput'); const limitInput = document.getElementById('discLimitInput');
     let code = (codeInput.value || '').trim().toUpperCase();
     const days = parseInt(daysInput.value) || 30;
@@ -1965,6 +2034,7 @@ async function createDiscountCode() {
     showToast(`🎁 ${code}`);
 }
 async function renderAdminDiscounts() {
+    if (!sb) return;
     const { data: discs } = await sb.from('discount_codes').select('*').order('created_at', { ascending: false });
     const list = document.getElementById('adminDiscountsList');
     if (!discs || discs.length === 0) { list.innerHTML = '<div class="admin-empty">کدی نیست</div>'; return; }
@@ -1977,9 +2047,9 @@ async function renderAdminDiscounts() {
     }).join('');
 }
 function copyDiscountCode(code) { navigator.clipboard.writeText(code).then(() => showToast('📋')).catch(() => prompt('Code:', code)); }
-async function deleteDiscountCode(code) { if (!isAdminUser()) return; if (!confirm(`حذف ${code}?`)) return; await sb.from('discount_codes').delete().eq('code', code); renderAdminDiscounts(); }
+async function deleteDiscountCode(code) { if (!isAdminUser() || !sb) return; if (!confirm(`حذف ${code}?`)) return; await sb.from('discount_codes').delete().eq('code', code); renderAdminDiscounts(); }
 async function sendGlobalAnnouncement() {
-    if (!isAdminUser()) return;
+    if (!isAdminUser() || !sb) return;
     const txt = (document.getElementById('adminAnnounceText').value || '').trim();
     if (!txt) return showToast('⚠️');
     await sb.from('announcements').update({ is_active: false }).eq('is_active', true);
@@ -1989,8 +2059,9 @@ async function sendGlobalAnnouncement() {
     renderAdminAnnouncements();
     showToast('📢');
 }
-async function clearGlobalAnnouncement() { if (!isAdminUser()) return; if (!confirm('حذف اعلان فعال؟')) return; await sb.from('announcements').update({ is_active: false }).eq('is_active', true); hideGlobalBanner(); renderAdminAnnouncements(); }
+async function clearGlobalAnnouncement() { if (!isAdminUser() || !sb) return; if (!confirm('حذف اعلان فعال؟')) return; await sb.from('announcements').update({ is_active: false }).eq('is_active', true); hideGlobalBanner(); renderAdminAnnouncements(); }
 async function renderAdminAnnouncements() {
+    if (!sb) return;
     const { data: anns } = await sb.from('announcements').select('*').order('created_at', { ascending: false }).limit(30);
     const list = document.getElementById('adminAnnounceHistory');
     if (!anns || anns.length === 0) { list.innerHTML = '<div class="admin-empty">اعلانی نیست</div>'; return; }
@@ -2000,10 +2071,10 @@ function showGlobalBanner(ann) { if (!ann) return; const b = document.getElement
 function hideGlobalBanner() { const b = document.getElementById('adminGlobalBanner'); if (b) b.classList.remove('show'); }
 function dismissGlobalBanner() { if (adminActiveAnnouncement) sessionStorage.setItem('lroom_banner_dismissed', adminActiveAnnouncement.id); hideGlobalBanner(); }
 function updateAdminButtons() { const show = isAdminUser(); const b1 = document.getElementById('adminPanelBtnLobby'); const b2 = document.getElementById('adminPanelBtnMeeting'); const m1 = document.getElementById('adminMenuBtn'); if (b1) b1.style.display = show ? 'inline-block' : 'none'; if (b2) b2.style.display = show ? 'inline-block' : 'none'; if (m1) m1.style.display = show ? 'flex' : 'none'; }
-function initRealtime() { if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
-async function loadActiveAnnouncement() { const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
+function initRealtime() { if (!sb) return; if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
+async function loadActiveAnnouncement() { if (!sb) return; const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
-// ═══════════════ joinMeeting بهبودیافته (permission اول) ═══════════════
+// ═══════════════ joinMeeting (با اولویت permission) ═══════════════
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
@@ -2019,7 +2090,7 @@ async function joinMeeting() {
         tempRoomId = sanitize(studentCode);
     }
 
-    // ⚡ درخواست مجوز رو بلافاصله شروع کن (user gesture حفظ بشه)
+    // ⚡ درخواست مجوز رو بلافاصله شروع کن (بدون await قبلش)
     const permPromise = requestMediaPermission();
 
     const btn = document.getElementById('joinBtn');
@@ -2584,4 +2655,90 @@ async function leaveMeeting(s) {
     wbStrokes = []; wbCurrentStroke = null;
     lastAutoApplied = '';
     spotlightedId = null; spotlightModeActive = false; isBlurEnabled = false;
-    ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => { const el = document.getElementById(id); if (el)
+    ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('open'); });
+    ['whiteboardModal','projectorModal','screenShareModal','giftCodeModal','profileModal','kickModal','recordingModal','passwordModal','activityTimerModal','announceModal'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('open'); });
+    document.getElementById('waitingRoomOverlay').style.display = 'none';
+    document.getElementById('meeting').classList.remove('active');
+    document.getElementById('videos').innerHTML = '';
+    document.getElementById('lobby').style.display = 'flex';
+    const joinInput = document.getElementById('joinRoomCode'); if (joinInput) joinInput.value = '';
+    const jb = document.getElementById('joinBtn'); if (jb) { jb.disabled = false; jb.textContent = (I18N[currentLang] && I18N[currentLang].joinMeeting) || 'ورود به جلسه'; }
+    setLobbyRole('teacher');
+}
+window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {} if (localStream) localStream.getTracks().forEach(t => t.stop()); if (isRecording) try { mediaRecorder.stop(); } catch (e) {} });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const wb = document.getElementById('whiteboardModal'); if (wb.classList.contains('open')) closeWhiteboard(); const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector(); const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal(); const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel(); const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal'); } });
+
+// ═══════════════ INIT ═══════════════
+window._appInit = async function() {
+    // مقداردهی Supabase
+    if (typeof window.supabase !== 'undefined') {
+        try {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
+                realtime: { params: { eventsPerSecond: 2 } }
+            });
+            console.log('✅ Supabase client initialized');
+        } catch(e) { console.error('Supabase init error:', e); }
+    } else {
+        console.warn('⚠️ Supabase not loaded');
+    }
+    
+    document.body.classList.toggle('light-theme', currentTheme === 'light');
+    const i = currentTheme === 'light' ? '☀️' : '🌙';
+    const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i;
+    const t2 = document.getElementById('themeToggleMeeting'); if (t2) t2.textContent = i;
+    const dm = localStorage.getItem('lroom_device') || 'auto';
+    const ds = document.getElementById('deviceSelect'); if (ds) ds.value = dm;
+    changeDevice(dm);
+    initWhiteboard(); initProjector(); setupEmojiPicker();
+    const savedLang = localStorage.getItem('lroom_lang') || 'fa';
+    const ls = document.getElementById('langSelect'); if (ls) ls.value = savedLang;
+    try { applyLanguage(savedLang); } catch (e) {}
+    const urlParams = new URLSearchParams(location.search);
+    const roomFromUrl = urlParams.get('room');
+    const shouldJoin = urlParams.get('join') === '1';
+    
+    try {
+        if (sb) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session && session.user) {
+                let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+                if (!profile) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name || 'User', role: session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); const r2 = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(); profile = r2.data; }
+                if (profile) {
+                    currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
+                    isGuestMode = false;
+                    checkAndShow(); initRealtime(); loadActiveAnnouncement();
+                    const _loader = document.getElementById('appLoader');
+                    if (_loader) _loader.style.display = 'none';
+                    if (roomFromUrl && shouldJoin && profile.role !== 'admin') {
+                        setTimeout(async () => {
+                            const end = parseDateSafe(profile.subscription_end);
+                            const isExpired = end && end.getTime() < Date.now();
+                            if (isExpired) { showToast('⚠️ اعتبار تمام شده'); return; }
+                            selectedLobbyRole = 'student'; setLobbyRole('student');
+                            document.getElementById('joinRoomCode').value = roomFromUrl;
+                            showToast('🚀 در حال ورود...');
+                            try { await joinMeeting(); } catch(e) {}
+                        }, 800);
+                    }
+                    return;
+                }
+            }
+        }
+    } catch (e) { console.error('Init error:', e); }
+    
+    if (roomFromUrl && shouldJoin) { showGuestJoinScreen(roomFromUrl); }
+    else { document.getElementById('authScreen').style.display = 'flex'; }
+    const loader = document.getElementById('appLoader');
+    if (loader) loader.style.display = 'none';
+};
+
+// اجرا وقتی DOM آماده شد
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { if (typeof window._appInit === 'function' && typeof window.supabase !== 'undefined') window._appInit(); });
+} else {
+    if (typeof window._appInit === 'function' && typeof window.supabase !== 'undefined') window._appInit();
+}
+</script>
+</body>
+</html>
