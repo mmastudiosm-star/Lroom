@@ -1,456 +1,35 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Lroom | کلاس آنلاین</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238ab4f8'/><text x='50' y='72' font-size='70' font-weight='900' text-anchor='middle' fill='%23202124' font-family='Tahoma'>L</text></svg>" />
-<style>
-:root{--bg-primary:#202124;--bg-secondary:#16213e;--bg-tertiary:#303134;--bg-hover:#3c4043;--bg-active:#0f3460;--text-primary:#fff;--text-secondary:#9aa0a6;--text-muted:#5f6368;--border-color:#3c4043;--accent:#8ab4f8;--accent-hover:#aecbfa;--danger:#ea4335;--success:#34a853;--warning:#fbbc04;--safe-bottom:env(safe-area-inset-bottom,0px)}
-body.light-theme{--bg-primary:#f5f5f5;--bg-secondary:#fff;--bg-tertiary:#e8eaed;--bg-hover:#dadce0;--bg-active:#d2e3fc;--text-primary:#202124;--text-secondary:#5f6368;--text-muted:#80868b;--border-color:#dadce0;--accent:#1a73e8}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg-primary);color:var(--text-primary);height:100vh;height:100dvh;overflow:hidden}
-button{font-family:inherit}
-#lobby{display:none;flex-direction:column;align-items:center;justify-content:center;height:100vh;height:100dvh;gap:16px;padding:20px;overflow-y:auto}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.logo-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--danger));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#fff}
-.logo-text{font-size:46px;font-weight:300;letter-spacing:-1px}
-.logo-text strong{font-weight:700;color:var(--accent)}
-.subtitle{color:var(--text-secondary);font-size:15px;margin-bottom:8px}
-.preview{width:100%;max-width:600px;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--border-color);position:relative}
-.preview video{width:100%;height:100%;object-fit:cover}
-.preview-controls{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
-.preview-controls button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:18px}
-.preview-controls button.off{background:var(--danger)}
-.row{display:flex;gap:10px;width:100%;max-width:600px}
-#lobby input,#lobby select{flex:1;padding:13px 18px;background:var(--bg-tertiary);border:1px solid var(--text-muted);border-radius:8px;color:var(--text-primary);font-size:15px;font-family:inherit}
-#lobby input:focus,#lobby select:focus{outline:none;border-color:var(--accent)}
-#lobby button.primary{padding:14px 32px;background:var(--accent);color:#202124;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;flex:1}
-#lobby button.primary:hover{background:var(--accent-hover)}
-#lobby button.primary:disabled{opacity:.5;cursor:wait}
-.hint{color:var(--text-secondary);font-size:13px;text-align:center;max-width:600px;line-height:1.8}
-.top-bar{position:fixed;top:calc(15px + env(safe-area-inset-top,0px));left:15px;right:15px;display:flex;justify-content:space-between;z-index:50}
-.top-bar-right{display:flex;gap:8px;align-items:center}
-.lang-selector,.theme-toggle,.device-selector{background:var(--bg-tertiary);border:1px solid var(--border-color);color:var(--text-primary);padding:8px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px}
-.theme-toggle{width:40px;height:40px;padding:0;font-size:18px}
-#meeting{display:none;height:100vh;height:100dvh;flex-direction:column;padding-bottom:var(--safe-bottom)}
-#meeting.active{display:flex}
-#header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--bg-primary);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:8px}
-#roomTitle{font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-#brandHeader{font-size:20px;font-weight:700;color:var(--accent);padding-left:10px;margin-left:4px;border-left:1px solid var(--border-color)}
-#roleBadge{padding:3px 10px;border-radius:12px;font-size:11px;background:var(--bg-tertiary);color:var(--text-secondary)}
-#roleBadge.teacher{background:var(--accent);color:#202124;font-weight:600}
-#roleBadge.coteacher{background:var(--warning);color:#202124;font-weight:600}
-#headerActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-#headerActions button{background:var(--bg-tertiary);border:none;color:var(--text-primary);padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;white-space:nowrap}
-#headerActions button:hover{background:var(--bg-hover)}
-#headerActions button.teacher-btn{background:var(--accent);color:#202124;font-weight:600}
-#recordingIndicator{display:none;align-items:center;gap:6px;padding:5px 12px;background:var(--danger);border-radius:20px;font-size:12px;font-weight:600;color:#fff}
-#recordingIndicator.active{display:flex}
-#recordingIndicator .dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:rec-blink 1s infinite}
-#classTimer{padding:5px 12px;background:var(--bg-tertiary);border-radius:20px;font-size:12px;font-weight:600;font-family:monospace;color:var(--text-primary)}
-@keyframes rec-blink{0%,100%{opacity:1}50%{opacity:.3}}
-#mainArea{flex:1;display:flex;overflow:hidden;position:relative;min-height:0}
-#videos{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px;padding:6px;background:var(--bg-primary);overflow-y:auto;align-content:start;grid-auto-rows:min-content;transition:all .3s}
-#videos.many{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px}
-#videos.many .video-box .avatar{width:50px;height:50px;font-size:22px}
-#videos.many .video-box .name{font-size:10px;padding:2px 6px}
-#videos.many .video-box .mic{width:22px;height:22px;font-size:11px}
-#videos.many .video-box .hand{font-size:12px;padding:2px 5px}
-#videos.many .video-box .quality{display:none}
-#videos.spotlight-mode{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;grid-auto-rows:min-content}
-#videos.spotlight-mode .video-box{aspect-ratio:16/9;border-radius:8px;cursor:pointer}
-#videos.spotlight-mode .video-box.spotlight-active{grid-column:1/-1;max-height:70vh;border-color:var(--accent);box-shadow:0 0 40px rgba(138,180,248,.5);border-radius:14px;cursor:default}
-#videos.spotlight-mode .video-box.spotlight-active .name{font-size:16px;padding:6px 14px;font-weight:700}
-#videos.spotlight-mode .video-box.spotlight-active .avatar{width:140px;height:140px;font-size:60px}
-#videos.spotlight-mode .video-box:not(.spotlight-active) .quality{display:none}
-#videos.spotlight-mode .video-box:not(.spotlight-active) .avatar{width:40px;height:40px;font-size:18px}
-#videos.spotlight-mode .video-box:not(.spotlight-active) .name{font-size:10px;padding:2px 6px}
-#videos.spotlight-mode .video-box:not(.spotlight-active) .mic{width:20px;height:20px;font-size:10px}
-.video-box.spotlight-source::before{content:'🎯';position:absolute;top:6px;left:6px;font-size:18px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
-.video-box:fullscreen{background:#000}
-.video-box:fullscreen video{object-fit:contain}
-#btnBlur.on{background:linear-gradient(135deg,var(--accent),#4285f4);color:#202124}
-.video-box.screensharing video:not(.ss-video){display:none!important}
-.video-box.screensharing .avatar{display:none!important}
-.video-box.screensharing .ss-video{display:block!important}
-.video-box .ss-badge{position:absolute;top:8px;left:8px;background:var(--success);color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.4)}
-.video-box{position:relative;background:var(--bg-hover);border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border:3px solid transparent;transition:border .2s,box-shadow .2s,transform .2s}
-.video-box.speaking{border-color:var(--success);box-shadow:0 0 20px rgba(52,168,83,.6)}
-.video-box video{width:100%;height:100%;object-fit:cover}
-.video-box .avatar{width:80px;height:80px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600}
-.video-box .name{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);padding:3px 10px;border-radius:6px;font-size:12px;color:#fff}
-.video-box .mic{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
-.video-box .mic.muted{background:var(--danger)}
-.video-box .hand{position:absolute;top:8px;right:8px;background:var(--warning);padding:3px 8px;border-radius:20px;font-size:15px}
-.video-box .group-badge{position:absolute;top:8px;left:8px;background:var(--accent);color:#202124;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.video-box .quality{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px;display:flex;gap:2px;align-items:flex-end;height:20px}
-.video-box .group-badge ~ .quality{top:32px}
-.quality-bar{width:3px;background:var(--text-muted);border-radius:1px}
-.quality-bar.active{background:var(--success)}
-.quality-bar.medium{background:var(--warning)}
-.quality-bar.poor{background:var(--danger)}
-.quality-bar:nth-child(1){height:5px}
-.quality-bar:nth-child(2){height:8px}
-.quality-bar:nth-child(3){height:11px}
-.quality-bar:nth-child(4){height:14px}
-.video-box .coteacher-badge{position:absolute;top:8px;right:8px;background:var(--warning);color:#202124;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
-#teacherPanel,#attendancePanel,#pollPanel,#breakoutPanel,#certPanel,#statsPanel,#participantsPanel,#waitingPanel{width:320px;background:var(--bg-primary);border-left:1px solid var(--border-color);display:none;flex-direction:column;overflow:hidden}
-#teacherPanel.open,#attendancePanel.open,#pollPanel.open,#breakoutPanel.open,#certPanel.open,#statsPanel.open,#participantsPanel.open,#waitingPanel.open{display:flex}
-.panel-header{padding:12px 16px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
-.panel-header h3{font-size:15px}
-.panel-header button.close-btn{background:none;border:none;color:var(--text-primary);font-size:20px;cursor:pointer;padding:4px 8px}
-.panel-body{flex:1;overflow-y:auto;padding:12px}
-.teacher-action-btn{width:100%;padding:10px 14px;border:none;border-radius:8px;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:inherit;font-size:13px;text-align:right;display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.teacher-action-btn:hover{background:var(--bg-hover)}
-.teacher-action-btn.danger{background:var(--danger);color:#fff}
-.teacher-action-btn.recording{background:var(--danger);color:#fff}
-#pendingRequests{padding:10px 12px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);max-height:200px;overflow-y:auto;display:none}
-#pendingRequests.active{display:block}
-#pendingRequests h4{font-size:12px;color:var(--warning);margin-bottom:8px}
-.request-item{background:var(--bg-tertiary);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
-.request-item .req-info{flex:1}
-.request-item .req-name{font-size:12px;font-weight:600}
-.request-item .req-type{font-size:10px;color:var(--warning)}
-.request-item .req-actions button{padding:5px 8px;border:none;border-radius:5px;cursor:pointer;font-size:13px;color:#fff}
-.request-item .req-actions .accept{background:var(--success)}
-.request-item .req-actions .reject{background:var(--danger)}
-.student-card{background:var(--bg-tertiary);border-radius:10px;padding:10px;margin-bottom:8px}
-.student-card .row1{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.student-card .s-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
-.student-card .s-avatar.coteacher{background:var(--warning)}
-.student-card .s-info{flex:1}
-.student-card .s-name{font-size:13px;font-weight:500}
-.student-card .s-status{font-size:10px;color:var(--text-secondary)}
-.student-card .perm-row{display:flex;gap:3px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border-color);flex-wrap:wrap}
-.perm-btn{flex:1;min-width:38px;padding:6px 2px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-primary);color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:10px;display:flex;align-items:center;justify-content:center}
-.perm-btn.granted{background:var(--success);color:#fff;border-color:var(--success);font-weight:600}
-.perm-btn.pending{background:var(--warning);color:#202124}
-.student-card .s-actions{display:flex;gap:4px;flex-wrap:wrap}
-.student-card .s-actions button{flex:1;min-width:50px;padding:6px;border:none;border-radius:5px;background:var(--text-muted);color:#fff;cursor:pointer;font-family:inherit;font-size:10px}
-.student-card .s-actions button.warn{background:var(--warning);color:#202124;font-weight:600}
-.student-card .s-actions button.kick{background:var(--danger);color:#fff}
-.student-card .s-actions button.coteacher{background:var(--accent);color:#202124;font-weight:600}
-.participant-item{background:var(--bg-tertiary);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer}
-.participant-item:hover{background:var(--bg-hover)}
-.participant-item .p-avatar{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;position:relative;flex-shrink:0}
-.participant-item .p-avatar.teacher{background:linear-gradient(135deg,var(--accent),var(--danger));color:#fff}
-.participant-item .p-avatar.coteacher{background:var(--warning);color:#202124}
-.participant-item .p-avatar .p-status-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg-tertiary);background:var(--success)}
-.participant-item .p-info{flex:1;min-width:0}
-.participant-item .p-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.participant-item .p-role{font-size:10px;color:var(--text-secondary);margin-top:3px}
-.participant-item .p-icons{display:flex;gap:4px;font-size:15px}
-.participant-item .p-icons .muted{opacity:.35}
-#controls{display:flex;justify-content:center;gap:10px;padding:14px 12px calc(14px + var(--safe-bottom)) 12px;background:var(--bg-primary);border-top:1px solid var(--border-color);flex-wrap:wrap;position:relative;z-index:10;flex-shrink:0}
-.ctrl-btn{width:48px;height:48px;border-radius:50%;border:none;background:var(--bg-tertiary);color:var(--text-primary);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ctrl-btn:hover{background:var(--bg-hover)}
-.ctrl-btn.off{background:var(--danger);color:#fff}
-.ctrl-btn.on{background:var(--success);color:#fff}
-.ctrl-btn.end{background:var(--danger);width:68px;border-radius:24px;font-size:13px;color:#fff}
-.ctrl-btn.waiting{background:var(--warning);color:#202124}
-.ctrl-btn.bandwidth-on{background:var(--warning);color:#202124}
-#reactionsBar{display:flex;justify-content:center;gap:6px;padding:8px 12px;background:var(--bg-secondary);border-top:1px solid var(--border-color);flex-wrap:wrap}
-#reactionsBar button{width:44px;height:44px;border-radius:50%;border:none;background:var(--bg-tertiary);color:#fff;cursor:pointer;font-size:22px}
-#reactionsBar button:hover{background:var(--bg-hover);transform:scale(1.15)}
-#chat{position:fixed;top:0;left:0;width:340px;height:100vh;height:100dvh;background:var(--bg-primary);border-left:1px solid var(--border-color);display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .3s;z-index:100}
-#chat.open{transform:translateX(0)}
-.chat-tabs{display:flex;border-bottom:1px solid var(--border-color)}
-.chat-tab{flex:1;padding:10px;background:none;border:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:13px}
-.chat-tab.active{color:var(--accent);border-bottom:2px solid var(--accent);font-weight:600}
-#chatMessages{flex:1;overflow-y:auto;padding:12px}
-.msg{margin-bottom:10px}
-.msg .who{font-size:11px;color:var(--accent);margin-bottom:3px}
-.msg .body{background:var(--bg-tertiary);padding:8px 12px;border-radius:10px;font-size:13px;word-wrap:break-word;display:inline-block;max-width:100%}
-.msg.self .body{background:var(--accent);color:#202124}
-.msg.private .who{color:var(--warning)}
-#chatInput{display:flex;padding:10px;padding-bottom:calc(10px + var(--safe-bottom));gap:6px;border-top:1px solid var(--border-color);position:relative}
-#chatInput input{flex:1;padding:9px 12px;background:var(--bg-tertiary);border:none;border-radius:18px;color:var(--text-primary);font-family:inherit;font-size:13px}
-#chatInput button{background:var(--accent);border:none;color:#202124;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px}
-#chatInput button.emoji-toggle{background:var(--bg-tertiary);color:var(--text-primary);font-size:18px}
-#emojiPicker{position:absolute;bottom:60px;right:10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:10px;display:none;z-index:200;width:280px;max-height:260px;overflow-y:auto}
-#emojiPicker.open{display:block}
-#emojiPicker .emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
-#emojiPicker button{background:none;border:none;font-size:22px;cursor:pointer;padding:4px;border-radius:6px;width:auto;height:auto;color:#fff}
-#emojiPicker button:hover{background:var(--bg-hover)}
-#privateRecipient{padding:8px 12px;border-bottom:1px solid var(--border-color);display:none}
-#privateRecipient.active{display:block}
-#privateRecipient select{width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;font-size:13px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
-.modal.open{display:flex}
-.modal-content{background:var(--bg-primary);border-radius:14px;padding:24px;max-width:520px;width:100%;text-align:center;border:1px solid var(--border-color);max-height:90vh;overflow-y:auto}
-.modal-content h2{font-size:20px;margin-bottom:10px}
-.modal-content p{color:var(--text-secondary);margin-bottom:16px;font-size:13px}
-.modal-content input,.modal-content select,.modal-content textarea{width:100%;padding:10px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:14px;margin-bottom:10px}
-.modal-content button{padding:10px 24px;background:var(--accent);color:#202124;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin:4px}
-.modal-content button.secondary{background:var(--bg-tertiary);color:var(--text-primary)}
-.poll-option{background:var(--bg-tertiary);border:2px solid var(--border-color);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;text-align:right;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.poll-option.selected{border-color:var(--accent);background:var(--bg-active)}
-.poll-option .opt-text{flex:1;font-size:14px}
-.poll-option .opt-bar-container{width:100px;height:6px;background:var(--bg-primary);border-radius:3px;overflow:hidden;display:none}
-.poll-option .opt-bar-container.show{display:block}
-.poll-option .opt-bar{height:100%;background:var(--accent);transition:width .5s}
-.poll-option .opt-count{font-size:12px;color:var(--text-secondary);min-width:40px;text-align:center}
-.breakout-group{background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:8px}
-.breakout-group h5{font-size:13px;color:var(--accent);margin-bottom:8px}
-.breakout-group .members{display:flex;flex-direction:column;gap:4px}
-.breakout-group .member{font-size:12px;padding:4px 8px;background:var(--bg-primary);border-radius:5px}
-.attendance-table{width:100%;border-collapse:collapse;font-size:12px}
-.attendance-table th{text-align:right;padding:8px 6px;border-bottom:1px solid var(--border-color);color:var(--text-secondary);font-weight:600}
-.attendance-table td{padding:8px 6px;border-bottom:1px solid var(--border-color)}
-.attendance-badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
-.attendance-badge.online{background:var(--success);color:#fff}
-.attendance-badge.offline{background:var(--text-muted);color:#fff}
-.file-item{background:var(--bg-tertiary);border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-.file-item .file-icon{width:36px;height:36px;border-radius:8px;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-size:18px}
-.file-item .file-info{flex:1}
-.file-item .file-name{font-size:12px;font-weight:600;word-break:break-all}
-.file-item .file-size{font-size:10px;color:var(--text-secondary)}
-.file-item .file-action{padding:6px 12px;background:var(--accent);color:#202124;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600}
-#whiteboardModal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:2000;padding:10px}
-#whiteboardModal.open{display:flex}
-#whiteboardContainer{background:var(--bg-secondary);border-radius:14px;width:100%;max-width:1200px;height:90vh;height:90dvh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border-color)}
-#whiteboardHeader{padding:10px 16px;background:var(--bg-primary);border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
-#whiteboardTools{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-wrap:wrap}
-.wb-tool-label{font-size:12px;color:var(--text-secondary);margin-left:4px}
-.color-btn{width:28px;height:28px;border-radius:50%;border:2px solid var(--border-color);cursor:pointer}
-.color-btn.active{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.5);transform:scale(1.15)}
-.size-btn{padding:5px 10px;border-radius:5px;border:1px solid var(--border-color);background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:inherit;font-size:11px}
-.size-btn.active{background:var(--accent);color:#202124;font-weight:600}
-.wb-action-btn{padding:6px 14px;border-radius:5px;border:none;background:var(--danger);color:#fff;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600}
-.wb-action-btn.undo{background:var(--warning);color:#202124}
-.wb-action-btn.save{background:var(--success);color:#fff}
-#whiteboardCanvasWrapper{flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);padding:10px;overflow:hidden}
-#whiteboardCanvas{background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;max-width:100%;max-height:100%}
-#projectorModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:2500;padding:10px}
-#projectorModal.open{display:flex}
-#projectorContainer{background:var(--bg-secondary);border-radius:14px;width:100%;max-width:1400px;height:95vh;height:95dvh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border-color)}
-#projectorHeader{padding:10px 16px;background:var(--bg-primary);border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
-#projectorHeader .close-btn{background:none;border:none;color:var(--text-primary);font-size:22px;cursor:pointer;padding:4px 10px}
-.projector-btn{padding:8px 14px;border-radius:6px;border:none;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:inherit;font-size:12px}
-.projector-btn.primary{background:var(--accent);color:#202124;font-weight:600}
-.projector-btn:disabled{opacity:.4;cursor:not-allowed}
-#projectorCanvasWrapper{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;min-height:0}
-#projectorVideo,#projectorImage{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:1}
-#projectorCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair;touch-action:none}
-#projectorEmptyState{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;background:#000}
-#projectorSeekBar{display:none;padding:8px 16px;background:var(--bg-primary);border-top:1px solid var(--border-color);align-items:center;gap:10px}
-#screenShareModal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:2600;padding:10px}
-#screenShareModal.open{display:flex}
-#screenShareContainer{background:var(--bg-secondary);border-radius:14px;width:100%;max-width:1400px;height:95vh;height:95dvh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border-color)}
-#screenShareHeader{padding:10px 16px;background:var(--bg-primary);border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-#screenShareHeader h3{font-size:15px;color:var(--accent)}
-#screenShareHeader .close-btn{background:none;border:none;color:var(--text-primary);font-size:22px;cursor:pointer;padding:4px 10px}
-#screenShareWrapper{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;min-height:0}
-#screenShareVideo{width:100%;height:100%;object-fit:contain;background:#000}
-#screenShareFullscreenBtn{padding:6px 14px;border-radius:6px;border:none;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:inherit;font-size:12px}
-#toast{position:fixed;bottom:calc(100px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--bg-tertiary);color:var(--text-primary);padding:12px 24px;border-radius:8px;font-size:14px;z-index:99999;max-width:90%;text-align:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,visibility .3s;box-shadow:0 4px 12px rgba(0,0,0,.4)}
-#toast.show{opacity:1;visibility:visible}
-#reactionsContainer{position:fixed;bottom:180px;right:20px;pointer-events:none;z-index:500;display:flex;flex-direction:column-reverse;gap:8px}
-.float-emoji{font-size:44px;animation:floatUp 3s ease-out forwards;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-.float-emoji .sender{font-size:11px;color:#fff;background:rgba(0,0,0,.6);padding:2px 8px;border-radius:10px;display:block;text-align:center;margin-top:-6px}
-@keyframes floatUp{0%{opacity:0;transform:translateY(30px) scale(0.5)}15%{opacity:1;transform:translateY(0) scale(1.1)}30%{transform:translateY(-20px) scale(1)}100%{opacity:0;transform:translateY(-300px) scale(1)}}
-#activityTimerDisplay{position:fixed;top:calc(60px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--warning);color:#202124;padding:8px 20px;border-radius:20px;font-size:16px;font-weight:700;font-family:monospace;display:none;z-index:600}
-#activityTimerDisplay.active{display:block}
-.stat-card{background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:8px}
-.stat-card h5{font-size:13px;color:var(--accent);margin-bottom:8px}
-.stat-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border-color)}
-.stat-row:last-child{border-bottom:none}
-.stat-row .label{color:var(--text-secondary)}
-.stat-row .value{font-weight:600;color:var(--text-primary)}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:var(--bg-primary)}
-::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:4px}
-#authScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9999;overflow-y:auto}
-.auth-box{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:16px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px}
-.auth-logo .logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--danger));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff}
-.auth-logo .logo-text{font-size:32px;font-weight:300}
-.auth-logo .logo-text strong{font-weight:700;color:var(--accent)}
-.auth-tabs{display:flex;margin-bottom:20px;background:var(--bg-tertiary);border-radius:10px;padding:4px}
-.auth-tab{flex:1;padding:10px;background:none;border:none;color:var(--text-secondary);cursor:pointer;border-radius:8px;font-size:14px;font-weight:600;font-family:inherit}
-.auth-tab.active{background:var(--accent);color:#202124}
-.auth-form label{display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;margin-top:12px}
-.auth-form input{width:100%;padding:12px 16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);font-family:inherit;font-size:14px}
-.auth-form input:focus{outline:none;border-color:var(--accent)}
-.auth-form button.submit{width:100%;padding:13px;margin-top:20px;background:var(--accent);color:#202124;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-.auth-form button.submit:disabled{opacity:.5;cursor:wait}
-.auth-error{background:rgba(234,67,53,.15);border:1px solid var(--danger);color:#ff8a80;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
-.auth-error.show{display:block}
-.auth-success{background:rgba(52,168,83,.15);border:1px solid var(--success);color:#81c995;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:12px;display:none}
-.auth-success.show{display:block}
-#expiredScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:var(--bg-primary);z-index:9998;overflow-y:auto}
-.expired-box{background:var(--bg-secondary);border:2px solid var(--danger);border-radius:16px;padding:28px 24px;width:100%;max-width:500px;text-align:center}
-.expired-box h1{font-size:22px;color:var(--danger);margin-bottom:8px}
-.expired-box .user-name{font-size:16px;margin-bottom:20px}
-.expired-box .user-name b{color:var(--accent)}
-.bale-note{background:var(--bg-tertiary);border-radius:10px;padding:14px;margin-top:16px;font-size:13px;line-height:1.8}
-.bale-note .bale-id{display:inline-block;background:var(--accent);color:#202124;padding:4px 12px;border-radius:8px;font-weight:700;margin-top:8px;font-size:15px;user-select:all}
-.logout-btn{margin-top:16px;padding:10px 24px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
-#userBadge{display:flex;align-items:center;gap:8px;padding:5px 12px;border-radius:20px;background:var(--bg-tertiary);font-size:12px;cursor:pointer;position:relative}
-#userBadge:hover{background:var(--bg-hover)}
-#userBadge .crown{color:#ffd700;font-size:16px;animation:crownGlow 2s infinite}
-@keyframes crownGlow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,215,0,.6))}50%{filter:drop-shadow(0 0 12px rgba(255,215,0,1))}}
-#userBadge .u-name{font-weight:600}
-#userBadge .u-days{color:var(--text-secondary);font-size:11px}
-.user-menu{position:absolute;top:100%;left:0;margin-top:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;padding:8px;min-width:220px;z-index:200;display:none;text-align:right;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.user-menu.open{display:block}
-.user-menu .menu-item{padding:10px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
-.user-menu .menu-item:hover{background:var(--bg-hover)}
-.user-menu .menu-sep{height:1px;background:var(--border-color);margin:6px 0}
-.session-code-box{width:100%;max-width:600px;text-align:center;background:var(--bg-secondary);border:2px solid var(--accent);border-radius:14px;padding:16px}
-.session-code-box .sc-label{font-size:13px;color:var(--text-secondary);margin-bottom:8px}
-.session-code-display{background:linear-gradient(135deg,var(--accent),var(--danger));color:#fff;padding:14px 24px;border-radius:12px;font-size:28px;font-weight:700;font-family:monospace;letter-spacing:4px;text-align:center;user-select:all;direction:ltr;margin-bottom:10px}
-.session-code-box .sc-hint{font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6}
-.student-join-box{width:100%;max-width:600px;text-align:center;background:var(--bg-secondary);border:2px solid var(--success);border-radius:14px;padding:16px}
-.student-join-box .sj-label{font-size:13px;color:var(--text-secondary);margin-bottom:8px}
-.student-join-box input{width:100%;padding:14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);font-family:monospace;font-size:22px;text-align:center;letter-spacing:3px;direction:ltr;font-weight:700}
-.student-join-box input:focus{outline:none;border-color:var(--success)}
-.student-join-box .sj-hint{font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6}
-.role-selector-row{width:100%;max-width:600px;display:flex;gap:8px}
-.role-btn{flex:1;padding:14px;border-radius:12px;border:2px solid var(--border-color);background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:all .2s}
-.role-btn:hover{border-color:var(--accent)}
-.role-btn.active{background:var(--accent);color:#202124;border-color:var(--accent)}
-#waitingRoomOverlay{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#16213e,#0f3460,#1a1a2e);z-index:10000;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
-#waitingRoomOverlay .waiting-spinner{width:60px;height:60px;border:4px solid rgba(138,180,248,.2);border-top-color:#8ab4f8;border-radius:50%;animation:spin 1s linear infinite;margin:20px 0}
-@keyframes spin{to{transform:rotate(360deg)}}
-#giftSection{margin-top:20px;width:100%;max-width:560px}
-#giftSection h3{font-size:16px;color:var(--success);margin-bottom:14px;text-align:center}
-#giftCodeBox{display:flex;gap:8px;margin-bottom:14px}
-#giftCodeBox input{flex:1;padding:11px 14px;background:var(--bg-tertiary);border:2px solid var(--success);border-radius:8px;color:var(--text-primary);font-family:monospace;font-size:16px;text-align:center;letter-spacing:2px;direction:ltr;text-transform:uppercase;font-weight:700}
-#giftCodeBox input:focus{outline:none;box-shadow:0 0 12px rgba(52,168,83,.4)}
-#giftCodeBox button{padding:11px 18px;background:var(--success);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-#giftCodeBox button:hover{opacity:.9}
-#giftStatus{font-size:13px;text-align:center;margin-bottom:10px;min-height:20px;font-weight:600}
-#giftStatus.ok{color:var(--success)}
-#giftStatus.err{color:var(--danger)}
-#adminPanelModal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:3000;padding:15px}
-#adminPanelModal.open{display:flex}
-#adminPanelContainer{background:var(--bg-primary);border-radius:16px;width:100%;max-width:1100px;height:92vh;height:92dvh;display:flex;flex-direction:column;overflow:hidden;border:2px solid var(--warning)}
-#adminPanelHeader{padding:14px 20px;background:linear-gradient(135deg,var(--warning),#ff9800);color:#202124;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-#adminPanelHeader h2{font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px}
-#adminPanelHeader .close-btn{background:rgba(0,0,0,.2);border:none;color:#202124;font-size:22px;cursor:pointer;padding:6px 12px;border-radius:8px;font-weight:700}
-.admin-tabs{display:flex;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-shrink:0;overflow-x:auto}
-.admin-tab{flex:1;min-width:120px;padding:12px 16px;background:none;border:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;border-bottom:3px solid transparent;white-space:nowrap}
-.admin-tab.active{color:var(--warning);border-bottom-color:var(--warning);background:var(--bg-tertiary)}
-.admin-tab:hover{background:var(--bg-tertiary)}
-#adminPanelBody{flex:1;overflow-y:auto;padding:16px;background:var(--bg-primary)}
-.admin-section{display:none}
-.admin-section.active{display:block}
-.admin-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:16px;margin-bottom:14px}
-.admin-card h3{font-size:15px;color:var(--warning);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.admin-input,.admin-select,.admin-textarea{width:100%;padding:10px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;font-size:13px;margin-bottom:10px}
-.admin-input:focus,.admin-select:focus,.admin-textarea:focus{outline:none;border-color:var(--warning)}
-.admin-textarea{min-height:80px;resize:vertical}
-.admin-btn{padding:10px 20px;background:var(--warning);color:#202124;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
-.admin-btn:hover{opacity:.9}
-.admin-btn.danger{background:var(--danger);color:#fff}
-.admin-btn.success{background:var(--success);color:#fff}
-.admin-btn.secondary{background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color)}
-.admin-btn:disabled{opacity:.5;cursor:wait}
-.admin-user-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg-tertiary);border-radius:10px;margin-bottom:8px;flex-wrap:wrap}
-.admin-user-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
-.admin-user-avatar.admin{background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124}
-.admin-user-info{flex:1;min-width:150px}
-.admin-user-name{font-size:13px;font-weight:700}
-.admin-user-email{font-size:11px;color:var(--text-secondary);direction:ltr;text-align:right}
-.admin-user-meta{font-size:10px;color:var(--text-muted);margin-top:3px}
-.admin-user-actions{display:flex;gap:6px;flex-wrap:wrap}
-.admin-user-actions button{padding:6px 12px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
-.admin-user-actions .add-days{background:var(--success);color:#fff}
-.admin-user-actions .sub-days{background:var(--warning);color:#202124}
-.admin-user-actions .reset-pass{background:var(--accent);color:#202124}
-.admin-user-actions .del-user{background:var(--danger);color:#fff}
-.admin-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
-.admin-stat-box{background:var(--bg-tertiary);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border-color)}
-.admin-stat-box .num{font-size:24px;font-weight:800;color:var(--warning)}
-.admin-stat-box .lbl{font-size:11px;color:var(--text-secondary);margin-top:4px}
-.discount-row{display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg-tertiary);border-radius:10px;margin-bottom:8px;flex-wrap:wrap}
-.discount-code{font-family:monospace;font-size:16px;font-weight:800;background:linear-gradient(135deg,var(--warning),#ff9800);color:#202124;padding:6px 14px;border-radius:8px;letter-spacing:2px;direction:ltr;user-select:all}
-.discount-info{flex:1;min-width:140px;font-size:12px}
-.discount-info .di-days{color:var(--success);font-weight:700}
-.discount-info .di-status{font-size:10px;margin-top:3px}
-.discount-info .di-status.used{color:var(--danger)}
-.discount-info .di-status.active{color:var(--success)}
-.discount-info .di-status.expired{color:var(--text-muted)}
-.announcement-row{background:var(--bg-tertiary);border-radius:10px;padding:12px;margin-bottom:8px;border-right:3px solid var(--warning)}
-.announcement-row .an-text{font-size:13px;line-height:1.7;margin-bottom:6px}
-.announcement-row .an-meta{font-size:10px;color:var(--text-secondary)}
-.announcement-row .an-meta b{color:var(--accent)}
-#adminGlobalBanner{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,var(--warning),#ff9800);color:#202124;padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px));z-index:99998;display:none;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);font-weight:600}
-#adminGlobalBanner.show{display:flex}
-#adminGlobalBanner .gb-text{flex:1;font-size:14px;line-height:1.5}
-#adminGlobalBanner .gb-text small{display:block;font-size:11px;font-weight:400;opacity:.8;margin-top:3px}
-#adminGlobalBanner button{background:rgba(0,0,0,.15);border:none;color:#202124;font-size:18px;cursor:pointer;padding:4px 12px;border-radius:8px;font-weight:700}
-.admin-empty{text-align:center;color:var(--text-secondary);font-size:13px;padding:30px 10px}
-.role-badge-admin{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124}
-.role-badge-user{padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;background:var(--bg-hover);color:var(--text-secondary)}
-#connBanner{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--warning);color:#202124;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:9998;box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:90%;text-align:center}
-#connBanner.show{display:block}
-#guestJoinScreen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:fixed;inset:0;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);z-index:9999;overflow-y:auto}
-.guest-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:36px 28px;width:100%;max-width:420px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);backdrop-filter:blur(20px)}
-.guest-box .guest-icon{font-size:72px;margin-bottom:12px}
-.guest-box h2{font-size:22px;color:#fff;margin-bottom:8px;font-weight:700}
-.guest-box .guest-room{display:inline-block;background:rgba(138,180,248,.2);border:1px solid rgba(138,180,248,.4);color:#8ab4f8;padding:6px 16px;border-radius:20px;font-size:14px;font-family:monospace;direction:ltr;margin-bottom:24px;font-weight:700;letter-spacing:2px}
-.guest-box p{color:rgba(255,255,255,.6);font-size:13px;line-height:1.8;margin-bottom:20px}
-.guest-box input{width:100%;padding:14px 18px;background:rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-family:inherit;font-size:16px;text-align:center;margin-bottom:14px;transition:border .2s}
-.guest-box input:focus{outline:none;border-color:#8ab4f8;background:rgba(0,0,0,.4)}
-.guest-box button.primary{width:100%;padding:15px;background:linear-gradient(135deg,#8ab4f8,#4285f4);color:#202124;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s}
-.guest-box button.primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(66,133,244,.5)}
-.guest-box button.primary:disabled{opacity:.5;cursor:wait;transform:none}
-.guest-box .back-link{display:inline-block;margin-top:18px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;text-decoration:underline}
-.guest-box .back-link:hover{color:#8ab4f8}
-#connectOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:20px}
-#connectOverlay.show{display:flex}
-#connectBar{width:280px;max-width:80vw;height:6px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}
-#connectBarFill{height:100%;background:linear-gradient(90deg,var(--accent),#4285f4);width:0%;border-radius:4px;transition:width .3s linear}
-#permModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99997;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(10px)}
-#permModal.show{display:flex}
-#permBox{background:var(--bg-secondary);border-radius:16px;padding:24px;max-width:420px;width:100%;text-align:center;border:2px solid var(--warning);max-height:90vh;overflow-y:auto}
-#permBox .perm-icon{font-size:64px;margin-bottom:12px}
-#permBox h2{font-size:18px;margin-bottom:10px;color:var(--warning)}
-#permBox p{color:var(--text-secondary);font-size:14px;line-height:1.9;margin-bottom:16px;text-align:right}
-#permBox ol{text-align:right;padding-right:20px;color:var(--text-primary);font-size:13px;line-height:2;margin-bottom:16px}
-#permBox ol li{margin-bottom:6px}
-#permBox .perm-btns{display:flex;flex-direction:column;gap:8px}
-#permBox button.retry{padding:14px;background:var(--accent);color:#202124;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
-#permBox button.retry:disabled{opacity:.6;cursor:wait}
-#permBox button.cancel{padding:12px;background:var(--bg-tertiary);color:var(--text-primary);border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;width:100%}
-.auth-method-toggle{display:flex;gap:6px;background:var(--bg-tertiary);border-radius:10px;padding:4px;margin-bottom:16px}
-.method-btn{flex:1;padding:10px;background:none;border:none;color:var(--text-secondary);cursor:pointer;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;transition:all .2s}
-.method-btn.active{background:var(--bg-secondary);color:var(--text-primary);box-shadow:0 2px 6px rgba(0,0,0,.15)}
-.method-btn:hover:not(.active){color:var(--text-primary)}
-@media (max-width:768px){
-.logo-text{font-size:36px}.logo-icon{width:52px;height:52px;font-size:32px}
-#lobby{gap:12px;padding:15px;justify-content:flex-start;padding-top:calc(80px + env(safe-area-inset-top,0px))}
-.row{flex-direction:column}#lobby button.primary{width:100%}
-#brandHeader{font-size:16px}#roomTitle{font-size:12px}
-#headerActions button{padding:6px 8px;font-size:11px}
-#videos{grid-template-columns:1fr}
-#videos.many{grid-template-columns:repeat(2,1fr)}
-#videos.spotlight-mode{grid-template-columns:repeat(2,1fr)}
-#videos.spotlight-mode .video-box.spotlight-active{grid-column:1/-1;max-height:55vh}
-#teacherPanel,#attendancePanel,#pollPanel,#breakoutPanel,#certPanel,#statsPanel,#participantsPanel,#waitingPanel{position:absolute;top:0;right:0;bottom:0;width:100%;max-width:100%;z-index:90}
-#chat{width:100%}
-#projectorModal,#whiteboardModal,#screenShareModal{padding:0}
-#projectorContainer,#whiteboardContainer,#screenShareContainer{height:100vh;height:100dvh;border-radius:0;max-width:100%}
-#controls{gap:8px;padding:14px 8px calc(22px + var(--safe-bottom)) 8px}
-.ctrl-btn{width:44px;height:44px;font-size:16px}
-.ctrl-btn.end{width:60px;font-size:12px}
-#adminPanelContainer{height:100vh;height:100dvh;border-radius:0;max-width:100%}
-.admin-tab{font-size:11px;padding:10px 8px;min-width:auto}
-.admin-user-row{padding:8px}
-.admin-user-avatar{width:34px;height:34px;font-size:13px}
-#giftCodeBox{flex-direction:column}
-#giftCodeBox button{width:100%}
-#connectBar{width:200px}
-}
-@media (max-width:600px){.auth-box{padding:24px 18px}}
-</style>
-</head>
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_type TEXT DEFAULT 'student';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan_level INT DEFAULT 1;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_students INT DEFAULT 4;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_mics INT DEFAULT 4;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_cams INT DEFAULT 4;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS max_minutes INT DEFAULT 60;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS password_plain TEXT;
+
+CREATE TABLE IF NOT EXISTS subscription_plans (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    max_students INT DEFAULT 4,
+    max_mics INT DEFAULT 4,
+    max_cams INT DEFAULT 4,
+    max_minutes INT DEFAULT 60,
+    price INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+INSERT INTO subscription_plans (name, max_students, max_mics, max_cams, max_minutes, price) VALUES
+('اشتراک پایه (رایگان)', 4, 4, 4, 60, 0),
+('اشتراک برنزی', 10, 5, 5, 120, 50000),
+('اشتراک نقره‌ای', 20, 10, 10, 180, 100000),
+('اشتراک طلایی', 30, 15, 15, 240, 200000),
+('اشتراک پلاتینیوم', 50, 20, 20, 300, 400000),
+('اشتراک الماسی', 100, 30, 30, 480, 800000),
+('اشتراک حرفه‌ای', 200, 50, 50, 600, 1500000),
+('اشتراک سازمانی', 500, 100, 100, 720, 3000000),
+('اشتراک سازمانی پلاس', 1000, 150, 150, 1440, 5000000),
+('اشتراک نامحدود', 9999, 200, 200, 9999, 10000000);
 <body>
 <script>
-// 🛡️ Fallback: اگه CDN لود نشد، بعد از ۸ ثانیه لودر رو مخفی کن
 setTimeout(function(){
     var loader = document.getElementById('appLoader');
     if (loader) loader.style.display = 'none';
@@ -463,7 +42,6 @@ setTimeout(function(){
     var guestOpen = guest && guest.style.display === 'flex';
     if (!lobbyOpen && !meetingOpen && !guestOpen && auth && auth.style.display === 'none') {
         auth.style.display = 'flex';
-        // اگه Supabase لود نشده، به کاربر پیام بده
         if (typeof window.supabase === 'undefined') {
             var warn = document.createElement('div');
             warn.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ea4335;color:#fff;padding:12px 20px;border-radius:8px;z-index:999999;font-size:13px;text-align:center;max-width:90%;';
@@ -521,6 +99,13 @@ setTimeout(function(){
                 <input type="email" id="regEmail" required autocomplete="email" />
                 <label>📱 شماره همراه (اختیاری)</label>
                 <input type="tel" id="regPhone" placeholder="09123456789" dir="ltr" autocomplete="tel" />
+                <!-- 👈 انتخاب نقش جدید -->
+                <label>نقش شما در پلتفرم:</label>
+                <select id="regUserType" required style="width:100%;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);margin-bottom:10px;font-family:inherit;">
+                    <option value="student" selected>👨‍🎓 دانشجو (رایگان)</option>
+                    <option value="teacher">👨‍🏫 مدرس (نیاز به اشتراک)</option>
+                    <option value="both">🎭 هر دو (نیاز به اشتراک)</option>
+                </select>
                 <label>رمز عبور</label>
                 <input type="password" id="regPassword" minlength="6" required autocomplete="new-password" />
                 <label>🎁 کد هدیه (اختیاری)</label>
@@ -529,7 +114,7 @@ setTimeout(function(){
                 <div class="auth-error" id="regError"></div>
                 <div class="auth-success" id="regSuccess"></div>
                 <button type="submit" class="submit" id="regBtn">ثبت‌نام</button>
-                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان</p>
+                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان (مخصوص مدرسین)</p>
             </form>
         </div>
 
@@ -557,6 +142,13 @@ setTimeout(function(){
                 <label>شماره همراه</label>
                 <input type="tel" id="phoneRegInput" placeholder="09123456789" dir="ltr" required autocomplete="tel" />
                 <div style="color:#ea4335;font-size:12px;margin-top:6px;font-weight:600;line-height:1.6;">⚠️ لطفاً شماره همراه معتبر وارد کنید (مثال: 09123456789)</div>
+                <!-- 👈 انتخاب نقش جدید -->
+                <label>نقش شما در پلتفرم:</label>
+                <select id="phoneRegUserType" required style="width:100%;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);margin-bottom:10px;font-family:inherit;">
+                    <option value="student" selected>👨‍🎓 دانشجو (رایگان)</option>
+                    <option value="teacher">👨‍🏫 مدرس (نیاز به اشتراک)</option>
+                    <option value="both">🎭 هر دو (نیاز به اشتراک)</option>
+                </select>
                 <label>رمز عبور</label>
                 <input type="password" id="phoneRegPassword" minlength="6" required autocomplete="new-password" />
                 <label>🎁 کد هدیه (اختیاری)</label>
@@ -565,7 +157,7 @@ setTimeout(function(){
                 <div class="auth-error" id="phoneRegError"></div>
                 <div class="auth-success" id="phoneRegSuccess"></div>
                 <button type="submit" class="submit" id="phoneRegBtn">ثبت‌نام</button>
-                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان</p>
+                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان (مخصوص مدرسین)</p>
             </form>
         </div>
     </div>
@@ -954,6 +546,7 @@ setTimeout(function(){
       <button class="admin-tab" onclick="switchAdminTab('users')">👥 کاربران</button>
       <button class="admin-tab" onclick="switchAdminTab('discounts')">🎁 کد هدیه</button>
       <button class="admin-tab" onclick="switchAdminTab('announce')">📢 اعلان همگانی</button>
+      <button class="admin-tab" onclick="switchAdminTab('plans')">💎 اشتراک‌ها</button>
     </div>
     <div id="adminPanelBody">
       <div class="admin-section active" id="adminSec-dashboard">
@@ -986,6 +579,19 @@ setTimeout(function(){
         </div>
         <div class="admin-card"><h3>📜 تاریخچه اعلان‌ها</h3><div id="adminAnnounceHistory"></div></div>
       </div>
+      <!-- 👈 سکشن جدید اشتراک‌ها -->
+      <div class="admin-section" id="adminSec-plans">
+        <div class="admin-card">
+          <h3>➕ ایجاد اشتراک جدید</h3>
+          <input class="admin-input" id="planName" placeholder="نام اشتراک (مثلا طلایی)" />
+          <input class="admin-input" type="number" id="planStudents" placeholder="حداکثر دانشجو" value="10" />
+          <input class="admin-input" type="number" id="planMics" placeholder="میکروفون همزمان" value="5" />
+          <input class="admin-input" type="number" id="planCams" placeholder="دوربین همزمان" value="5" />
+          <input class="admin-input" type="number" id="planMinutes" placeholder="زمان مجاز (دقیقه)" value="120" />
+          <button class="admin-btn" onclick="createPlan()">ثبت اشتراک</button>
+        </div>
+        <div class="admin-card"><h3>📋 لیست اشتراک‌ها</h3><div id="adminPlansList"></div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1004,7 +610,6 @@ setTimeout(function(){
 <div id="toast"></div>
 
 <script>
-// 🛡️ بارگذاری CDN با Fallback چندگانه
 (function(){
     function loadScript(urls, callback) {
         if (urls.length === 0) { if (callback) callback(false); return; }
@@ -1019,37 +624,29 @@ setTimeout(function(){
     }
     window._loadScript = loadScript;
     
-    // مرحله ۱: Supabase
     loadScript([
         'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
         'https://unpkg.com/@supabase/supabase-js@2',
         'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js'
     ], function(ok1){
-        console.log('✅ Supabase:', ok1);
-        // مرحله ۲: LiveKit
         loadScript([
             'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js',
             'https://unpkg.com/livekit-client@2.5.7/dist/livekit-client.umd.min.js'
         ], function(ok2){
-            console.log('✅ LiveKit:', ok2);
-            // مرحله ۳: Track Processors
             loadScript([
                 'https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js',
                 'https://unpkg.com/@livekit/track-processors@latest/dist/track-processors.umd.min.js'
             ], function(ok3){
-                console.log('✅ Processors:', ok3);
-                // حالا اسکریپت اصلی رو لود کن
                 var mainScript = document.createElement('script');
                 mainScript.textContent = window._mainAppCode || '';
                 document.body.appendChild(mainScript);
-                // فراخوانی مقداردهی اولیه
                 if (typeof window._appInit === 'function') window._appInit();
             });
         });
     });
 })();
-</script>
-<script>
+</script>\
+    <script>
 const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
 const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud';
@@ -1060,7 +657,6 @@ const BALE_ID = '@sobhan101095';
 const DEFAULT_SUBSCRIPTION_DAYS = 20;
 const PROJECTOR_BUCKET = 'projector-media';
 
-// متغیرهای global
 let sb = null;
 let currentUser = null;
 let livekitRoom = null;
@@ -1121,9 +717,7 @@ let connectBarTimer = null;
 let currentAuthMethod = 'email';
 const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
 
-function openPasswordRecovery() {
-    document.getElementById('passwordRecoveryModal').classList.add('open');
-}
+function openPasswordRecovery() { document.getElementById('passwordRecoveryModal').classList.add('open'); }
 function openBaleChat() {
     const username = 'mohammadmahdimma';
     const webUrl = `https://web.bale.ai/@${username}`;
@@ -1131,18 +725,10 @@ function openBaleChat() {
     if (isMobile) {
         const appUrl = `bale://@${username}`;
         const start = Date.now();
-        const timer = setTimeout(() => {
-            if (Date.now() - start < 2500 && !document.hidden) {
-                window.location.href = webUrl;
-            }
-        }, 1500);
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) clearTimeout(timer);
-        }, { once: true });
+        const timer = setTimeout(() => { if (Date.now() - start < 2500 && !document.hidden) { window.location.href = webUrl; } }, 1500);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); }, { once: true });
         window.location.href = appUrl;
-    } else {
-        window.open(webUrl, '_blank');
-    }
+    } else { window.open(webUrl, '_blank'); }
 }
 
 const DAY_MS = 86400000;
@@ -1154,8 +740,7 @@ function getRenewalBase(endVal) { const end = parseDateSafe(endVal); if (end && 
 
 function normalizePhone(input) {
     let p = String(input || '').trim().replace(/[\s\-\(\)]/g, '');
-    p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-         .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     if (p.startsWith('+98')) return p;
     if (p.startsWith('0098')) return '+98' + p.slice(4);
     if (p.startsWith('98') && p.length >= 12) return '+' + p;
@@ -1163,10 +748,7 @@ function normalizePhone(input) {
     if (p.length === 10) return '+98' + p;
     return p.startsWith('+') ? p : '+' + p;
 }
-function phoneToFakeEmail(phone) {
-    const digits = phone.replace(/\D/g, '');
-    return `p${digits}@${PHONE_EMAIL_DOMAIN}`;
-}
+function phoneToFakeEmail(phone) { const digits = phone.replace(/\D/g, ''); return `p${digits}@${PHONE_EMAIL_DOMAIN}`; }
 function switchAuthMethod(method) {
     currentAuthMethod = method;
     document.getElementById('methodBtnEmail').classList.toggle('active', method === 'email');
@@ -1191,27 +773,21 @@ async function handlePhoneLogin(e) {
     const btn = document.getElementById('phoneLoginBtn');
     errEl.classList.remove('show');
     const phone = normalizePhone(phoneRaw);
-    if (!/^\+98\d{10}$/.test(phone)) {
-        errEl.textContent = '⚠️ شماره معتبر نیست (مثال: 09123456789)';
-        errEl.classList.add('show'); return;
-    }
+    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
     btn.disabled = true; btn.textContent = '⏳...';
     try {
         const email = phoneToFakeEmail(phone);
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw new Error('شماره یا رمز عبور اشتباه است');
-        if (!data.user) throw new Error('یافت نشد');
         let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
         if (!profile) throw new Error('پروفایل یافت نشد');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
+        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams };
         isGuestMode = false;
         try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
         showToast('✅ ورود موفق');
         checkAndShow(); initRealtime(); loadActiveAnnouncement();
-    } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'خطا');
-        errEl.classList.add('show');
-    } finally { btn.disabled = false; btn.textContent = 'ورود'; }
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ورود'; }
 }
 async function handlePhoneRegister(e) {
     e.preventDefault();
@@ -1219,6 +795,7 @@ async function handlePhoneRegister(e) {
     const name = document.getElementById('phoneRegName').value.trim();
     const phoneRaw = document.getElementById('phoneRegInput').value;
     const password = document.getElementById('phoneRegPassword').value;
+    const userType = document.getElementById('phoneRegUserType').value; // 👈 جدید
     const discCode = (document.getElementById('phoneRegDiscountCode')?.value || '').trim().toUpperCase();
     const errEl = document.getElementById('phoneRegError');
     const okEl = document.getElementById('phoneRegSuccess');
@@ -1226,7 +803,7 @@ async function handlePhoneRegister(e) {
     errEl.classList.remove('show'); okEl.classList.remove('show');
     const phone = normalizePhone(phoneRaw);
     if (!name || name.length < 2) { errEl.textContent = '⚠️ نام را وارد کنید'; errEl.classList.add('show'); return; }
-    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست (مثال: 09123456789)'; errEl.classList.add('show'); return; }
+    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
     if (password.length < 6) { errEl.textContent = '⚠️ رمز عبور حداقل ۶ کاراکتر باشد'; errEl.classList.add('show'); return; }
     btn.disabled = true; btn.textContent = '⏳...';
     try {
@@ -1248,15 +825,10 @@ async function handlePhoneRegister(e) {
         await new Promise(r => setTimeout(r, 1000));
         let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
         if (!prof) {
-            const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS);
-            const insertData = { id: authData.user.id, email: email, name: name, role: 'user', phone: phone, subscription_end: endDate.toISOString(), password_plain: password };
+            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString(); // 👈 دانشجو اشتراک نمی‌خواد
+            const insertData = { id: authData.user.id, email: email, name: name, role: 'user', user_type: userType, phone: phone, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 4, max_mics: 4, max_cams: 4 };
             const { error: insErr } = await sb.from('profiles').insert(insertData);
-            if (insErr) {
-                if ((insErr.message || '').toLowerCase().includes('phone')) {
-                    delete insertData.phone;
-                    await sb.from('profiles').insert(insertData);
-                } else { throw new Error(insErr.message); }
-            }
+            if (insErr) { if ((insErr.message || '').toLowerCase().includes('phone')) { delete insertData.phone; await sb.from('profiles').insert(insertData); } else { throw new Error(insErr.message); } }
             const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
             prof = r2.data;
         }
@@ -1274,17 +846,15 @@ async function handlePhoneRegister(e) {
                 if (loginData?.user) {
                     const { data: profile } = await sb.from('profiles').select('*').eq('id', loginData.user.id).maybeSingle();
                     if (profile) {
-                        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
+                        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams };
                         isGuestMode = false;
                         checkAndShow(); initRealtime(); loadActiveAnnouncement();
                     }
                 }
             } catch (e) {}
         }, 1500);
-    } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'خطا');
-        errEl.classList.add('show');
-    } finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
 }
 
 const I18N = {
@@ -1340,26 +910,12 @@ function toggleTheme() { currentTheme = currentTheme === 'dark' ? 'light' : 'dar
 
 function showConnectCountdown() {
     let el = document.getElementById('connectOverlay');
-    if (!el) {
-        el = document.createElement('div');
-        el.id = 'connectOverlay';
-        el.innerHTML = '<div id="connectBar"><div id="connectBarFill"></div></div>';
-        document.body.appendChild(el);
-    }
+    if (!el) { el = document.createElement('div'); el.id = 'connectOverlay'; el.innerHTML = '<div id="connectBar"><div id="connectBarFill"></div></div>'; document.body.appendChild(el); }
     el.classList.add('show');
     const barEl = document.getElementById('connectBarFill');
-    barEl.style.transition = 'none';
-    barEl.style.width = '0%';
-    let progress = 0;
+    barEl.style.transition = 'none'; barEl.style.width = '0%'; let progress = 0;
     if (connectBarTimer) clearInterval(connectBarTimer);
-    connectBarTimer = setInterval(() => {
-        if (progress < 90) {
-            progress += Math.random() * 4 + 1.5;
-            if (progress > 90) progress = 90;
-            barEl.style.transition = 'width .4s ease-out';
-            barEl.style.width = progress + '%';
-        }
-    }, 200);
+    connectBarTimer = setInterval(() => { if (progress < 90) { progress += Math.random() * 4 + 1.5; if (progress > 90) progress = 90; barEl.style.transition = 'width .4s ease-out'; barEl.style.width = progress + '%'; } }, 200);
 }
 function hideConnectCountdown() {
     const el = document.getElementById('connectOverlay');
@@ -1371,41 +927,23 @@ function hideConnectCountdown() {
 }
 
 function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
-    let title = 'دسترسی به دوربین و میکروفون';
-    let desc = '';
-    let instructions = '';
+    let title = 'دسترسی به دوربین و میکروفون'; let desc = ''; let instructions = '';
     if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
         desc = 'شما قبلاً دسترسی رو رد کردید. برای ورود، باید دسترسی رو در تنظیمات مرورگر فعال کنید.';
-        if (isIOS) {
-            instructions = `<ol><li>به <b>Settings</b> گوشی بروید</li><li>به <b>Safari</b> بروید</li><li>گزینه <b>Camera</b> رو روی <b>Allow</b> بذارید</li><li>گزینه <b>Microphone</b> رو روی <b>Allow</b> بذارید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`;
-        } else if (isAndroid) {
-            instructions = `<ol><li style="color:#fbbc04;font-weight:600;">⚠️ اول دکمه <b>Reset permissions</b> رو بزنید (پایین همین صفحه)</li><li>بعد صفحه رو <b>رفرش</b> کنید</li><li>وقتی پنجره‌ی مرورگر باز شد، هر دو گزینه <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>اگه دوباره این پیام اومد، دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`;
-        } else if (isFirefox) {
-            instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>گزینه <b>Clear permission</b> رو انتخاب کنید</li><li>صفحه رو <b>رفرش</b> کنید و دسترسی بدید</li></ol>`;
-        } else {
-            instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>در بخش دسترسی‌ها، <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`;
-        }
-    } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError') {
-        desc = 'دوربین یا میکروفونی روی این دستگاه پیدا نشد.';
-        instructions = `<ol><li>مطمئن شوید دوربین روی دستگاه وجود دارد</li><li>اگر دارد، ممکن است توسط برنامه دیگری استفاده شود</li></ol>`;
-    } else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') {
-        desc = 'دوربین یا میکروفون توسط برنامه دیگری در حال استفاده است.';
-        instructions = `<ol><li>تمام برنامه‌های دیگر (دوربین، واتس‌اپ، اینستاگرام و...) رو ببندید</li><li>دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`;
-    } else if (errorName === 'SecurityError') {
-        desc = 'دسترسی تنها از طریق HTTPS امکان‌پذیر است.';
-        instructions = `<ol><li>آدرس سایت باید با <b>https://</b> شروع شود</li><li>از یک مرورگر مدرن استفاده کنید</li></ol>`;
-    } else {
-        desc = 'دسترسی به دوربین یا میکروفون امکان‌پذیر نیست.';
-        instructions = `<ol><li>تنظیمات دسترسی مرورگر رو بررسی کنید</li><li>صفحه رو رفرش کنید</li><li>مرورگر رو ببندید و دوباره باز کنید</li></ol>`;
-    }
+        if (isIOS) { instructions = `<ol><li>به <b>Settings</b> گوشی بروید</li><li>به <b>Safari</b> بروید</li><li>گزینه <b>Camera</b> رو روی <b>Allow</b> بذارید</li><li>گزینه <b>Microphone</b> رو روی <b>Allow</b> بذارید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`; }
+        else if (isAndroid) { instructions = `<ol><li style="color:#fbbc04;font-weight:600;">⚠️ اول دکمه <b>Reset permissions</b> رو بزنید (پایین همین صفحه)</li><li>بعد صفحه رو <b>رفرش</b> کنید</li><li>وقتی پنجره‌ی مرورگر باز شد، هر دو گزینه <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>اگه دوباره این پیام اومد، دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`; }
+        else if (isFirefox) { instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>گزینه <b>Clear permission</b> رو انتخاب کنید</li><li>صفحه رو <b>رفرش</b> کنید و دسترسی بدید</li></ol>`; }
+        else { instructions = `<ol><li>آیکون 🔒 رو در نوار آدرس بزنید</li><li>در بخش دسترسی‌ها، <b>Camera</b> و <b>Microphone</b> رو <b>Allow</b> کنید</li><li>صفحه رو <b>رفرش</b> کنید</li></ol>`; }
+    } else if (errorName === 'NotFoundError' || errorName === 'DevicesNotFoundError') { desc = 'دوربین یا میکروفونی روی این دستگاه پیدا نشد.'; instructions = `<ol><li>مطمئن شوید دوربین روی دستگاه وجود دارد</li><li>اگر دارد، ممکن است توسط برنامه دیگری استفاده شود</li></ol>`; }
+    else if (errorName === 'NotReadableError' || errorName === 'TrackStartError') { desc = 'دوربین یا میکروفون توسط برنامه دیگری در حال استفاده است.'; instructions = `<ol><li>تمام برنامه‌های دیگر رو ببندید</li><li>دکمه <b>📨 ارسال درخواست</b> رو بزنید</li></ol>`; }
+    else if (errorName === 'SecurityError') { desc = 'دسترسی تنها از طریق HTTPS امکان‌پذیر است.'; instructions = `<ol><li>آدرس سایت باید با <b>https://</b> شروع شود</li><li>از یک مرورگر مدرن استفاده کنید</li></ol>`; }
+    else { desc = 'دسترسی به دوربین یا میکروفون امکان‌پذیر نیست.'; instructions = `<ol><li>تنظیمات دسترسی مرورگر رو بررسی کنید</li><li>صفحه رو رفرش کنید</li><li>مرورگر رو ببندید و دوباره باز کنید</li></ol>`; }
     return { title, desc, instructions };
 }
-
 function showPermissionModal(errorName) {
     const ua = navigator.userAgent;
     const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isAndroid = /Android/i.test(ua);
-    const isFirefox = /Firefox/i.test(ua);
+    const isAndroid = /Android/i.test(ua); const isFirefox = /Firefox/i.test(ua);
     const { title, desc, instructions } = getPermissionHelp(errorName, isIOS, isAndroid, isFirefox);
     document.getElementById('permTitle').textContent = title;
     document.getElementById('permDesc').textContent = desc;
@@ -1413,231 +951,90 @@ function showPermissionModal(errorName) {
     const icon = document.getElementById('permIcon');
     if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') icon.textContent = '🔒';
     else if (errorName === 'NotFoundError') icon.textContent = '❌';
-    else if (errorName === 'NotReadableError') icon.textContent = '⚠️';
-    else icon.textContent = '📷';
-    const btn = document.getElementById('btnSendPermRequest');
-    if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; }
-    document.getElementById('permModal').classList.add('show');
-    hideConnectCountdown();
+    else if (errorName === 'NotReadableError') icon.textContent = '⚠️'; else icon.textContent = '📷';
+    const btn = document.getElementById('btnSendPermRequest'); if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; }
+    document.getElementById('permModal').classList.add('show'); hideConnectCountdown();
 }
 function hidePermissionModal() { document.getElementById('permModal').classList.remove('show'); }
 
 async function retryCameraPermission() {
-    const btn = document.getElementById('btnSendPermRequest');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ارسال...'; }
+    const btn = document.getElementById('btnSendPermRequest'); if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ارسال...'; }
     hidePermissionModal();
     if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch(e){} localStream = null; }
     showConnectCountdown();
     const ok = await requestMediaPermission();
-    if (ok) {
-        hideConnectCountdown();
-        showToast('✅ دسترسی داده شد');
-        const jbtn = document.getElementById('joinBtn');
-        if (jbtn) { jbtn.disabled = false; jbtn.textContent = I18N[currentLang].joinMeeting; }
-        if (!livekitRoom) { try { await joinMeeting(); } catch(e) {} }
-    } else {
-        hideConnectCountdown();
-        if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; }
-    }
+    if (ok) { hideConnectCountdown(); showToast('✅ دسترسی داده شد'); const jbtn = document.getElementById('joinBtn'); if (jbtn) { jbtn.disabled = false; jbtn.textContent = I18N[currentLang].joinMeeting; } if (!livekitRoom) { try { await joinMeeting(); } catch(e) {} } }
+    else { hideConnectCountdown(); if (btn) { btn.disabled = false; btn.textContent = '📨 ارسال درخواست'; } }
 }
-function cancelCameraPermission() {
-    hidePermissionModal();
-    const btn = document.getElementById('joinBtn');
-    if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
-}
+function cancelCameraPermission() { hidePermissionModal(); const btn = document.getElementById('joinBtn'); if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; } }
 
 async function requestMediaPermission() {
     if (localStream && (localStream.getVideoTracks().length > 0 || localStream.getAudioTracks().length > 0)) return true;
     if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch(e){} localStream = null; }
-    
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showPermissionModal('SecurityError');
-        return false;
-    }
-    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showPermissionModal('SecurityError'); return false; }
     let stream = null;
-    
     try {
         showToast('🎤📹 درخواست دسترسی به دوربین و میکروفون...');
-        stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true },
-            video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, facingMode: 'user' }
-        });
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, facingMode: 'user' } });
     } catch (e) {
         console.warn('getUserMedia failed:', e.name, e.message);
-        
-        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                showToast('⚠️ فقط میکروفون فعال شد');
-            } catch (e2) {
-                showPermissionModal('NotAllowedError');
-                return false;
-            }
-        }
-        else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                showToast('⚠️ دوربین پیدا نشد — بدون تصویر وارد می‌شوید');
-            } catch (e2) {
-                if (e2.name === 'NotAllowedError' || e2.name === 'PermissionDeniedError') {
-                    showPermissionModal('NotAllowedError');
-                    return false;
-                }
-                showPermissionModal('NotFoundError');
-                return false;
-            }
-        }
-        else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                showToast('⚠️ دوربین در دسترس نیست — بدون تصویر وارد می‌شوید');
-            } catch (e2) {
-                showPermissionModal('NotReadableError');
-                return false;
-            }
-        }
-        else {
-            showPermissionModal(e.name || 'NotAllowedError');
-            return false;
-        }
+        if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') { try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); showToast('⚠️ فقط میکروفون فعال شد'); } catch (e2) { showPermissionModal('NotAllowedError'); return false; } }
+        else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') { try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); showToast('⚠️ دوربین پیدا نشد — بدون تصویر وارد می‌شوید'); } catch (e2) { if (e2.name === 'NotAllowedError' || e2.name === 'PermissionDeniedError') { showPermissionModal('NotAllowedError'); return false; } showPermissionModal('NotFoundError'); return false; } }
+        else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') { try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); showToast('⚠️ دوربین در دسترس نیست — بدون تصویر وارد می‌شوید'); } catch (e2) { showPermissionModal('NotReadableError'); return false; } }
+        else { showPermissionModal(e.name || 'NotAllowedError'); return false; }
     }
-    
     if (!stream) { showPermissionModal('NotFoundError'); return false; }
-    
     localStream = stream;
     localStream.getAudioTracks().forEach(t => t.enabled = false);
     localStream.getVideoTracks().forEach(t => t.enabled = false);
-    
-    const pv = document.getElementById('previewVideo');
-    if (pv) { pv.srcObject = localStream; pv.play().catch(() => {}); }
-    
+    const pv = document.getElementById('previewVideo'); if (pv) { pv.srcObject = localStream; pv.play().catch(() => {}); }
     const pmb = document.getElementById('previewMicBtn'); if (pmb) pmb.classList.add('off');
     const pcb = document.getElementById('previewCamBtn'); if (pcb) pcb.classList.add('off');
-    
     return true;
 }
 
-function playJoinSound() {
-    try {
-        if (!bellAudioCtx) bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (bellAudioCtx.state === 'suspended') bellAudioCtx.resume();
-        const ctx = bellAudioCtx; const now = ctx.currentTime;
-        const notes = [{ freq: 523.25, time: 0, dur: 0.35 }, { freq: 659.25, time: 0.12, dur: 0.45 }];
-        notes.forEach(n => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.value = n.freq; gain.gain.setValueAtTime(0, now + n.time); gain.gain.linearRampToValueAtTime(0.18, now + n.time + 0.03); gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur); osc.connect(gain); gain.connect(ctx.destination); osc.start(now + n.time); osc.stop(now + n.time + n.dur + 0.1); });
-    } catch (e) {}
-}
+function playJoinSound() { try { if (!bellAudioCtx) bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (bellAudioCtx.state === 'suspended') bellAudioCtx.resume(); const ctx = bellAudioCtx; const now = ctx.currentTime; const notes = [{ freq: 523.25, time: 0, dur: 0.35 }, { freq: 659.25, time: 0.12, dur: 0.45 }]; notes.forEach(n => { const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.type = 'sine'; osc.frequency.value = n.freq; gain.gain.setValueAtTime(0, now + n.time); gain.gain.linearRampToValueAtTime(0.18, now + n.time + 0.03); gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + n.dur); osc.connect(gain); gain.connect(ctx.destination); osc.start(now + n.time); osc.stop(now + n.time + n.dur + 0.1); }); } catch (e) {} }
 
 function toggleSpotlightMode() {
     spotlightModeActive = !spotlightModeActive;
-    const videos = document.getElementById('videos');
-    const btn = document.getElementById('btnSpotlightToggle');
-    if (spotlightModeActive) {
-        videos.classList.add('spotlight-mode');
-        if (btn) { btn.textContent = '❌ Spotlight'; btn.style.background = 'var(--accent)'; btn.style.color = '#202124'; }
-        showToast('🎯 روی هر ویدیو کلیک کن');
-        applySpotlightToAll();
-    } else { clearSpotlight(); }
+    const videos = document.getElementById('videos'); const btn = document.getElementById('btnSpotlightToggle');
+    if (spotlightModeActive) { videos.classList.add('spotlight-mode'); if (btn) { btn.textContent = '❌ Spotlight'; btn.style.background = 'var(--accent)'; btn.style.color = '#202124'; } showToast('🎯 روی هر ویدیو کلیک کن'); applySpotlightToAll(); }
+    else { clearSpotlight(); }
 }
-function clearSpotlight() {
-    spotlightedId = null; spotlightModeActive = false;
-    const videos = document.getElementById('videos'); if (videos) videos.classList.remove('spotlight-mode');
-    document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source'));
-    const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '🎯 Spotlight'; btn.style.background = ''; btn.style.color = ''; }
-    broadcast({ type: 'spotlight-clear' });
-}
-function applySpotlightToAll() {
-    document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source'));
-    if (!spotlightedId) return;
-    const targetBox = spotlightedId === myId ? document.getElementById('video-me') : document.getElementById(`video-${spotlightedId}`);
-    if (targetBox) { targetBox.classList.add('spotlight-active', 'spotlight-source'); document.getElementById('videos').prepend(targetBox); }
-}
-function setSpotlight(pid) {
-    if (!spotlightModeActive) return;
-    spotlightedId = pid; applySpotlightToAll(); broadcast({ type: 'spotlight-set', id: pid, from: myId });
-    const pInfo = pid === myId ? { name: myName } : remoteParticipants.get(pid);
-    if (pInfo) showToast(`🎯 ${pInfo.name}`);
-}
-function receiveSpotlight(id) {
-    if (!spotlightModeActive) { spotlightModeActive = true; const videos = document.getElementById('videos'); if (videos) videos.classList.add('spotlight-mode'); const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '❌ Spotlight'; btn.style.background = 'var(--accent)'; btn.style.color = '#202124'; } }
-    spotlightedId = id; applySpotlightToAll();
-}
-function receiveSpotlightClear() {
-    spotlightedId = null; spotlightModeActive = false;
-    const videos = document.getElementById('videos'); if (videos) videos.classList.remove('spotlight-mode');
-    document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source'));
-    const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '🎯 Spotlight'; btn.style.background = ''; btn.style.color = ''; }
-}
-function toggleVideoFullscreen(box) {
-    if (!box) return;
-    if (!document.fullscreenElement) { if (box.requestFullscreen) box.requestFullscreen().catch(() => {}); else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen(); }
-    else { if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
-}
+function clearSpotlight() { spotlightedId = null; spotlightModeActive = false; const videos = document.getElementById('videos'); if (videos) videos.classList.remove('spotlight-mode'); document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source')); const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '🎯 Spotlight'; btn.style.background = ''; btn.style.color = ''; } broadcast({ type: 'spotlight-clear' }); }
+function applySpotlightToAll() { document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source')); if (!spotlightedId) return; const targetBox = spotlightedId === myId ? document.getElementById('video-me') : document.getElementById(`video-${spotlightedId}`); if (targetBox) { targetBox.classList.add('spotlight-active', 'spotlight-source'); document.getElementById('videos').prepend(targetBox); } }
+function setSpotlight(pid) { if (!spotlightModeActive) return; spotlightedId = pid; applySpotlightToAll(); broadcast({ type: 'spotlight-set', id: pid, from: myId }); const pInfo = pid === myId ? { name: myName } : remoteParticipants.get(pid); if (pInfo) showToast(`🎯 ${pInfo.name}`); }
+function receiveSpotlight(id) { if (!spotlightModeActive) { spotlightModeActive = true; const videos = document.getElementById('videos'); if (videos) videos.classList.add('spotlight-mode'); const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '❌ Spotlight'; btn.style.background = 'var(--accent)'; btn.style.color = '#202124'; } } spotlightedId = id; applySpotlightToAll(); }
+function receiveSpotlightClear() { spotlightedId = null; spotlightModeActive = false; const videos = document.getElementById('videos'); if (videos) videos.classList.remove('spotlight-mode'); document.querySelectorAll('.video-box').forEach(b => b.classList.remove('spotlight-active', 'spotlight-source')); const btn = document.getElementById('btnSpotlightToggle'); if (btn) { btn.textContent = '🎯 Spotlight'; btn.style.background = ''; btn.style.color = ''; } }
+function toggleVideoFullscreen(box) { if (!box) return; if (!document.fullscreenElement) { if (box.requestFullscreen) box.requestFullscreen().catch(() => {}); else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen(); } else { if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); } }
 async function toggleBackgroundBlur() {
-    if (!livekitRoom || !livekitRoom.localParticipant) return;
-    const btn = document.getElementById('btnBlur');
-    const lp = livekitRoom.localParticipant;
-    const videoPub = lp.getTrackPublication(LivekitClient.Track.Source.Camera);
-    if (!videoPub || !videoPub.track) { showToast('⚠️ اول دوربین رو روشن کن'); return; }
-    try {
-        if (!isBlurEnabled) {
-            if (!LivekitClient.BackgroundBlur) { showToast('⚠️ پشتیبانی نمی‌شه'); return; }
-            blurProcessor = new LivekitClient.BackgroundBlur(10);
-            await lp.setTrackProcessor(LivekitClient.Track.Source.Camera, blurProcessor);
-            isBlurEnabled = true; btn.classList.add('on'); showToast('🌫️ پس‌زمینه تار شد');
-        } else {
-            await lp.setTrackProcessor(LivekitClient.Track.Source.Camera, null);
-            blurProcessor = null; isBlurEnabled = false; btn.classList.remove('on'); showToast('✅ پس‌زمینه عادی');
-        }
-    } catch (e) { showToast('❌ ' + e.message); }
+    if (!livekitRoom || !livekitRoom.localParticipant) return; const btn = document.getElementById('btnBlur'); const lp = livekitRoom.localParticipant; const videoPub = lp.getTrackPublication(LivekitClient.Track.Source.Camera); if (!videoPub || !videoPub.track) { showToast('⚠️ اول دوربین رو روشن کن'); return; }
+    try { if (!isBlurEnabled) { if (!LivekitClient.BackgroundBlur) { showToast('⚠️ پشتیبانی نمی‌شه'); return; } blurProcessor = new LivekitClient.BackgroundBlur(10); await lp.setTrackProcessor(LivekitClient.Track.Source.Camera, blurProcessor); isBlurEnabled = true; btn.classList.add('on'); showToast('🌫️ پس‌زمینه تار شد'); } else { await lp.setTrackProcessor(LivekitClient.Track.Source.Camera, null); blurProcessor = null; isBlurEnabled = false; btn.classList.remove('on'); showToast('✅ پس‌زمینه عادی'); } } catch (e) { showToast('❌ ' + e.message); }
 }
-function saveWhiteboardAsImage() {
-    if (!wbCanvas) return;
-    try {
-        const ex = document.createElement('canvas'); ex.width = wbCanvas.width; ex.height = wbCanvas.height;
-        const ctx = ex.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, ex.width, ex.height); ctx.drawImage(wbCanvas, 0, 0);
-        ex.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); const a = document.createElement('a'); const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); a.href = u; a.download = `Lroom-whiteboard-${roomId || 'class'}-${ts}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000); showToast('📥 ذخیره شد'); }, 'image/png');
-    } catch (e) { showToast('❌ خطا'); }
-}
-function isSlowConnection() {
-    try {
-        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        if (!conn) return false;
-        const type = conn.effectiveType || '';
-        if (type === 'slow-2g' || type === '2g') return true;
-        if (conn.saveData) return true;
-        if (type === '3g' && conn.downlink && conn.downlink < 0.8) return true;
-        if (conn.rtt && conn.rtt > 800) return true;
-        if (conn.downlink && conn.downlink < 1.0) return true;
-        return false;
-    } catch (e) { return false; }
-}
-function checkRealConnectionQuality() {
-    if (!livekitRoom || !livekitRoom.engine) return;
-    try {
-        let rtt = 0;
-        if (livekitRoom.engine.client && typeof livekitRoom.engine.client.rtt === 'number') rtt = livekitRoom.engine.client.rtt;
-        if (rtt > 600 && !isLowBandwidth) showToast('📶 اتصال کند است — می‌توانید حالت کم‌مصرف را از دکمه 📶 فعال کنید');
-    } catch (e) {}
-}
-function startWaitingAudioBlocker() {
-    if (waitingAudioBlockInterval) return;
-    waitingAudioBlockInterval = setInterval(() => {
-        if (!isWaitingForApproval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; return; }
-        document.querySelectorAll('audio[data-identity]').forEach(el => { if (!el.muted) el.muted = true; try { el.volume = 0; } catch(e){} });
-        try { livekitRoom?.remoteParticipants?.forEach(p => { p.audioTrackPublications?.forEach(pub => { if (pub.track && !pub.track.isMuted) { try { pub.track.mediaStreamTrack.enabled = false; } catch(e){} } }); }); } catch(e){}
-    }, 300);
-}
-function stopWaitingAudioBlocker() {
-    if (waitingAudioBlockInterval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; }
-    document.querySelectorAll('audio[data-identity]').forEach(el => { el.muted = false; try { el.volume = 1; } catch(e){} el.play().catch(() => {}); });
-    try { livekitRoom?.remoteParticipants?.forEach(p => { p.audioTrackPublications?.forEach(pub => { if (pub.track) { try { pub.track.mediaStreamTrack.enabled = true; } catch(e){} } }); }); } catch(e){}
-}
+function saveWhiteboardAsImage() { if (!wbCanvas) return; try { const ex = document.createElement('canvas'); ex.width = wbCanvas.width; ex.height = wbCanvas.height; const ctx = ex.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, ex.width, ex.height); ctx.drawImage(wbCanvas, 0, 0); ex.toBlob(bl => { if (!bl) return; const u = URL.createObjectURL(bl); const a = document.createElement('a'); const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); a.href = u; a.download = `Lroom-whiteboard-${roomId || 'class'}-${ts}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000); showToast('📥 ذخیره شد'); }, 'image/png'); } catch (e) { showToast('❌ خطا'); } }
+function isSlowConnection() { try { const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection; if (!conn) return false; const type = conn.effectiveType || ''; if (type === 'slow-2g' || type === '2g') return true; if (conn.saveData) return true; if (type === '3g' && conn.downlink && conn.downlink < 0.8) return true; if (conn.rtt && conn.rtt > 800) return true; if (conn.downlink && conn.downlink < 1.0) return true; return false; } catch (e) { return false; } }
+function checkRealConnectionQuality() { if (!livekitRoom || !livekitRoom.engine) return; try { let rtt = 0; if (livekitRoom.engine.client && typeof livekitRoom.engine.client.rtt === 'number') rtt = livekitRoom.engine.client.rtt; if (rtt > 600 && !isLowBandwidth) showToast('📶 اتصال کند است — می‌توانید حالت کم‌مصرف را فعال کنید'); } catch (e) {} }
+function startWaitingAudioBlocker() { if (waitingAudioBlockInterval) return; waitingAudioBlockInterval = setInterval(() => { if (!isWaitingForApproval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; return; } document.querySelectorAll('audio[data-identity]').forEach(el => { if (!el.muted) el.muted = true; try { el.volume = 0; } catch(e){} }); try { livekitRoom?.remoteParticipants?.forEach(p => { p.audioTrackPublications?.forEach(pub => { if (pub.track && !pub.track.isMuted) { try { pub.track.mediaStreamTrack.enabled = false; } catch(e){} } }); }); } catch(e){} }, 300); }
+function stopWaitingAudioBlocker() { if (waitingAudioBlockInterval) { clearInterval(waitingAudioBlockInterval); waitingAudioBlockInterval = null; } document.querySelectorAll('audio[data-identity]').forEach(el => { el.muted = false; try { el.volume = 1; } catch(e){} el.play().catch(() => {}); }); try { livekitRoom?.remoteParticipants?.forEach(p => { p.audioTrackPublications?.forEach(pub => { if (pub.track) { try { pub.track.mediaStreamTrack.enabled = true; } catch(e){} } }); }); } catch(e){} }
 
-async function generateLiveKitToken(roomName, identity, name, isTeacher) {
+async function generateLiveKitToken(roomName, identity, name, canPublish) { // 👈 canPublish جایگزین isTeacher شد
     const now = Math.floor(Date.now() / 1000);
     const header = { alg: 'HS256', typ: 'JWT' };
-    const payload = { exp: now + 6 * 60 * 60, iss: LIVEKIT_API_KEY, sub: identity, nbf: now - 10, name: name, video: { roomJoin: true, room: roomName, canPublish: true, canSubscribe: true, canPublishData: true }, metadata: JSON.stringify({ role: isTeacher ? 'teacher' : 'student' }) };
+    const payload = { 
+        exp: now + 6 * 60 * 60, 
+        iss: LIVEKIT_API_KEY, 
+        sub: identity, 
+        nbf: now - 10, 
+        name: name, 
+        video: { 
+            roomJoin: true, 
+            room: roomName, 
+            canPublish: canPublish, // 👈 اعمال محدودیت
+            canSubscribe: true, 
+            canPublishData: true 
+        }, 
+        metadata: JSON.stringify({ role: myRole === 'teacher' ? 'teacher' : 'student' }) 
+    };
     const enc = new TextEncoder();
     const b64url = (obj) => { const str = typeof obj === 'string' ? obj : JSON.stringify(obj); const bytes = enc.encode(str); let binary = ''; bytes.forEach(b => binary += String.fromCharCode(b)); return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''); };
     const data = `${b64url(header)}.${b64url(payload)}`;
@@ -1650,27 +1047,9 @@ async function generateLiveKitToken(roomName, identity, name, isTeacher) {
     return `${data}.${sigB64}`;
 }
 
-function getStudentCamConstraints(level) {
-    switch(level) {
-        case 'low': return { width: { max: 320 }, height: { max: 180 }, frameRate: { max: 10 } };
-        case 'high': return { width: { ideal: 1280, max: 1920 }, height: { ideal: 720, max: 1080 }, frameRate: { ideal: 30, max: 30 } };
-        default: return { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 20, max: 30 } };
-    }
-}
-function getScreenShareCapture(level) {
-    switch(level) {
-        case 'low': return { resolution: { width: 1280, height: 720, frameRate: 10 }, audio: true };
-        case 'high': return { resolution: { width: 1920, height: 1080, frameRate: 30 }, audio: true };
-        default: return { resolution: { width: 1920, height: 1080, frameRate: 15 }, audio: true };
-    }
-}
-function getScreenSharePublish(level) {
-    switch(level) {
-        case 'low': return { simulcast: false, screenShareEncoding: { maxBitrate: 600000, maxFramerate: 10 } };
-        case 'high': return { simulcast: true, screenShareEncoding: { maxBitrate: 5000000, maxFramerate: 30 } };
-        default: return { simulcast: true, screenShareEncoding: { maxBitrate: 2500000, maxFramerate: 15 } };
-    }
-}
+function getStudentCamConstraints(level) { switch(level) { case 'low': return { width: { max: 320 }, height: { max: 180 }, frameRate: { max: 10 } }; case 'high': return { width: { ideal: 1280, max: 1920 }, height: { ideal: 720, max: 1080 }, frameRate: { ideal: 30, max: 30 } }; default: return { width: { ideal: 640, max: 1280 }, height: { ideal: 360, max: 720 }, frameRate: { ideal: 20, max: 30 } }; } }
+function getScreenShareCapture(level) { switch(level) { case 'low': return { resolution: { width: 1280, height: 720, frameRate: 10 }, audio: true }; case 'high': return { resolution: { width: 1920, height: 1080, frameRate: 30 }, audio: true }; default: return { resolution: { width: 1920, height: 1080, frameRate: 15 }, audio: true }; } }
+function getScreenSharePublish(level) { switch(level) { case 'low': return { simulcast: false, screenShareEncoding: { maxBitrate: 600000, maxFramerate: 10 } }; case 'high': return { simulcast: true, screenShareEncoding: { maxBitrate: 5000000, maxFramerate: 30 } }; default: return { simulcast: true, screenShareEncoding: { maxBitrate: 2500000, maxFramerate: 15 } }; } }
 function getActualParticipantCount() { return remoteParticipants.size + 1; }
 function getAutoQualityRules(participantCount) {
     const slow = isSlowConnection();
@@ -1679,16 +1058,9 @@ function getAutoQualityRules(participantCount) {
     if (participantCount <= 8) return { studentCam: 'medium', screenShare: 'high', projector: 'medium', label: 'کیفیت متوسط (۵-۸ نفر)' };
     if (participantCount <= 15) return { studentCam: 'medium', screenShare: 'medium', projector: 'medium', label: 'کیفیت متوسط (۹-۱۵ نفر)' };
     if (participantCount <= 25) return { studentCam: 'low', screenShare: 'medium', projector: 'low', label: 'کیفیت کم (۱۶-۲۵ نفر)' };
-    if (participantCount <= 40) return { studentCam: 'low', screenShare: 'medium', projector: 'low', label: 'کیفیت کم — ' + participantCount + ' نفر' };
     return { studentCam: 'low', screenShare: 'low', projector: 'low', label: '📡 حالت بهینه برای ' + participantCount + ' نفر' };
 }
-function applyUniformQualityToRemote() {
-    if (!livekitRoom) return;
-    const q = qualitySettings.studentCam;
-    const qualityMap = { low: LivekitClient.VideoQuality.LOW, medium: LivekitClient.VideoQuality.MEDIUM, high: LivekitClient.VideoQuality.HIGH };
-    const vq = qualityMap[q] || LivekitClient.VideoQuality.MEDIUM;
-    try { livekitRoom.remoteParticipants.forEach(p => { p.videoTrackPublications.forEach(pub => { if (pub.source === LivekitClient.Track.Source.Camera) { try { pub.setVideoQuality(vq); } catch(e){} } }); }); } catch(e) {}
-}
+function applyUniformQualityToRemote() { if (!livekitRoom) return; const q = qualitySettings.studentCam; const qualityMap = { low: LivekitClient.VideoQuality.LOW, medium: LivekitClient.VideoQuality.MEDIUM, high: LivekitClient.VideoQuality.HIGH }; const vq = qualityMap[q] || LivekitClient.VideoQuality.MEDIUM; try { livekitRoom.remoteParticipants.forEach(p => { p.videoTrackPublications.forEach(pub => { if (pub.source === LivekitClient.Track.Source.Camera) { try { pub.setVideoQuality(vq); } catch(e){} } }); }); } catch(e) {} }
 function autoAdjustQuality(force) {
     if (myRole !== 'teacher' && !isCoTeacher) return;
     const hasAuto = qualitySettings.studentCam === 'auto' || qualitySettings.screenShare === 'auto' || qualitySettings.projector === 'auto';
@@ -1700,31 +1072,12 @@ function autoAdjustQuality(force) {
     if (sig === lastAutoApplied && !force) return;
     lastAutoApplied = sig;
     broadcast({ type: 'quality-settings', settings: newSettings, from: myId });
-    const st = document.getElementById('autoQualityStatus');
-    const info = document.getElementById('autoQualityInfo');
+    const st = document.getElementById('autoQualityStatus'); const info = document.getElementById('autoQualityInfo');
     if (st && info) { st.style.display = 'block'; const icons = { high: '🟢', medium: '🟡', low: '🔴' }; info.innerHTML = `👥 نفرات: <b>${count}</b><br>📹 دوربین دانشجو: ${icons[newSettings.studentCam]}<br>🖥️ اشتراک صفحه: ${icons[newSettings.screenShare]}<br>📽️ پروژکتور: ${icons[newSettings.projector]}<br><small style="color:var(--success);">✅ کیفیت یکسان برای همه</small>`; }
     setTimeout(applyUniformQualityToRemote, 300);
 }
-function applyQualitySettings() {
-    if (myRole !== 'teacher') return;
-    qualitySettings.studentCam = document.getElementById('qStudentCam').value;
-    qualitySettings.screenShare = document.getElementById('qScreenShare').value;
-    qualitySettings.projector = document.getElementById('qProjector').value;
-    lastAutoApplied = '';
-    if (qualitySettings.studentCam === 'auto' || qualitySettings.screenShare === 'auto' || qualitySettings.projector === 'auto') autoAdjustQuality(true);
-    else { broadcast({ type: 'quality-settings', settings: qualitySettings, from: myId }); showToast('⚙️ کیفیت اعمال شد'); setTimeout(applyUniformQualityToRemote, 300); }
-}
-function receiveQualitySettings(settings) {
-    if (!settings) return;
-    qualitySettings.studentCam = settings.studentCam || 'medium';
-    qualitySettings.screenShare = settings.screenShare || 'medium';
-    qualitySettings.projector = settings.projector || 'medium';
-    if (settings._autoLabel) qualitySettings._autoLabel = settings._autoLabel;
-    if (settings._count) qualitySettings._count = settings._count;
-    if (myRole === 'student' || isCoTeacher) { const vt = localStream?.getVideoTracks()[0]; if (vt) { const c = getStudentCamConstraints(qualitySettings.studentCam); vt.applyConstraints(c).catch(() => {}); } }
-    setTimeout(applyUniformQualityToRemote, 300);
-    setTimeout(applyUniformQualityToRemote, 1500);
-}
+function applyQualitySettings() { if (myRole !== 'teacher') return; qualitySettings.studentCam = document.getElementById('qStudentCam').value; qualitySettings.screenShare = document.getElementById('qScreenShare').value; qualitySettings.projector = document.getElementById('qProjector').value; lastAutoApplied = ''; if (qualitySettings.studentCam === 'auto' || qualitySettings.screenShare === 'auto' || qualitySettings.projector === 'auto') autoAdjustQuality(true); else { broadcast({ type: 'quality-settings', settings: qualitySettings, from: myId }); showToast('⚙️ کیفیت اعمال شد'); setTimeout(applyUniformQualityToRemote, 300); } }
+function receiveQualitySettings(settings) { if (!settings) return; qualitySettings.studentCam = settings.studentCam || 'medium'; qualitySettings.screenShare = settings.screenShare || 'medium'; qualitySettings.projector = settings.projector || 'medium'; if (settings._autoLabel) qualitySettings._autoLabel = settings._autoLabel; if (settings._count) qualitySettings._count = settings._count; if (myRole === 'student' || isCoTeacher) { const vt = localStream?.getVideoTracks()[0]; if (vt) { const c = getStudentCamConstraints(qualitySettings.studentCam); vt.applyConstraints(c).catch(() => {}); } } setTimeout(applyUniformQualityToRemote, 300); setTimeout(applyUniformQualityToRemote, 1500); }
 
 async function _applyGiftCodeToUser(code, statusEl) {
     if (!currentUser) { if (statusEl) statusEl.textContent = '⚠️'; return false; }
@@ -1735,78 +1088,34 @@ async function _applyGiftCodeToUser(code, statusEl) {
     const usedCount = (disc.used_by || []).length;
     if (disc.max_uses > 0 && usedCount >= disc.max_uses) { if (statusEl) statusEl.textContent = '⛔'; return false; }
     if ((disc.used_by || []).includes(currentUser.id)) { if (statusEl) statusEl.textContent = '⚠️'; return false; }
-    const days = Number(disc.days) || 0;
-    if (days < 1) { if (statusEl) statusEl.textContent = '❌'; return false; }
+    const days = Number(disc.days) || 0; if (days < 1) { if (statusEl) statusEl.textContent = '❌'; return false; }
     if (statusEl) statusEl.textContent = '⏳...';
     const { data: prof } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
     if (!prof) { if (statusEl) statusEl.textContent = '❌'; return false; }
-    const base = getRenewalBase(prof.subscription_end);
-    const newEnd = addDaysSafe(base, days);
+    const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, days);
     await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', currentUser.id);
     await sb.from('discount_codes').update({ used_count: usedCount + 1, used_by: [...(disc.used_by || []), currentUser.id] }).eq('id', disc.id);
-    currentUser.subscriptionEnd = newEnd.toISOString();
-    const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
+    currentUser.subscriptionEnd = newEnd.toISOString(); const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
     const ud = document.getElementById('userBadgeDays'); if (ud) ud.textContent = `(${daysLeft} روز مانده)`;
-    showToast(`🎁 ${days}`);
-    return days;
+    showToast(`🎁 ${days}`); return days;
 }
-async function checkExpiredDiscount() {
-    const input = document.getElementById('expiredDiscountCode'); const status = document.getElementById('giftStatus');
-    const code = (input.value || '').trim().toUpperCase();
-    status.className = ''; status.textContent = '';
-    if (!code) { status.textContent = '⚠️'; return; }
-    status.textContent = '⏳...';
-    const result = await _applyGiftCodeToUser(code, status);
-    if (typeof result === 'number') { status.textContent = `✅ ${result}`; status.className = 'ok'; setTimeout(() => { document.getElementById('expiredScreen').style.display = 'none'; checkAndShow(); }, 2000); }
-}
+async function checkExpiredDiscount() { const input = document.getElementById('expiredDiscountCode'); const status = document.getElementById('giftStatus'); const code = (input.value || '').trim().toUpperCase(); status.className = ''; status.textContent = ''; if (!code) { status.textContent = '⚠️'; return; } status.textContent = '⏳...'; const result = await _applyGiftCodeToUser(code, status); if (typeof result === 'number') { status.textContent = `✅ ${result}`; status.className = 'ok'; setTimeout(() => { document.getElementById('expiredScreen').style.display = 'none'; checkAndShow(); }, 2000); } }
 function openGiftCodeModal() { document.getElementById('userMenu').classList.remove('open'); document.getElementById('giftCodeModalInput').value = ''; const st = document.getElementById('giftCodeModalStatus'); st.textContent = ''; document.getElementById('giftCodeModal').classList.add('open'); setTimeout(() => document.getElementById('giftCodeModalInput').focus(), 150); }
-async function submitGiftCode() {
-    const input = document.getElementById('giftCodeModalInput'); const status = document.getElementById('giftCodeModalStatus');
-    const code = (input.value || '').trim().toUpperCase();
-    status.className = ''; status.textContent = '';
-    if (!code) { status.textContent = '⚠️'; return; }
-    status.textContent = '⏳...';
-    const result = await _applyGiftCodeToUser(code, status);
-    if (typeof result === 'number') { status.textContent = `✅ ${result}`; setTimeout(() => { closeModal('giftCodeModal'); if (currentUser.role !== 'admin') checkAndShow(); }, 1800); }
-}
+async function submitGiftCode() { const input = document.getElementById('giftCodeModalInput'); const status = document.getElementById('giftCodeModalStatus'); const code = (input.value || '').trim().toUpperCase(); status.className = ''; status.textContent = ''; if (!code) { status.textContent = '⚠️'; return; } status.textContent = '⏳...'; const result = await _applyGiftCodeToUser(code, status); if (typeof result === 'number') { status.textContent = `✅ ${result}`; setTimeout(() => { closeModal('giftCodeModal'); if (currentUser.role !== 'admin') checkAndShow(); }, 1800); } }
 
-function showGuestJoinScreen(roomCode) {
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('lobby').style.display = 'none';
-    document.getElementById('expiredScreen').style.display = 'none';
-    document.getElementById('guestJoinScreen').style.display = 'flex';
-    document.getElementById('guestRoomCodeDisplay').textContent = roomCode;
-    const savedName = localStorage.getItem('lroom_guest_name') || '';
-    if (savedName) document.getElementById('guestNameInput').value = savedName;
-    setTimeout(() => document.getElementById('guestNameInput').focus(), 200);
-    const inp = document.getElementById('guestNameInput');
-    inp.onkeypress = (e) => { if (e.key === 'Enter') submitGuestJoin(); };
-}
+function showGuestJoinScreen(roomCode) { document.getElementById('authScreen').style.display = 'none'; document.getElementById('lobby').style.display = 'none'; document.getElementById('expiredScreen').style.display = 'none'; document.getElementById('guestJoinScreen').style.display = 'flex'; document.getElementById('guestRoomCodeDisplay').textContent = roomCode; const savedName = localStorage.getItem('lroom_guest_name') || ''; if (savedName) document.getElementById('guestNameInput').value = savedName; setTimeout(() => document.getElementById('guestNameInput').focus(), 200); const inp = document.getElementById('guestNameInput'); inp.onkeypress = (e) => { if (e.key === 'Enter') submitGuestJoin(); }; }
 function cancelGuestJoin() { const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); }
 async function submitGuestJoin() {
-    const name = document.getElementById('guestNameInput').value.trim();
-    if (!name || name.length < 2) return showToast('⚠️ نام را وارد کنید');
-    const roomCode = new URLSearchParams(location.search).get('room');
-    if (!roomCode) return showToast('❌ کد پیدا نشد');
-    const btn = document.getElementById('guestJoinBtn');
-    btn.disabled = true; btn.textContent = '⏳...';
-    localStorage.setItem('lroom_guest_name', name);
-    isGuestMode = true; guestName = name;
-    currentUser = { id: 'guest-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), email: '', name: name, role: 'student', sessionCode: null, subscriptionEnd: null, isGuest: true };
-    document.getElementById('guestJoinScreen').style.display = 'none';
-    selectedLobbyRole = 'student';
-    document.getElementById('joinRoomCode').value = roomCode;
+    const name = document.getElementById('guestNameInput').value.trim(); if (!name || name.length < 2) return showToast('⚠️ نام را وارد کنید');
+    const roomCode = new URLSearchParams(location.search).get('room'); if (!roomCode) return showToast('❌ کد پیدا نشد');
+    const btn = document.getElementById('guestJoinBtn'); btn.disabled = true; btn.textContent = '⏳...';
+    localStorage.setItem('lroom_guest_name', name); isGuestMode = true; guestName = name;
+    currentUser = { id: 'guest-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), email: '', name: name, role: 'student', sessionCode: null, subscriptionEnd: null, isGuest: true, userType: 'student', planLevel: 1, maxStudents: 4, maxMics: 4, maxCams: 4 };
+    document.getElementById('guestJoinScreen').style.display = 'none'; selectedLobbyRole = 'student'; document.getElementById('joinRoomCode').value = roomCode;
     try { await joinMeeting(); } catch (e) { showToast('❌ ' + (e.message || 'خطا')); document.getElementById('guestJoinScreen').style.display = 'flex'; btn.disabled = false; btn.textContent = '🚀 ورود'; }
 }
 
-function switchAuthTab(tab) {
-    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
-    document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
-    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('loginError').classList.remove('show');
-    document.getElementById('regError').classList.remove('show');
-}
+function switchAuthTab(tab) { document.getElementById('tabLogin').classList.toggle('active', tab === 'login'); document.getElementById('tabRegister').classList.toggle('active', tab === 'register'); document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none'; document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none'; document.getElementById('loginError').classList.remove('show'); document.getElementById('regError').classList.remove('show'); }
 async function handleRegister(e) {
     e.preventDefault();
     if (!sb) return showToast('⚠️ سرور در دسترس نیست');
@@ -1814,6 +1123,7 @@ async function handleRegister(e) {
     const email = document.getElementById('regEmail').value.trim().toLowerCase();
     const phone = (document.getElementById('regPhone')?.value || '').trim();
     const password = document.getElementById('regPassword').value;
+    const userType = document.getElementById('regUserType').value; // 👈 جدید
     const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
     const errEl = document.getElementById('regError'); const okEl = document.getElementById('regSuccess'); const btn = document.getElementById('regBtn');
     errEl.classList.remove('show'); okEl.classList.remove('show');
@@ -1828,7 +1138,24 @@ async function handleRegister(e) {
         if (!authData.session) throw new Error('Confirm email رو خاموش کن');
         await new Promise(r => setTimeout(r, 1500));
         let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', phone: phone || null, subscription_end: endDate.toISOString(), password_plain: password }); const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; }
+        if (!prof) { 
+            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString(); // 👈 دانشجو اشتراک نمی‌خواد
+            await sb.from('profiles').insert({ 
+                id: authData.user.id, 
+                email: authData.user.email, 
+                name: name, 
+                role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', 
+                user_type: userType, 
+                phone: phone || null, 
+                subscription_end: endDate, 
+                password_plain: password,
+                plan_level: 1,
+                max_students: 4,
+                max_mics: 4,
+                max_cams: 4
+            }); 
+            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; 
+        }
         if (disc && prof) { const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, disc.days); await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', authData.user.id); await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id); }
         try { await sb.auth.signOut(); } catch (e) {}
         okEl.textContent = '✅ ثبت‌نام موفق!' + (disc ? ` ${disc.days} روز اضافه شد.` : '');
@@ -1849,9 +1176,13 @@ async function handleLogin(e) {
         if (error) throw new Error(error.message);
         if (!data.user) throw new Error('یافت نشد');
         let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (!profile) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: data.user.id, email: data.user.email, name: data.user.user_metadata?.name || 'User', role: data.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); const r2 = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle(); profile = r2.data; }
+        if (!profile) { 
+            const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); 
+            await sb.from('profiles').insert({ id: data.user.id, email: data.user.email, name: data.user.user_metadata?.name || 'User', role: data.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); 
+            const r2 = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle(); profile = r2.data; 
+        }
         if (!profile) throw new Error('خطا');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
+        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams };
         isGuestMode = false;
         try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
         checkAndShow(); initRealtime(); loadActiveAnnouncement();
@@ -1860,22 +1191,17 @@ async function handleLogin(e) {
 }
 async function applyDiscountCode(inputId) {
     if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const id = inputId || 'regDiscountCode';
-    const input = document.getElementById(id);
-    if (!input) return;
-    const code = (input.value || '').trim().toUpperCase();
-    if (!code) return showToast('⚠️ کد را وارد کنید');
+    const id = inputId || 'regDiscountCode'; const input = document.getElementById(id); if (!input) return;
+    const code = (input.value || '').trim().toUpperCase(); if (!code) return showToast('⚠️ کد را وارد کنید');
     const { data: d, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
     if (error || !d) return showToast('❌ کد نامعتبر');
-    const usedCount = (d.used_by || []).length;
-    if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔ این کد تمام شده');
+    const usedCount = (d.used_by || []).length; if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔ این کد تمام شده');
     showToast(`✅ ${d.days} روز هدیه`);
 }
 async function logout() {
     if (isGuestMode) { localStorage.removeItem('lroom_guest_name'); isGuestMode = false; guestName = ''; currentUser = null; if (livekitRoom) { try { livekitRoom.disconnect(); } catch(e){} } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); return; }
     try { if (sb) await sb.auth.signOut(); } catch (e) {}
-    sessionStorage.removeItem('lroom_admin_auth');
-    currentUser = null;
+    sessionStorage.removeItem('lroom_admin_auth'); currentUser = null;
     if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} }
     if (livekitRoom) { try { livekitRoom.disconnect(); } catch (e) {} }
     if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
@@ -1886,36 +1212,52 @@ async function ensureSessionCode() {
     if (!currentUser || isGuestMode) return null;
     if (currentUser.sessionCode) return currentUser.sessionCode;
     if (!sb) return String(1000 + Math.floor(Math.random() * 9000));
-    let code;
-    for (let i = 0; i < 10; i++) { code = String(1000 + Math.floor(Math.random() * 9000)); const { data } = await sb.from('profiles').select('id').eq('session_code', code).maybeSingle(); if (!data) break; }
-    await sb.from('profiles').update({ session_code: code }).eq('id', currentUser.id);
-    currentUser.sessionCode = code;
-    return code;
+    let code; for (let i = 0; i < 10; i++) { code = String(1000 + Math.floor(Math.random() * 9000)); const { data } = await sb.from('profiles').select('id').eq('session_code', code).maybeSingle(); if (!data) break; }
+    await sb.from('profiles').update({ session_code: code }).eq('id', currentUser.id); currentUser.sessionCode = code; return code;
 }
 function setLobbyRole(role) {
     selectedLobbyRole = role;
     const btnT = document.getElementById('roleBtnTeacher'); const btnS = document.getElementById('roleBtnStudent');
     const teacherBox = document.getElementById('teacherSessionBox'); const studentBox = document.getElementById('studentJoinBox');
-    if (role === 'teacher') { btnT.classList.add('active'); btnS.classList.remove('active'); teacherBox.style.display = 'block'; studentBox.style.display = 'none'; (async () => { const code = await ensureSessionCode(); const el = document.getElementById('userSessionCodeDisplay'); if (el) el.textContent = code || '—'; })(); }
-    else { btnT.classList.remove('active'); btnS.classList.add('active'); teacherBox.style.display = 'none'; studentBox.style.display = 'block'; }
+    
+    // 👈 چک کردن نوع کاربر
+    if (currentUser.userType === 'student' && role === 'teacher') {
+        showToast('⛔ شما فقط به عنوان دانشجو مجاز هستید');
+        role = 'student';
+    }
+    
+    if (role === 'teacher') { 
+        btnT.classList.add('active'); btnS.classList.remove('active'); teacherBox.style.display = 'block'; studentBox.style.display = 'none'; 
+        (async () => { const code = await ensureSessionCode(); const el = document.getElementById('userSessionCodeDisplay'); if (el) el.textContent = code || '—'; })(); 
+    } else { 
+        btnT.classList.remove('active'); btnS.classList.add('active'); teacherBox.style.display = 'none'; studentBox.style.display = 'block'; 
+    }
 }
 function checkAndShow() {
     if (!currentUser) return;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('expiredScreen').style.display = 'none';
-    document.getElementById('lobby').style.display = 'none';
-    document.getElementById('guestJoinScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'none'; document.getElementById('expiredScreen').style.display = 'none'; document.getElementById('lobby').style.display = 'none'; document.getElementById('guestJoinScreen').style.display = 'none';
+    
     if (isGuestMode) { document.getElementById('lobby').style.display = 'flex'; document.getElementById('userBadgeName').textContent = currentUser.name + ' (مهمان)'; document.getElementById('userBadgeDays').textContent = ''; document.getElementById('userBadgeCrown').style.display = 'none'; updateAdminButtons(); setLobbyRole('student'); return; }
+    
     const isAdmin = currentUser.role === 'admin';
     const end = parseDateSafe(currentUser.subscriptionEnd);
     const isExpired = end && end.getTime() < Date.now();
     const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
-    if (isAdmin || !isExpired) {
+    
+    // 👈 دانشجو اشتراک نمی‌خواد
+    const isStudentOnly = currentUser.userType === 'student';
+
+    if (isAdmin || isStudentOnly || !isExpired) {
         document.getElementById('lobby').style.display = 'flex';
         document.getElementById('userBadgeName').textContent = currentUser.name;
-        document.getElementById('userBadgeDays').textContent = isAdmin ? '' : `(${daysLeft} روز مانده)`;
+        
+        // نمایش وضعیت
+        if (isAdmin) { document.getElementById('userBadgeDays').textContent = ''; }
+        else if (isStudentOnly) { document.getElementById('userBadgeDays').textContent = '(دانشجو - رایگان)'; }
+        else { document.getElementById('userBadgeDays').textContent = `(سطح ${currentUser.planLevel || 1} - ${daysLeft} روز)`; }
+        
         document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
-        updateAdminButtons(); setLobbyRole('teacher');
+        updateAdminButtons(); setLobbyRole(currentUser.userType === 'both' ? 'teacher' : (currentUser.userType === 'student' ? 'student' : 'teacher'));
     } else {
         document.getElementById('expiredScreen').style.display = 'flex';
         document.getElementById('expUserName').textContent = currentUser.name;
@@ -1928,9 +1270,10 @@ document.addEventListener('click', (e) => { const menu = document.getElementById
 function showSubscriptionInfo() {
     if (!currentUser) return;
     if (isGuestMode) { alert('👤 مهمان'); return; }
+    if (currentUser.userType === 'student') { alert('👨‍🎓 شما به عنوان دانشجو وارد شده‌اید و نیازی به اشتراک ندارید.'); return; }
     const end = parseDateSafe(currentUser.subscriptionEnd); const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
     if (currentUser.role === 'admin') alert('👑 Admin');
-    else if (daysLeft > 0) { let msg = `✅ ${end.toLocaleDateString('fa-IR')}\n\n⏳ ${daysLeft}`; if (currentUser.sessionCode) msg += `\n\n🔑 ${currentUser.sessionCode}`; alert(msg); }
+    else if (daysLeft > 0) { let msg = `سطح: ${currentUser.planLevel || 1}\n✅ ${end.toLocaleDateString('fa-IR')}\n\n⏳ ${daysLeft} روز باقی مانده`; if (currentUser.sessionCode) msg += `\n\n🔑 ${currentUser.sessionCode}`; alert(msg); }
     else alert(`⛔ Expired`);
 }
 function togglePreviewMic() { const b = document.getElementById('previewMicBtn'); const tr = localStream?.getAudioTracks()[0]; if (tr) { tr.enabled = !tr.enabled; b.classList.toggle('off', !tr.enabled); b.textContent = tr.enabled ? '🎤' : '🔇'; } }
@@ -1941,11 +1284,15 @@ function isAdminUser() { return currentUser && currentUser.role === 'admin' && !
 function openAdminPanel() { if (!isAdminUser()) { showToast('⛔'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
 function closeAdminPanel() { document.getElementById('adminPanelModal').classList.remove('open'); }
 function switchAdminTab(tab) {
-    const tabs = ['dashboard','users','discounts','announce'];
+    const tabs = ['dashboard','users','discounts','announce', 'plans']; // 👈 plans اضافه شد
     document.querySelectorAll('.admin-tab').forEach((el, i) => el.classList.toggle('active', tabs[i] === tab));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     const sec = document.getElementById('adminSec-' + tab); if (sec) sec.classList.add('active');
-    if (tab === 'dashboard') renderAdminDashboard(); else if (tab === 'users') renderAdminUsers(); else if (tab === 'discounts') renderAdminDiscounts(); else if (tab === 'announce') renderAdminAnnouncements();
+    if (tab === 'dashboard') renderAdminDashboard(); 
+    else if (tab === 'users') renderAdminUsers(); 
+    else if (tab === 'discounts') renderAdminDiscounts(); 
+    else if (tab === 'announce') renderAdminAnnouncements();
+    else if (tab === 'plans') renderAdminPlans(); // 👈 اضافه شد
 }
 async function renderAdminDashboard() {
     if (!sb) return;
@@ -1974,15 +1321,12 @@ async function renderAdminUsers() {
         const end = parseDateSafe(u.subscription_end); 
         const daysLeft = calcDaysLeft(u.subscription_end);
         const isAdmin = u.role === 'admin';
-        const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز مانده` : '⛔ منقضی');
-        const statusColor = isAdmin ? '#ffd700' : (daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
-        const phoneDisplay = u.phone 
-            ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
-            : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
-        const passDisplay = u.password_plain 
-            ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>`
-            : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
-        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div><div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div><div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div><div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button><button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
+        const statusText = isAdmin ? '👑 ادمین' : (u.user_type === 'student' ? '👨‍🎓 دانشجو (رایگان)' : (daysLeft > 0 ? `✅ ${daysLeft} روز (سطح ${u.plan_level||1})` : '⛔ منقضی'));
+        const statusColor = isAdmin ? '#ffd700' : (u.user_type === 'student' || daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
+        const phoneDisplay = u.phone ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>` : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        const passDisplay = u.password_plain ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>` : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        
+        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : `<span class="role-badge-user">${u.user_type === 'student' ? 'STUDENT' : 'TEACHER'}</span>`}</div><div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div><div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div><div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button><button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
     }).join('');
 }
 async function adminAddDays(userId, days) {
@@ -2067,6 +1411,45 @@ async function renderAdminAnnouncements() {
     if (!anns || anns.length === 0) { list.innerHTML = '<div class="admin-empty">اعلانی نیست</div>'; return; }
     list.innerHTML = anns.map(a => `<div class="announcement-row"><div class="an-text">${escapeHtml(a.text)} ${a.is_active ? '<span style="color:var(--success);font-size:10px;">(فعال)</span>' : ''}</div><div class="an-meta">👤 <b>${escapeHtml(a.from_name || '-')}</b> • ${new Date(a.created_at).toLocaleString('fa-IR')}</div></div>`).join('');
 }
+
+// 👈 توابع مربوط به اشتراک‌ها
+async function createPlan() {
+    if (!isAdminUser() || !sb) return;
+    const name = document.getElementById('planName').value.trim();
+    const students = parseInt(document.getElementById('planStudents').value) || 4;
+    const mics = parseInt(document.getElementById('planMics').value) || 4;
+    const cams = parseInt(document.getElementById('planCams').value) || 4;
+    const minutes = parseInt(document.getElementById('planMinutes').value) || 60;
+    
+    if (!name) return showToast('⚠️ نام را وارد کنید');
+
+    const { error } = await sb.from('subscription_plans').insert({ 
+        name, max_students: students, max_mics: mics, max_cams: cams, max_minutes: minutes 
+    });
+    
+    if (error) return showToast('❌ ' + error.message);
+    showToast('✅ اشتراک ساخته شد');
+    renderAdminPlans();
+}
+async function renderAdminPlans() {
+    if (!sb) return;
+    const { data: plans } = await sb.from('subscription_plans').select('*').order('id', { ascending: true });
+    const list = document.getElementById('adminPlansList');
+    if (!plans || plans.length === 0) { list.innerHTML = '<div class="admin-empty">هیچ اشتراکی ثبت نشده</div>'; return; }
+    
+    list.innerHTML = plans.map(p => `
+        <div class="discount-row" style="flex-direction:column;align-items:flex-start;">
+            <div style="font-weight:bold;font-size:15px;color:var(--accent);">${escapeHtml(p.name)}</div>
+            <div style="font-size:12px;margin-top:5px;">
+                👥 حداکثر دانشجو: <b>${p.max_students}</b> | 
+                🎤 میکروفون همزمان: <b>${p.max_mics}</b> | 
+                📹 دوربین همزمان: <b>${p.max_cams}</b> | 
+                ⏱️ زمان: <b>${p.max_minutes}</b> دقیقه
+            </div>
+        </div>
+    `).join('');
+}
+
 function showGlobalBanner(ann) { if (!ann) return; const b = document.getElementById('adminGlobalBanner'); const t = document.getElementById('adminGlobalBannerText'); const m = document.getElementById('adminGlobalBannerMeta'); if (!b) return; t.textContent = '📢 ' + ann.text; m.textContent = 'از مدیریت • ' + new Date(ann.created_at || ann.at).toLocaleString('fa-IR'); b.classList.add('show'); }
 function hideGlobalBanner() { const b = document.getElementById('adminGlobalBanner'); if (b) b.classList.remove('show'); }
 function dismissGlobalBanner() { if (adminActiveAnnouncement) sessionStorage.setItem('lroom_banner_dismissed', adminActiveAnnouncement.id); hideGlobalBanner(); }
@@ -2074,12 +1457,27 @@ function updateAdminButtons() { const show = isAdminUser(); const b1 = document.
 function initRealtime() { if (!sb) return; if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} } realtimeChannel = sb.channel('lroom-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, (payload) => { if (payload.new && payload.new.is_active) { adminActiveAnnouncement = payload.new; if (sessionStorage.getItem('lroom_banner_dismissed') !== payload.new.id) showGlobalBanner(payload.new); } else if (payload.eventType === 'UPDATE' && payload.new && !payload.new.is_active) hideGlobalBanner(); }).subscribe(); }
 async function loadActiveAnnouncement() { if (!sb) return; const { data } = await sb.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle(); if (data && sessionStorage.getItem('lroom_banner_dismissed') !== data.id) { adminActiveAnnouncement = data; setTimeout(() => showGlobalBanner(data), 1000); } }
 
-// ═══════════════ joinMeeting (با اولویت permission) ═══════════════
+// ═══════════════ joinMeeting (با محدودیت ۴ نفر) ═══════════════
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️');
     myName = currentUser.name;
     myRole = selectedLobbyRole;
     if (isGuestMode) myRole = 'student';
+
+    // 👈 چک کردن محدودیت نقش
+    if (currentUser.userType === 'student' && myRole === 'teacher') {
+        showToast('⛔ شما فقط به عنوان دانشجو مجاز هستید');
+        return;
+    }
+
+    // 👈 چک کردن اشتراک (فقط برای مدرس)
+    if (myRole === 'teacher' || currentUser.userType === 'both') {
+        const end = parseDateSafe(currentUser.subscriptionEnd);
+        if (end && end.getTime() < Date.now() && currentUser.role !== 'admin') {
+            showToast('⛔ اعتبار اشتراک شما تمام شده است');
+            return;
+        }
+    }
 
     let tempRoomId = '';
     if (myRole === 'teacher' && !isGuestMode) {
@@ -2090,12 +1488,9 @@ async function joinMeeting() {
         tempRoomId = sanitize(studentCode);
     }
 
-    // ⚡ درخواست مجوز رو بلافاصله شروع کن (بدون await قبلش)
     const permPromise = requestMediaPermission();
-
     const btn = document.getElementById('joinBtn');
     if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
-    
     showConnectCountdown();
     
     const permOk = await permPromise;
@@ -2118,34 +1513,32 @@ async function joinMeeting() {
         myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
         teacherId = `teacher-${roomId}`;
 
-        const tokenPromise = generateLiveKitToken(roomId, myId, myName, myRole === 'teacher');
+        // 👈 تعیین اینکه چه کسی اجازه پابلیش داره (محدودیت ۴ نفر برای رتبه ۱)
+        const isTier1 = (currentUser.planLevel === 1) || (currentUser.userType === 'student');
+        let canPublish = (myRole === 'teacher' || isCoTeacher);
+        
+        if (!canPublish && isTier1) {
+            // بررسی تعداد افراد در اتاق (اگر کمتر از ۴ نفر باشن، دانشجوها هم می‌تونن)
+            // این متغیر قبل از اتصال هنوز صفره، پس فعلاً اجازه میدیم، بعد از اتصال چک میکنیم
+            canPublish = true; 
+        }
+
+        const tokenPromise = generateLiveKitToken(roomId, myId, myName, canPublish);
         const initialRes = { width: 480, height: 270, frameRate: 15 };
 
         livekitRoom = new LivekitClient.Room({
-            adaptiveStream: true,
-            dynacast: true,
-            disconnectOnPageLeave: false,
+            adaptiveStream: true, dynacast: true, disconnectOnPageLeave: false,
             videoCaptureDefaults: { resolution: initialRes, facingMode: 'user' },
             audioCaptureDefaults: { echoCancellation: true },
-            publishDefaults: {
-                simulcast: true,
-                videoSimulcastLayers: [
-                    { width: 160, height: 90, encoding: { maxBitrate: 60000, maxFramerate: 8 } },
-                    { width: 320, height: 180, encoding: { maxBitrate: 150000, maxFramerate: 12 } }
-                ],
-                videoCodec: 'vp8', dtx: true,
-                degradationPreference: 'maintain-framerate',
-                screenShareEncoding: { maxBitrate: 1200000, maxFramerate: 10 },
-            },
+            publishDefaults: { simulcast: true, videoCodec: 'vp8', dtx: true, screenShareEncoding: { maxBitrate: 1200000, maxFramerate: 10 } },
             connectOptions: {
-                autoSubscribe: true, maxRetries: 8,
-                peerConnectionTimeout: 30000, websocketTimeout: 30000,
+                autoSubscribe: true, maxRetries: 8, peerConnectionTimeout: 60000, websocketTimeout: 60000,
                 rtcConfig: {
                     iceTransportPolicy: 'all', bundlePolicy: 'max-bundle', rtcpMuxPolicy: 'require',
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun.cloudflare.com:3478' }
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
                     ]
                 }
             },
@@ -2155,43 +1548,37 @@ async function joinMeeting() {
         setupLiveKitEvents();
 
         const token = await tokenPromise;
-        if (!localStream) {
-            hideConnectCountdown();
-            if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
-            showPermissionModal('NotFoundError');
-            return;
-        }
+        if (!localStream) { hideConnectCountdown(); if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; } showPermissionModal('NotFoundError'); return; }
 
         const hasVideo = localStream.getVideoTracks().length > 0;
         const hasAudio = localStream.getAudioTracks().length > 0;
-        if (!hasVideo && !hasAudio) {
-            hideConnectCountdown();
-            if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
-            showPermissionModal('NotFoundError');
-            return;
-        }
+        if (!hasVideo && !hasAudio) { hideConnectCountdown(); if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; } showPermissionModal('NotFoundError'); return; }
         if (!hasAudio) showToast('⚠️ بدون میکروفون وارد می‌شوید');
         if (!hasVideo) showToast('⚠️ بدون دوربین وارد می‌شوید');
 
         showToast('🌐 در حال اتصال به سرور...');
         let elapsed = 0;
-        const progressInterval = setInterval(() => {
-            elapsed += 3;
-            if (elapsed === 9) showConnBanner(t('connWait'));
-            if (elapsed === 30) showConnBanner(t('connPatience'));
-        }, 3000);
+        const progressInterval = setInterval(() => { elapsed += 3; if (elapsed === 9) showConnBanner(t('connWait')); if (elapsed === 30) showConnBanner(t('connPatience')); }, 3000);
 
         try {
-            await Promise.race([
-                livekitRoom.connect(LIVEKIT_URL, token),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 45000))
-            ]);
+            await Promise.race([ livekitRoom.connect(LIVEKIT_URL, token), new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 45000)) ]);
         } catch (connectErr) {
-            if (connectErr.message.includes('timeout')) throw new Error('⏱️ اتصال طول کشید. لطفاً اینترنت خود را چک کنید و دوباره تلاش کنید.');
+            if (connectErr.message.includes('timeout')) throw new Error('⏱️ اتصال طول کشید. لطفاً اینترنت خود را چک کنید.');
             throw connectErr;
         } finally {
-            clearInterval(progressInterval);
-            hideConnBanner();
+            clearInterval(progressInterval); hideConnBanner();
+        }
+
+        // 👈 اعمال محدودیت ۴ نفر بعد از اتصال (برای رتبه ۱)
+        if (isTier1 && myRole !== 'teacher') {
+            const participantCount = livekitRoom.remoteParticipants.size + 1; // شامل خودم
+            if (participantCount > 4) {
+                // اگر بیشتر از ۴ نفر شد، دوربین و میکروفون رو خاموش و قفل کن
+                try { await livekitRoom.localParticipant.setCameraEnabled(false); await livekitRoom.localParticipant.setMicrophoneEnabled(false); } catch(e) {}
+                document.getElementById('btnCam').disabled = true; document.getElementById('btnCam').textContent = '🔒'; document.getElementById('btnCam').classList.add('waiting');
+                document.getElementById('btnMic').disabled = true; document.getElementById('btnMic').textContent = '🔒'; document.getElementById('btnMic').classList.add('waiting');
+                showToast('👥 ظرفیت کلاس ۴ نفره پر است. شما فقط تماشاچی هستید.');
+            }
         }
 
         showMeetingUI();
@@ -2203,12 +1590,8 @@ async function joinMeeting() {
 
         if (myRole === 'teacher') {
             (async () => {
-                if (localStream.getAudioTracks()[0]) {
-                    try { await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); isMicOn = true; localStream.getAudioTracks().forEach(t => t.enabled = true); updateMicUI(); broadcast({ type: 'mic', on: true }); } catch (e) {}
-                }
-                if (localStream.getVideoTracks()[0]) {
-                    try { await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); isCamOn = true; localStream.getVideoTracks().forEach(t => t.enabled = true); updateCamUI(); broadcast({ type: 'cam', on: true }); } catch (e) {}
-                }
+                if (localStream.getAudioTracks()[0]) { try { await lp.publishTrack(localStream.getAudioTracks()[0], { name: 'microphone', source: LivekitClient.Track.Source.Microphone }); isMicOn = true; localStream.getAudioTracks().forEach(t => t.enabled = true); updateMicUI(); broadcast({ type: 'mic', on: true }); } catch (e) {} }
+                if (localStream.getVideoTracks()[0]) { try { await lp.publishTrack(localStream.getVideoTracks()[0], { name: 'camera', source: LivekitClient.Track.Source.Camera }); isCamOn = true; localStream.getVideoTracks().forEach(t => t.enabled = true); updateCamUI(); broadcast({ type: 'cam', on: true }); } catch (e) {} }
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
             })();
         } else {
@@ -2218,13 +1601,6 @@ async function joinMeeting() {
             isWaitingForApproval = true;
             startWaitingAudioBlocker();
             document.getElementById('waitingRoomOverlay').style.display = 'flex';
-
-            livekitRoom.remoteParticipants.forEach(p => {
-                if (p.identity && p.identity.startsWith('teacher-')) {
-                    const el = document.getElementById('waitingTeacherName');
-                    if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity);
-                }
-            });
             setTimeout(() => { sendData({ type: 'hello', name: myName, role: myRole, micOn: false, camOn: false, isWaiting: true }); }, 100);
         }
 
@@ -2238,35 +1614,19 @@ async function joinMeeting() {
 }
 
 function showMeetingUI() {
-    document.getElementById('lobby').style.display = 'none';
-    document.getElementById('meeting').classList.add('active');
+    document.getElementById('lobby').style.display = 'none'; document.getElementById('meeting').classList.add('active');
     document.getElementById('roomName').textContent = roomId;
-    const b = document.getElementById('roleBadge');
-    b.textContent = myRole === 'teacher' ? '👨‍🏫 مدرس' : '👨‍🎓 دانشجو';
-    b.classList.toggle('teacher', myRole === 'teacher');
+    const b = document.getElementById('roleBadge'); b.textContent = myRole === 'teacher' ? '👨‍🏫 مدرس' : '👨‍🎓 دانشجو'; b.classList.toggle('teacher', myRole === 'teacher');
     if (myRole === 'teacher') {
-        document.getElementById('btnWaitingPanel').style.display = 'inline-block';
-        document.getElementById('btnTeacherPanel').style.display = 'inline-block';
-        document.getElementById('teacherPanel').classList.add('open');
-        document.getElementById('btnPollHeader').style.display = 'inline-block';
-        document.getElementById('btnBreakoutHeader').style.display = 'inline-block';
-        document.getElementById('btnCertHeader').style.display = 'inline-block';
-        document.getElementById('btnFilesHeader').style.display = 'inline-block';
-        document.getElementById('btnActivityTimer').style.display = 'inline-block';
-        document.getElementById('btnAnnouncement').style.display = 'inline-block';
-        document.getElementById('btnExportCSV').style.display = 'block';
-        document.getElementById('btnClearAtt').style.display = 'block';
+        document.getElementById('btnWaitingPanel').style.display = 'inline-block'; document.getElementById('btnTeacherPanel').style.display = 'inline-block'; document.getElementById('teacherPanel').classList.add('open');
+        document.getElementById('btnPollHeader').style.display = 'inline-block'; document.getElementById('btnBreakoutHeader').style.display = 'inline-block'; document.getElementById('btnCertHeader').style.display = 'inline-block'; document.getElementById('btnFilesHeader').style.display = 'inline-block';
+        document.getElementById('btnActivityTimer').style.display = 'inline-block'; document.getElementById('btnAnnouncement').style.display = 'inline-block';
+        document.getElementById('btnExportCSV').style.display = 'block'; document.getElementById('btnClearAtt').style.display = 'block';
     } else { document.getElementById('btnFilesHeader').style.display = 'inline-block'; }
-    document.getElementById('btnSpotlightToggle').style.display = 'inline-block';
-    updateAdminButtons();
-    addMyVideo();
-    updateMicUI(); updateCamUI();
-    startAttendanceTracking(myId, myName, myRole, true);
-    initUserStats(myId, myName, myRole);
-    startClassTimer();
-    setupVoiceDetection();
-    startQualityCheck();
-    updateParticipantsPanel();
+    document.getElementById('btnSpotlightToggle').style.display = 'inline-block'; updateAdminButtons();
+    addMyVideo(); updateMicUI(); updateCamUI();
+    startAttendanceTracking(myId, myName, myRole, true); initUserStats(myId, myName, myRole);
+    startClassTimer(); setupVoiceDetection(); startQualityCheck(); updateParticipantsPanel();
     if (!bellAudioCtx) { try { bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
     document.title = `Lroom | ${roomId}`;
     if (myRole === 'teacher') setTimeout(() => autoAdjustQuality(true), 3000);
@@ -2274,24 +1634,9 @@ function showMeetingUI() {
 function setupLiveKitEvents() {
     const R = LivekitClient.RoomEvent;
     livekitRoom.on(R.ParticipantConnected, (p) => { if (isWaitingForApproval && p.identity && p.identity.startsWith('teacher-')) { const el = document.getElementById('waitingTeacherName'); if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity); } updateParticipantCount(); });
-    livekitRoom.on(R.ParticipantDisconnected, (p) => {
-        removeVideo(p.identity); remoteParticipants.delete(p.identity); qualityCache.delete(p.identity); waitingList.delete(p.identity); updateWaitingPanel();
-        const s = stats.userStats.get(p.identity); if (s) s.isOnline = false;
-        if (attendanceLog.has(p.identity)) attendanceLog.get(p.identity).leftAt = new Date();
-        updateParticipantCount(); updateAttendanceUI(); updateTeacherPanel(); updateParticipantsPanel(); updatePrivateRecipientList();
-        setTimeout(() => autoAdjustQuality(false), 500);
-    });
-    livekitRoom.on(R.TrackSubscribed, (track, pub, p) => {
-        if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { showScreenShareInline(p.identity, track, pub, p.name || p.identity); return; }
-        if (track.kind === LivekitClient.Track.Kind.Audio) { const el = track.attach(); el.autoplay = true; el.style.display = 'none'; el.dataset.identity = p.identity; if (isWaitingForApproval) { el.muted = true; try { el.volume = 0; } catch(e){} } document.body.appendChild(el); return; }
-        const el = track.attach(); el.autoplay = true; el.playsInline = true; el.muted = true; addRemoteVideo(p.identity, el, p.name || p.identity);
-        setTimeout(applyUniformQualityToRemote, 500);
-    });
-    livekitRoom.on(R.TrackUnsubscribed, (track, pub, p) => {
-        if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { removeScreenShareInline(p.identity); }
-        track.detach().forEach(el => el.remove());
-        if (track.kind === LivekitClient.Track.Kind.Video && remoteParticipants.has(p.identity)) showAvatar(p.identity);
-    });
+    livekitRoom.on(R.ParticipantDisconnected, (p) => { removeVideo(p.identity); remoteParticipants.delete(p.identity); qualityCache.delete(p.identity); waitingList.delete(p.identity); updateWaitingPanel(); const s = stats.userStats.get(p.identity); if (s) s.isOnline = false; if (attendanceLog.has(p.identity)) attendanceLog.get(p.identity).leftAt = new Date(); updateParticipantCount(); updateAttendanceUI(); updateTeacherPanel(); updateParticipantsPanel(); updatePrivateRecipientList(); setTimeout(() => autoAdjustQuality(false), 500); });
+    livekitRoom.on(R.TrackSubscribed, (track, pub, p) => { if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { showScreenShareInline(p.identity, track, pub, p.name || p.identity); return; } if (track.kind === LivekitClient.Track.Kind.Audio) { const el = track.attach(); el.autoplay = true; el.style.display = 'none'; el.dataset.identity = p.identity; if (isWaitingForApproval) { el.muted = true; try { el.volume = 0; } catch(e){} } document.body.appendChild(el); return; } const el = track.attach(); el.autoplay = true; el.playsInline = true; el.muted = true; addRemoteVideo(p.identity, el, p.name || p.identity); setTimeout(applyUniformQualityToRemote, 500); });
+    livekitRoom.on(R.TrackUnsubscribed, (track, pub, p) => { if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { removeScreenShareInline(p.identity); } track.detach().forEach(el => el.remove()); if (track.kind === LivekitClient.Track.Kind.Video && remoteParticipants.has(p.identity)) showAvatar(p.identity); });
     livekitRoom.on(R.TrackMuted, (pub, p) => { if (pub.kind === LivekitClient.Track.Kind.Audio) updateRemoteMicUI(p.identity, false); else if (pub.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.Camera) showAvatar(p.identity); });
     livekitRoom.on(R.TrackUnmuted, (pub, p) => { if (pub.kind === LivekitClient.Track.Kind.Audio) updateRemoteMicUI(p.identity, true); else if (pub.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.Camera) hideAvatar(p.identity); });
     livekitRoom.on(R.DataReceived, (payload, p) => { try { handleIncomingData(JSON.parse(new TextDecoder().decode(payload)), p?.identity); } catch (e) {} });
@@ -2299,44 +1644,14 @@ function setupLiveKitEvents() {
     livekitRoom.on(R.Reconnecting, () => { showConnBanner(t('connReconnect')); showToast(t('connReconnect')); });
     livekitRoom.on(R.Reconnected, () => { hideConnBanner(); showToast(t('connConnected')); });
     livekitRoom.on(R.ConnectionStateChanged, (state) => { if (state === 'disconnected') showConnBanner(t('connLost')); else if (state === 'connected') hideConnBanner(); });
-    livekitRoom.on(R.ActiveSpeakersChanged, (speakers) => {
-        try { const activeIdentities = new Set(speakers.map(s => s.identity)); remoteParticipants.forEach((_, pid) => { const pub = livekitRoom.remoteParticipants.get(pid)?.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) { const isActive = activeIdentities.has(pid); if (remoteParticipants.size > 15) pub.setSubscribed(isActive); else pub.setSubscribed(true); } }); } catch(e) {}
-    });
+    livekitRoom.on(R.ActiveSpeakersChanged, (speakers) => { try { const activeIdentities = new Set(speakers.map(s => s.identity)); remoteParticipants.forEach((_, pid) => { const pub = livekitRoom.remoteParticipants.get(pid)?.getTrackPublication(LivekitClient.Track.Source.Microphone); if (pub) { const isActive = activeIdentities.has(pid); if (remoteParticipants.size > 15) pub.setSubscribed(isActive); else pub.setSubscribed(true); } }); } catch(e) {} });
 }
 function sendData(data, destinations) { if (!livekitRoom) return; const payload = new TextEncoder().encode(JSON.stringify(data)); const opts = { reliable: true, topic: 'lroom' }; if (destinations && destinations.length) opts.destinationIdentities = destinations; livekitRoom.localParticipant.publishData(payload, opts); }
 function broadcast(data) { sendData(data); }
 function sendTo(id, data) { sendData(data, [id]); }
 
-function showScreenShareInline(pid, track, pub, name) {
-    const isSelf = pid === myId;
-    let box = isSelf ? document.getElementById('video-me') : document.getElementById(`video-${pid}`);
-    if (!box && !isSelf) { const tempEl = document.createElement('video'); tempEl.autoplay = true; tempEl.playsInline = true; addRemoteVideo(pid, tempEl, name); box = document.getElementById(`video-${pid}`); }
-    if (!box) return;
-    const oldSS = box.querySelector('.ss-video'); if (oldSS) oldSS.remove();
-    const camVideo = box.querySelector('video:not(.ss-video)'); if (camVideo) camVideo.style.display = 'none';
-    const av = box.querySelector('.avatar'); if (av) av.style.display = 'none';
-    const ssVideo = track.attach(); ssVideo.autoplay = true; ssVideo.playsInline = true; ssVideo.muted = true; ssVideo.className = 'ss-video';
-    ssVideo.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2;';
-    box.appendChild(ssVideo);
-    box.classList.add('screensharing');
-    if (!box.querySelector('.ss-badge')) { const badge = document.createElement('div'); badge.className = 'ss-badge'; badge.textContent = '🖥️ اسکرین' + (isSelf ? ' (شما)' : ''); box.appendChild(badge); }
-    if (spotlightModeActive && spotlightedId === pid) applySpotlightToAll();
-}
-function removeScreenShareInline(pid) {
-    const isSelf = pid === myId;
-    const box = isSelf ? document.getElementById('video-me') : document.getElementById(`video-${pid}`);
-    if (!box) return;
-    const ssVideo = box.querySelector('.ss-video'); if (ssVideo) ssVideo.remove();
-    const badge = box.querySelector('.ss-badge'); if (badge) badge.remove();
-    box.classList.remove('screensharing');
-    const camVideo = box.querySelector('video:not(.ss-video)');
-    const info = isSelf ? { camOn: isCamOn, name: myName } : (remoteParticipants.get(pid) || { camOn: false, name: '?' });
-    if (camVideo) {
-        if (info.camOn) { camVideo.style.display = 'block'; const av = box.querySelector('.avatar'); if (av) av.remove(); }
-        else { camVideo.style.display = 'none'; if (!box.querySelector('.avatar')) { const av = document.createElement('div'); av.className = 'avatar'; av.textContent = (info.name || '?')[0].toUpperCase(); box.insertBefore(av, box.firstChild); } }
-    }
-    if (spotlightModeActive && spotlightedId === pid) applySpotlightToAll();
-}
+function showScreenShareInline(pid, track, pub, name) { const isSelf = pid === myId; let box = isSelf ? document.getElementById('video-me') : document.getElementById(`video-${pid}`); if (!box && !isSelf) { const tempEl = document.createElement('video'); tempEl.autoplay = true; tempEl.playsInline = true; addRemoteVideo(pid, tempEl, name); box = document.getElementById(`video-${pid}`); } if (!box) return; const oldSS = box.querySelector('.ss-video'); if (oldSS) oldSS.remove(); const camVideo = box.querySelector('video:not(.ss-video)'); if (camVideo) camVideo.style.display = 'none'; const av = box.querySelector('.avatar'); if (av) av.style.display = 'none'; const ssVideo = track.attach(); ssVideo.autoplay = true; ssVideo.playsInline = true; ssVideo.muted = true; ssVideo.className = 'ss-video'; ssVideo.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2;'; box.appendChild(ssVideo); box.classList.add('screensharing'); if (!box.querySelector('.ss-badge')) { const badge = document.createElement('div'); badge.className = 'ss-badge'; badge.textContent = '🖥️ اسکرین' + (isSelf ? ' (شما)' : ''); box.appendChild(badge); } if (spotlightModeActive && spotlightedId === pid) applySpotlightToAll(); }
+function removeScreenShareInline(pid) { const isSelf = pid === myId; const box = isSelf ? document.getElementById('video-me') : document.getElementById(`video-${pid}`); if (!box) return; const ssVideo = box.querySelector('.ss-video'); if (ssVideo) ssVideo.remove(); const badge = box.querySelector('.ss-badge'); if (badge) badge.remove(); box.classList.remove('screensharing'); const camVideo = box.querySelector('video:not(.ss-video)'); const info = isSelf ? { camOn: isCamOn, name: myName } : (remoteParticipants.get(pid) || { camOn: false, name: '?' }); if (camVideo) { if (info.camOn) { camVideo.style.display = 'block'; const av = box.querySelector('.avatar'); if (av) av.remove(); } else { camVideo.style.display = 'none'; if (!box.querySelector('.avatar')) { const av = document.createElement('div'); av.className = 'avatar'; av.textContent = (info.name || '?')[0].toUpperCase(); box.insertBefore(av, box.firstChild); } } } if (spotlightModeActive && spotlightedId === pid) applySpotlightToAll(); }
 function showScreenShareModal(track, name, identity) { showScreenShareInline(identity, track, null, name); }
 function closeScreenShareModal() { }
 function toggleScreenShareFullscreen() { const wrapper = document.getElementById('screenShareWrapper'); if (!wrapper) return; if (!document.fullscreenElement) wrapper.requestFullscreen?.().catch(() => {}); else document.exitFullscreen?.().catch(() => {}); }
@@ -2344,29 +1659,7 @@ function toggleScreenShareFullscreen() { const wrapper = document.getElementById
 function handleIncomingData(data, senderId) {
     const info = remoteParticipants.get(senderId) || {};
     switch (data.type) {
-        case 'hello': {
-            if (myRole === 'teacher' && data.role === 'student' && data.isWaiting) { waitingList.set(senderId, { name: data.name }); updateWaitingPanel(); showToast(`🚪 ${data.name}`); return; }
-            remoteParticipants.set(senderId, { name: data.name, role: data.role, micOn: data.micOn, camOn: data.camOn, handRaised: false });
-            if (myRole === 'teacher' && data.role === 'student') {
-                if (!studentPermissions.has(senderId)) { studentPermissions.set(senderId, { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: { mic: false, cam: false, whiteboard: false, projector: false } }); }
-                startAttendanceTracking(senderId, data.name, 'student', false);
-                initUserStats(senderId, data.name, 'student');
-                setTimeout(() => { sendTo(senderId, { type: 'force-mute' }); sendTo(senderId, { type: 'force-camera-off' }); }, 1500);
-                sendStudentListTo(senderId);
-                if (wbStrokes.length > 0) sendTo(senderId, { type: 'wb-sync-full', strokes: wbStrokes });
-                if (projCurrentMedia) sendTo(senderId, { type: 'proj-media', media: projCurrentMedia, state: projCurrentState });
-                if (isRecording) sendTo(senderId, { type: 'recording-started' });
-                if (currentPoll) sendTo(senderId, { type: 'poll-new', poll: currentPoll });
-                if (breakoutGroups) sendTo(senderId, { type: 'breakout-groups', groups: breakoutGroups });
-                sendTo(senderId, { type: 'quality-settings', settings: qualitySettings, from: myId });
-            }
-            if (myRole === 'student' && data.role === 'teacher') { sendTo(senderId, { type: 'request-my-permissions' }); sendTo(senderId, { type: 'request-quality-settings' }); }
-            const nameEl = document.querySelector(`#video-${senderId} .name`); if (nameEl) nameEl.textContent = data.name;
-            updateTeacherPanel(); updateParticipantCount(); updatePrivateRecipientList(); updateParticipantsPanel();
-            playJoinSound();
-            setTimeout(() => autoAdjustQuality(false), 800);
-            break;
-        }
+        case 'hello': { if (myRole === 'teacher' && data.role === 'student' && data.isWaiting) { waitingList.set(senderId, { name: data.name }); updateWaitingPanel(); showToast(`🚪 ${data.name}`); return; } remoteParticipants.set(senderId, { name: data.name, role: data.role, micOn: data.micOn, camOn: data.camOn, handRaised: false }); if (myRole === 'teacher' && data.role === 'student') { if (!studentPermissions.has(senderId)) { studentPermissions.set(senderId, { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false, pending: { mic: false, cam: false, whiteboard: false, projector: false } }); } startAttendanceTracking(senderId, data.name, 'student', false); initUserStats(senderId, data.name, 'student'); setTimeout(() => { sendTo(senderId, { type: 'force-mute' }); sendTo(senderId, { type: 'force-camera-off' }); }, 1500); sendStudentListTo(senderId); if (wbStrokes.length > 0) sendTo(senderId, { type: 'wb-sync-full', strokes: wbStrokes }); if (projCurrentMedia) sendTo(senderId, { type: 'proj-media', media: projCurrentMedia, state: projCurrentState }); if (isRecording) sendTo(senderId, { type: 'recording-started' }); if (currentPoll) sendTo(senderId, { type: 'poll-new', poll: currentPoll }); if (breakoutGroups) sendTo(senderId, { type: 'breakout-groups', groups: breakoutGroups }); sendTo(senderId, { type: 'quality-settings', settings: qualitySettings, from: myId }); } if (myRole === 'student' && data.role === 'teacher') { sendTo(senderId, { type: 'request-my-permissions' }); sendTo(senderId, { type: 'request-quality-settings' }); } const nameEl = document.querySelector(`#video-${senderId} .name`); if (nameEl) nameEl.textContent = data.name; updateTeacherPanel(); updateParticipantCount(); updatePrivateRecipientList(); updateParticipantsPanel(); playJoinSound(); setTimeout(() => autoAdjustQuality(false), 800); break; }
         case 'admit': { isWaitingForApproval = false; document.getElementById('waitingRoomOverlay').style.display = 'none'; stopWaitingAudioBlocker(); showToast('✅'); setTimeout(() => { sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false }); }, 300); break; }
         case 'deny': { isWaitingForApproval = false; document.getElementById('waitingRoomOverlay').style.display = 'none'; stopWaitingAudioBlocker(); showToast('❌'); setTimeout(() => leaveMeeting(true), 1500); break; }
         case 'quality-settings': receiveQualitySettings(data.settings); break;
@@ -2569,8 +1862,8 @@ function showAvatar(pid) { const box = pid === 'me' ? document.getElementById('v
 function hideAvatar(pid) { const box = pid === 'me' ? document.getElementById('video-me') : document.getElementById(`video-${pid}`); if (!box) return; const v = box.querySelector('video:not(.ss-video)'); if (v) v.style.display = 'block'; const av = box.querySelector('.avatar'); if (av) av.remove(); }
 function updateParticipantCount() { const boxes = document.querySelectorAll('.video-box'); const n = boxes.length; document.getElementById('participantCount').textContent = `(${n})`; const vc = document.getElementById('videos'); if (vc) { if (n > 9) vc.classList.add('many'); else vc.classList.remove('many'); } }
 
-function updateMicUI() { const b = document.getElementById('btnMic'); b.classList.toggle('off', !isMicOn); b.textContent = isMicOn ? '🎤' : '🔇'; if (myRole === 'student' && !isCoTeacher && !myPermissions.mic && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.mic || isCoTeacher)) b.classList.remove('waiting'); const m = document.getElementById('mic-me'); if (m) { m.classList.toggle('muted', !isMicOn); m.textContent = isMicOn ? '🎤' : '🔇'; } }
-function updateCamUI() { const b = document.getElementById('btnCam'); b.classList.toggle('off', !isCamOn); if (myRole === 'student' && !isCoTeacher && !myPermissions.cam && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.cam || isCoTeacher)) b.classList.remove('waiting'); const v = document.querySelector('#video-me video:not(.ss-video)'); const box = document.getElementById('video-me'); if (!box) return; let av = box.querySelector('.avatar'); if (!isCamOn && !isSharing) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; av.textContent = myName[0].toUpperCase(); box.insertBefore(av, box.firstChild); } } else if (!isSharing) { if (v) v.style.display = 'block'; if (av) av.remove(); } }
+function updateMicUI() { const b = document.getElementById('btnMic'); if (!b) return; b.classList.toggle('off', !isMicOn); b.textContent = isMicOn ? '🎤' : '🔇'; if (myRole === 'student' && !isCoTeacher && !myPermissions.mic && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.mic || isCoTeacher)) b.classList.remove('waiting'); const m = document.getElementById('mic-me'); if (m) { m.classList.toggle('muted', !isMicOn); m.textContent = isMicOn ? '🎤' : '🔇'; } }
+function updateCamUI() { const b = document.getElementById('btnCam'); if (!b) return; b.classList.toggle('off', !isCamOn); if (myRole === 'student' && !isCoTeacher && !myPermissions.cam && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.cam || isCoTeacher)) b.classList.remove('waiting'); const v = document.querySelector('#video-me video:not(.ss-video)'); const box = document.getElementById('video-me'); if (!box) return; let av = box.querySelector('.avatar'); if (!isCamOn && !isSharing) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; av.textContent = myName[0].toUpperCase(); box.insertBefore(av, box.firstChild); } } else if (!isSharing) { if (v) v.style.display = 'block'; if (av) av.remove(); } }
 function updateRemoteMicUI(pid, on) { const m = document.getElementById(`mic-${pid}`); if (m) { m.classList.toggle('muted', !on); m.textContent = on ? '🎤' : '🔇'; } }
 function updateRemoteCamUI(pid, on) { const b = document.getElementById(`video-${pid}`); if (!b) return; if (b.classList.contains('screensharing')) return; const v = b.querySelector('video:not(.ss-video)'); let av = b.querySelector('.avatar'); if (!on) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; const i = remoteParticipants.get(pid); av.textContent = (i?.name || '?')[0].toUpperCase(); b.insertBefore(av, b.firstChild); } } else { if (v) v.style.display = 'block'; if (av) av.remove(); } }
 function updateHandUI(pid, r) { const c = pid === 'me' ? document.getElementById('video-me') : document.getElementById(`video-${pid}`); if (!c) return; let h = c.querySelector('.hand'); if (r && !h) { h = document.createElement('div'); h.className = 'hand'; h.textContent = '✋'; c.appendChild(h); } else if (!r && h) h.remove(); }
@@ -2668,19 +1961,14 @@ async function leaveMeeting(s) {
 window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRoom.disconnect(); } catch (e) {} if (localStream) localStream.getTracks().forEach(t => t.stop()); if (isRecording) try { mediaRecorder.stop(); } catch (e) {} });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { const wb = document.getElementById('whiteboardModal'); if (wb.classList.contains('open')) closeWhiteboard(); const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector(); const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal(); const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel(); const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal'); } });
 
-// ═══════════════ INIT ═══════════════
 window._appInit = async function() {
-    // مقداردهی Supabase
     if (typeof window.supabase !== 'undefined') {
         try {
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
                 realtime: { params: { eventsPerSecond: 2 } }
             });
-            console.log('✅ Supabase client initialized');
         } catch(e) { console.error('Supabase init error:', e); }
-    } else {
-        console.warn('⚠️ Supabase not loaded');
     }
     
     document.body.classList.toggle('light-theme', currentTheme === 'light');
@@ -2705,7 +1993,7 @@ window._appInit = async function() {
                 let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
                 if (!profile) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name || 'User', role: session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); const r2 = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(); profile = r2.data; }
                 if (profile) {
-                    currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end };
+                    currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams };
                     isGuestMode = false;
                     checkAndShow(); initRealtime(); loadActiveAnnouncement();
                     const _loader = document.getElementById('appLoader');
@@ -2714,7 +2002,7 @@ window._appInit = async function() {
                         setTimeout(async () => {
                             const end = parseDateSafe(profile.subscription_end);
                             const isExpired = end && end.getTime() < Date.now();
-                            if (isExpired) { showToast('⚠️ اعتبار تمام شده'); return; }
+                            if (isExpired && profile.user_type !== 'student') { showToast('⚠️ اعتبار تمام شده'); return; }
                             selectedLobbyRole = 'student'; setLobbyRole('student');
                             document.getElementById('joinRoomCode').value = roomFromUrl;
                             showToast('🚀 در حال ورود...');
@@ -2733,7 +2021,6 @@ window._appInit = async function() {
     if (loader) loader.style.display = 'none';
 };
 
-// اجرا وقتی DOM آماده شد
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => { if (typeof window._appInit === 'function' && typeof window.supabase !== 'undefined') window._appInit(); });
 } else {
