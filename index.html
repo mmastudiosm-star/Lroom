@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Lroom | کلاس آنلاین</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238ab4f8'/><text x='50' y='72' font-size='70' font-weight='900' text-anchor='middle' fill='%23202124' font-family='Tahoma'>L</text></svg>" />
+<!-- 👇 اضافه شدن PeerJS برای رتبه ۱ (وب خام) -->
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
 :root{--bg-primary:#202124;--bg-secondary:#16213e;--bg-tertiary:#303134;--bg-hover:#3c4043;--bg-active:#0f3460;--text-primary:#fff;--text-secondary:#9aa0a6;--text-muted:#5f6368;--border-color:#3c4043;--accent:#8ab4f8;--accent-hover:#aecbfa;--danger:#ea4335;--success:#34a853;--warning:#fbbc04;--safe-bottom:env(safe-area-inset-bottom,0px)}
@@ -1008,33 +1009,616 @@ setTimeout(function(){
   </div>
 </div>
 
-<!-- 👇 مودال اشتراک سفارشی (این بخش جدید اضافه شده) -->
-<div id="customSubModal" class="modal" style="z-index: 4000;">
-    <div class="modal-content" style="text-align: right;">
-        <h2 style="text-align: center;">⚙️ تنظیم اشتراک سفارشی</h2>
-        <p id="customSubUserName" style="color:var(--accent); font-weight:bold; margin-bottom: 15px; text-align: center;">کاربر: ...</p>
-        
-        <label>تعداد روز اعتبار:</label>
-        <input type="number" id="customDays" value="30" min="1" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:#fff; border-radius:8px;">
-        
-        <label>حداکثر تعداد دانشجو:</label>
-        <input type="number" id="customMaxStudents" value="10" min="1" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:#fff; border-radius:8px;">
-        
-        <label>حداکثر میکروفون همزمان:</label>
-        <input type="number" id="customMaxMics" value="4" min="1" style="width:100%; padding:10px; margin-bottom:10px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:#fff; border-radius:8px;">
-        
-        <label>حداکثر دوربین همزمان:</label>
-        <input type="number" id="customMaxCams" value="4" min="1" style="width:100%; padding:10px; margin-bottom:20px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:#fff; border-radius:8px;">
-        
-        <label>تکنولوژی اتصال:</label>
-        <select id="customTechType" style="width:100%; padding:10px; margin-bottom:20px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:#fff; border-radius:8px; font-family:inherit;">
-            <option value="livekit">🚀 لایوکیت (LiveKit)</option>
-            <option value="webrtc">🌐 وب (WebRTC P2P)</option>
-        </select>
-        
-        <button onclick="submitCustomSub()" style="background:var(--success); color:#fff; width:100%; padding:12px; border-radius:8px; font-weight:bold; border:none; cursor:pointer; font-family:inherit;">✅ اعمال اشتراک</button>
-        <button onclick="closeModal('customSubModal')" class="secondary" style="width:100%; margin-top:8px; padding:10px; background:var(--bg-tertiary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-family:inherit;">لغو</button>
+<div id="adminGlobalBanner">
+  <div class="gb-text">
+    <span id="adminGlobalBannerText"></span>
+    <small id="adminGlobalBannerMeta"></small>
+  </div>
+  <button onclick="dismissGlobalBanner()">✕</button>
+</div>
+
+<div id="activityTimerDisplay"></div>
+<div id="reactionsContainer"></div>
+<div id="connBanner"></div>
+<div id="toast"></div>
+
+<!-- اسکریپت‌ها با CDNهای جایگزین -->
+<script>
+(function(){
+    function loadScript(urls, callback) {
+        if (urls.length === 0) { if (callback) callback(false); return; }
+        var s = document.createElement('script');
+        s.src = urls[0];
+        s.onload = function(){ if (callback) callback(true); };
+        s.onerror = function(){ 
+            console.warn('CDN failed:', urls[0]);
+            loadScript(urls.slice(1), callback); 
+        };
+        document.head.appendChild(s);
+    }
+    window._loadScript = loadScript;
+    
+    loadScript([
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+        'https://unpkg.com/@supabase/supabase-js@2',
+        'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js'
+    ], function(ok1){
+        loadScript([
+            'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js',
+            'https://unpkg.com/livekit-client@2.5.7/dist/livekit-client.umd.min.js'
+        ], function(ok2){
+            loadScript([
+                'https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js',
+                'https://unpkg.com/@livekit/track-processors@latest/dist/track-processors.umd.min.js'
+            ], function(ok3){
+                var mainScript = document.createElement('script');
+                mainScript.textContent = window._mainAppCode || '';
+                document.body.appendChild(mainScript);
+                if (typeof window._appInit === 'function') window._appInit();
+            });
+        });
+    });
+})();
+</script>
+</body>
+</html>
+<body>
+<script>
+// 🛡️ Fallback: اگه CDN لود نشد، بعد از ۸ ثانیه لودر رو مخفی کن
+setTimeout(function(){
+    var loader = document.getElementById('appLoader');
+    if (loader) loader.style.display = 'none';
+    var auth = document.getElementById('authScreen');
+    var lobby = document.getElementById('lobby');
+    var meeting = document.getElementById('meeting');
+    var guest = document.getElementById('guestJoinScreen');
+    var lobbyOpen = lobby && lobby.style.display === 'flex';
+    var meetingOpen = meeting && meeting.classList.contains('active');
+    var guestOpen = guest && guest.style.display === 'flex';
+    if (!lobbyOpen && !meetingOpen && !guestOpen && auth && auth.style.display === 'none') {
+        auth.style.display = 'flex';
+        if (typeof window.supabase === 'undefined') {
+            var warn = document.createElement('div');
+            warn.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ea4335;color:#fff;padding:12px 20px;border-radius:8px;z-index:999999;font-size:13px;text-align:center;max-width:90%;';
+            warn.textContent = '⚠️ اتصال به سرور برقرار نشد. لطفاً صفحه را رفرش کنید.';
+            document.body.appendChild(warn);
+        }
+    }
+}, 8000);
+</script>
+
+<div id="appLoader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-primary);z-index:999999;gap:20px;">
+    <div class="logo-icon" style="width:80px;height:80px;font-size:50px;border-radius:22px;">L</div>
+    <div style="color:var(--text-secondary);font-size:14px;">⏳ در حال بارگذاری...</div>
+</div>
+
+<div id="guestJoinScreen">
+  <div class="guest-box">
+    <div class="guest-icon">🎓</div>
+    <h2>ورود به کلاس</h2>
+    <div class="guest-room" id="guestRoomCodeDisplay">—</div>
+    <p>برای ورود، نام خود را وارد کنید.<br>مدرس شما را به کلاس راه می‌دهد.</p>
+    <input type="text" id="guestNameInput" placeholder="نام و نام خانوادگی" maxlength="40" autocomplete="name" />
+    <button class="primary" id="guestJoinBtn" onclick="submitGuestJoin()">🚀 ورود به اتاق انتظار</button>
+    <div class="back-link" onclick="cancelGuestJoin()">← بازگشت به صفحه اصلی</div>
+  </div>
+</div>
+
+<div id="authScreen">
+    <div class="auth-box">
+        <div class="auth-logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
+
+        <div class="auth-method-toggle">
+            <button type="button" class="method-btn active" id="methodBtnEmail" onclick="switchAuthMethod('email')">📧 ایمیل</button>
+            <button type="button" class="method-btn" id="methodBtnPhone" onclick="switchAuthMethod('phone')">📱 شماره همراه</button>
+        </div>
+
+        <div id="emailAuthSection">
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">ورود</button>
+                <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">ثبت‌نام</button>
+            </div>
+            <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+                <label>ایمیل</label>
+                <input type="email" id="loginEmail" required autocomplete="email" />
+                <label>رمز عبور</label>
+                <input type="password" id="loginPassword" required autocomplete="current-password" />
+                <div class="auth-error" id="loginError"></div>
+                <button type="submit" class="submit" id="loginBtn">ورود</button>
+                <div style="text-align:center;margin-top:12px;">
+                    <a onclick="openPasswordRecovery()" style="color:var(--accent);cursor:pointer;font-size:13px;text-decoration:underline;">🔐 فراموشی رمز عبور؟</a>
+                </div>
+            </form>
+            <form class="auth-form" id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+                <label>نام و نام خانوادگی</label>
+                <input type="text" id="regName" required autocomplete="name" />
+                <label>ایمیل</label>
+                <input type="email" id="regEmail" required autocomplete="email" />
+                <label>📱 شماره همراه (اختیاری)</label>
+                <input type="tel" id="regPhone" placeholder="09123456789" dir="ltr" autocomplete="tel" />
+                
+                <label>نقش شما در پلتفرم:</label>
+                <select id="regUserType" required style="width:100%;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);margin-bottom:10px;font-family:inherit;">
+                    <option value="student" selected>👨‍🎓 دانشجو (رایگان)</option>
+                    <option value="teacher">👨‍🏫 مدرس (نیاز به اشتراک)</option>
+                    <option value="both">🎭 هر دو (نیاز به اشتراک)</option>
+                </select>
+                
+                <label>رمز عبور</label>
+                <input type="password" id="regPassword" minlength="6" required autocomplete="new-password" />
+                <label>🎁 کد هدیه (اختیاری)</label>
+                <input type="text" id="regDiscountCode" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;" />
+                <button type="button" onclick="applyDiscountCode('regDiscountCode')" style="width:100%;padding:9px;margin-top:6px;background:var(--success);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">🎁 بررسی کد هدیه</button>
+                <div class="auth-error" id="regError"></div>
+                <div class="auth-success" id="regSuccess"></div>
+                <button type="submit" class="submit" id="regBtn">ثبت‌نام</button>
+                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان (مخصوص مدرسین)</p>
+            </form>
+        </div>
+
+        <div id="phoneAuthSection" style="display:none;">
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="phoneTabLogin" onclick="switchPhoneTab('login')">ورود</button>
+                <button class="auth-tab" id="phoneTabRegister" onclick="switchPhoneTab('register')">ثبت‌نام</button>
+            </div>
+
+            <form class="auth-form" id="phoneLoginForm" onsubmit="handlePhoneLogin(event)">
+                <label>شماره همراه</label>
+                <input type="tel" id="phoneLoginInput" placeholder="09123456789" dir="ltr" required autocomplete="tel" />
+                <label>رمز عبور</label>
+                <input type="password" id="phoneLoginPassword" required autocomplete="current-password" />
+                <div class="auth-error" id="phoneLoginError"></div>
+                <button type="submit" class="submit" id="phoneLoginBtn">ورود</button>
+                <div style="text-align:center;margin-top:12px;">
+                    <a onclick="openPasswordRecovery()" style="color:var(--accent);cursor:pointer;font-size:13px;text-decoration:underline;">🔐 فراموشی رمز عبور؟</a>
+                </div>
+            </form>
+
+            <form class="auth-form" id="phoneRegisterForm" style="display:none;" onsubmit="handlePhoneRegister(event)">
+                <label>نام و نام خانوادگی</label>
+                <input type="text" id="phoneRegName" required autocomplete="name" />
+                <label>شماره همراه</label>
+                <input type="tel" id="phoneRegInput" placeholder="09123456789" dir="ltr" required autocomplete="tel" />
+                <div style="color:#ea4335;font-size:12px;margin-top:6px;font-weight:600;line-height:1.6;">⚠️ لطفاً شماره همراه معتبر وارد کنید (مثال: 09123456789)</div>
+                
+                <label>نقش شما در پلتفرم:</label>
+                <select id="phoneRegUserType" required style="width:100%;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);margin-bottom:10px;font-family:inherit;">
+                    <option value="student" selected>👨‍🎓 دانشجو (رایگان)</option>
+                    <option value="teacher">👨‍🏫 مدرس (نیاز به اشتراک)</option>
+                    <option value="both">🎭 هر دو (نیاز به اشتراک)</option>
+                </select>
+
+                <label>رمز عبور</label>
+                <input type="password" id="phoneRegPassword" minlength="6" required autocomplete="new-password" />
+                <label>🎁 کد هدیه (اختیاری)</label>
+                <input type="text" id="phoneRegDiscountCode" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;" />
+                <button type="button" onclick="applyDiscountCode('phoneRegDiscountCode')" style="width:100%;padding:9px;margin-top:6px;background:var(--success);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">🎁 بررسی کد هدیه</button>
+                <div class="auth-error" id="phoneRegError"></div>
+                <div class="auth-success" id="phoneRegSuccess"></div>
+                <button type="submit" class="submit" id="phoneRegBtn">ثبت‌نام</button>
+                <p style="text-align:center;color:var(--text-secondary);font-size:12px;margin-top:12px;">🎁 ۲۰ روز اعتبار رایگان (مخصوص مدرسین)</p>
+            </form>
+        </div>
     </div>
+</div>
+
+<div id="expiredScreen">
+    <div class="expired-box">
+        <h1>⛔ اعتبار شما تمام شده است</h1>
+        <p class="user-name">کاربر گرامی <b id="expUserName">-</b></p>
+        <div id="giftSection">
+            <h3>🎁 کد هدیه</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">کد هدیه خود را وارد کنید تا اعتبار به حسابتان اضافه شود:</p>
+            <div id="giftCodeBox">
+                <input type="text" id="expiredDiscountCode" placeholder="کد هدیه..." />
+                <button onclick="checkExpiredDiscount()">🎁 فعال کردن</button>
+            </div>
+            <div id="giftStatus"></div>
+        </div>
+        <div class="bale-note" style="margin-top:20px;">
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.8;">برای دریافت کد هدیه یا خرید اشتراک، به آیدی زیر پیام دهید:</div>
+            <div class="bale-id">@sobhan101095</div>
+        </div>
+        <button class="logout-btn" onclick="logout()" style="margin-top:20px;">🚪 خروج از حساب</button>
+    </div>
+</div>
+
+<div id="lobby">
+<div class="top-bar">
+<div></div>
+<div class="top-bar-right">
+<div id="userBadge" onclick="toggleUserMenu()">
+    <span id="userBadgeCrown" style="display:none;" class="crown">👑</span>
+    <span class="u-name" id="userBadgeName">کاربر</span>
+    <span class="u-days" id="userBadgeDays"></span>
+    <div class="user-menu" id="userMenu">
+        <div class="menu-item" onclick="showSubscriptionInfo()">💳 وضعیت اشتراک</div>
+        <div class="menu-item" onclick="openGiftCodeModal()">🎁 وارد کردن کد هدیه</div>
+        <div class="menu-item" id="adminMenuBtn" style="display:none;" onclick="openAdminPanel()">👑 پنل مدیریت</div>
+        <div class="menu-sep"></div>
+        <div class="menu-item" onclick="logout()">🚪 خروج</div>
+    </div>
+</div>
+<button id="adminPanelBtnLobby" onclick="openAdminPanel()" style="display:none;width:auto;padding:8px 14px;font-size:13px;background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-family:inherit;">👑 ادمین</button>
+<select class="device-selector" id="deviceSelect" onchange="changeDevice(this.value)">
+<option value="auto">🖥️ خودکار</option>
+<option value="phone">📱 گوشی</option>
+<option value="tablet">📲 تبلت</option>
+<option value="laptop">💻 لپ‌تاپ</option>
+</select>
+<select class="lang-selector" id="langSelect" onchange="changeLanguage(this.value)">
+<option value="fa">🇮🇷 فارسی</option>
+<option value="en">🇬🇧 English</option>
+<option value="ar">🇸🇦 العربية</option>
+</select>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+</div>
+</div>
+<div class="logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
+<p class="subtitle">پلتفرم کلاس آنلاین و وبینار</p>
+<div class="preview">
+<video id="previewVideo" autoplay muted playsinline></video>
+<div class="preview-controls">
+<button id="previewMicBtn" onclick="togglePreviewMic()">🎤</button>
+<button id="previewCamBtn" onclick="togglePreviewCam()">📹</button>
+</div>
+</div>
+
+<div class="role-selector-row">
+    <button type="button" class="role-btn active" id="roleBtnTeacher" onclick="setLobbyRole('teacher')">👨‍🏫 مدرس</button>
+    <button type="button" class="role-btn" id="roleBtnStudent" onclick="setLobbyRole('student')">👨‍🎓 دانشجو</button>
+</div>
+
+<div class="session-code-box" id="teacherSessionBox">
+<div class="sc-label">🔑 کد جلسه اختصاصی شما (این کد را به دانشجویان بدهید)</div>
+<div class="session-code-display" id="userSessionCodeDisplay">—</div>
+<button onclick="copySessionCode()" style="padding:8px 20px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;font-family:inherit;font-size:12px;">📋 کپی کد جلسه</button>
+<div class="sc-hint">این کد قابل تغییر نیست. دانشجویان با این کد وارد کلاس شما می‌شوند.</div>
+</div>
+
+<div class="student-join-box" id="studentJoinBox" style="display:none;">
+<div class="sj-label">🔑 کد جلسه را از مدرس خود بگیرید و اینجا وارد کنید</div>
+<input type="text" id="joinRoomCode" placeholder="مثلاً 1001" maxlength="20" />
+<div class="sj-hint">پس از وارد کردن کد، روی «ورود به جلسه» کلیک کنید.</div>
+</div>
+
+<p class="hint" id="lobbyHint">💡 کد جلسه خود را برای دانشجویان بفرستید یا کد مدرس را وارد کنید.</p>
+<div class="row"><button class="primary" id="joinBtn" onclick="joinMeeting()">ورود به جلسه</button></div>
+</div>
+
+<div id="meeting">
+<div id="header">
+<div id="roomTitle">
+<span id="brandHeader">Lroom</span>
+<span>جلسه:</span> <strong id="roomName"></strong>
+<span id="roleBadge">دانشجو</span>
+<small id="participantCount" style="color:var(--text-secondary);"></small>
+</div>
+<div id="headerActions">
+<div id="classTimer">⏱️ 00:00</div>
+<div id="recordingIndicator"><span class="dot"></span><span>ضبط</span><span id="recordingTimer">00:00</span></div>
+<button onclick="copyLink()">🔗 لینک</button>
+<button onclick="toggleParticipantsPanel()">👥 شرکت‌کننده‌ها <span id="participantsCount" style="background:var(--accent);color:#202124;border-radius:10px;padding:0 6px;font-size:10px;font-weight:700;">0</span></button>
+<button id="btnWaitingPanel" onclick="toggleWaitingPanel()" style="display:none;">🚪 انتظار <span id="waitingCount" style="background:var(--danger);color:#fff;border-radius:10px;padding:0 6px;font-size:10px;font-weight:700;display:none;">0</span></button>
+<button onclick="toggleAttendancePanel()">📊 حضور</button>
+<button onclick="toggleStatsPanel()">📈 آمار</button>
+<button id="btnProjectorHeader" onclick="openProjector()">📽️ پروژکتور</button>
+<button id="btnActivityTimer" onclick="openActivityTimer()" style="display:none;">⏳ تایمر</button>
+<button id="btnAnnouncement" onclick="openAnnouncement()" style="display:none;">📢 اعلان</button>
+<button id="btnPollHeader" onclick="togglePollPanel()" style="display:none;">📝 نظرسنجی</button>
+<button id="btnBreakoutHeader" onclick="toggleBreakoutPanel()" style="display:none;">👥 گروه‌ها</button>
+<button id="btnCertHeader" onclick="toggleCertPanel()" style="display:none;">🎓 گواهی</button>
+<button id="btnFilesHeader" onclick="openFilesPanel()" style="display:none;">📎 فایل‌ها</button>
+<button id="btnSpotlightToggle" onclick="toggleSpotlightMode()" style="display:none;">🎯 Spotlight</button>
+<button id="adminPanelBtnMeeting" onclick="openAdminPanel()" style="display:none;background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;font-weight:700;">👑 ادمین</button>
+<button onclick="toggleTheme()" id="themeToggleMeeting">🌙</button>
+<button id="btnTeacherPanel" class="teacher-btn" style="display:none;" onclick="toggleTeacherPanel()">🎓 پنل مدرس</button>
+</div>
+</div>
+
+<div id="mainArea">
+<div id="teacherPanel">
+<div class="panel-header"><h3>🎓 پنل مدیریت کلاس</h3><button class="close-btn" onclick="toggleTeacherPanel()">✕</button></div>
+<div id="pendingRequests"><h4>📩 درخواست‌ها</h4><div id="pendingRequestsList"></div></div>
+<div class="panel-body">
+<button class="teacher-action-btn danger" onclick="muteAllStudents()">🔇 بستن صدای همه</button>
+<button class="teacher-action-btn" onclick="muteAllCameras()">📹 خاموش کردن دوربین همه</button>
+<button class="teacher-action-btn" onclick="lockRoom()"><span id="lockIcon">🔓</span> <span>قفل کردن اتاق</span></button>
+<button class="teacher-action-btn" onclick="clearAllHands()">✋ پایین آوردن دست‌ها</button>
+<button class="teacher-action-btn" onclick="openWhiteboard()">📝 تخته سفید</button>
+<button class="teacher-action-btn" onclick="openProjector()">📽️ ویدیو پروژکتور</button>
+<button class="teacher-action-btn" id="btnRecordPanel" onclick="toggleRecording()">🎥 شروع ضبط</button>
+<button class="teacher-action-btn" onclick="openFileUpload()">📤 آپلود فایل</button>
+<button class="teacher-action-btn" onclick="openActivityTimer()">⏳ تایمر فعالیت</button>
+<button class="teacher-action-btn" onclick="openAnnouncement()">📢 اعلان</button>
+<button class="teacher-action-btn" onclick="clearSpotlight()">❌ بستن Spotlight</button>
+</div>
+<div class="panel-body" style="border-top:1px solid var(--border-color);">
+<h4 style="font-size:12px;color:var(--accent);margin-bottom:8px;">⚙️ تنظیم کیفیت</h4>
+<label style="font-size:11px;color:var(--text-secondary);display:block;margin-top:8px;">📹 کیفیت دوربین دانشجویان</label>
+<select id="qStudentCam" onchange="applyQualitySettings()" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;font-size:12px;margin-top:4px;">
+<option value="auto" selected>🔄 خودکار (توصیه می‌شود)</option>
+<option value="low">🔴 کم (180p - 10fps)</option>
+<option value="medium">🟡 متوسط (360p - 20fps)</option>
+<option value="high">🟢 زیاد (720p - 30fps)</option>
+</select>
+<label style="font-size:11px;color:var(--text-secondary);display:block;margin-top:8px;">🖥️ کیفیت اشتراک صفحه</label>
+<select id="qScreenShare" onchange="applyQualitySettings()" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;font-size:12px;margin-top:4px;">
+<option value="auto" selected>🔄 خودکار (توصیه می‌شود)</option>
+<option value="low">🔴 کم (720p - 10fps)</option>
+<option value="medium">🟡 متوسط (1080p - 15fps)</option>
+<option value="high">🟢 زیاد (1080p - 30fps)</option>
+</select>
+<label style="font-size:11px;color:var(--text-secondary);display:block;margin-top:8px;">📽️ کیفیت پروژکتور</label>
+<select id="qProjector" onchange="applyQualitySettings()" style="width:100%;padding:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;font-size:12px;margin-top:4px;">
+<option value="auto" selected>🔄 خودکار (توصیه می‌شود)</option>
+<option value="low">🔴 کم (480p)</option>
+<option value="medium">🟡 متوسط (720p)</option>
+<option value="high">🟢 زیاد (1080p)</option>
+</select>
+<div id="autoQualityStatus" style="margin-top:12px;padding:10px;background:rgba(52,168,83,.15);border:1px solid var(--success);border-radius:8px;font-size:11px;color:var(--success);display:none;line-height:1.7;">
+  <b>🔄 حالت خودکار فعال</b>
+  <div id="autoQualityInfo" style="margin-top:4px;color:var(--text-secondary);">—</div>
+</div>
+</div>
+<div class="panel-body" style="border-top:1px solid var(--border-color);flex:1;"><div id="studentsList"></div></div>
+</div>
+
+<div id="attendancePanel"><div class="panel-header"><h3>📊 گزارش حضور</h3><button class="close-btn" onclick="toggleAttendancePanel()">✕</button></div>
+<div class="panel-body">
+<button class="teacher-action-btn" onclick="exportAttendanceCSV()" id="btnExportCSV" style="display:none;">⬇️ دانلود CSV</button>
+<button class="teacher-action-btn" onclick="clearAttendance()" id="btnClearAtt" style="display:none;">🗑️ پاک کردن</button>
+<div id="attendanceList" style="margin-top:12px;"></div>
+</div>
+</div>
+
+<div id="statsPanel"><div class="panel-header"><h3>📈 آمار کلاس</h3><button class="close-btn" onclick="toggleStatsPanel()">✕</button></div>
+<div class="panel-body" id="statsPanelBody"></div></div>
+
+<div id="pollPanel"><div class="panel-header"><h3>📝 نظرسنجی</h3><button class="close-btn" onclick="togglePollPanel()">✕</button></div><div class="panel-body" id="pollPanelBody"></div></div>
+
+<div id="breakoutPanel"><div class="panel-header"><h3>👥 اتاق‌های شکست</h3><button class="close-btn" onclick="toggleBreakoutPanel()">✕</button></div><div class="panel-body" id="breakoutPanelBody"></div></div>
+
+<div id="certPanel"><div class="panel-header"><h3>🎓 گواهی‌نامه</h3><button class="close-btn" onclick="toggleCertPanel()">✕</button></div><div class="panel-body" id="certPanelBody"></div></div>
+
+<div id="participantsPanel">
+<div class="panel-header"><h3>👥 شرکت‌کننده‌ها</h3><button class="close-btn" onclick="toggleParticipantsPanel()">✕</button></div>
+<div class="panel-body" id="participantsListBody"></div>
+</div>
+
+<div id="waitingPanel">
+<div class="panel-header"><h3>🚪 اتاق انتظار</h3><button class="close-btn" onclick="toggleWaitingPanel()">✕</button></div>
+<div class="panel-body" id="waitingPanelBody"></div>
+</div>
+
+<div id="videos"></div>
+</div>
+
+<div id="reactionsBar">
+<button onclick="sendReaction('👍')">👍</button>
+<button onclick="sendReaction('❤️')">❤️</button>
+<button onclick="sendReaction('😂')">😂</button>
+<button onclick="sendReaction('👏')">👏</button>
+<button onclick="sendReaction('🎉')">🎉</button>
+<button onclick="sendReaction('🙋')">🙋</button>
+</div>
+
+<div id="controls">
+<button class="ctrl-btn" id="btnMic" onclick="toggleMic()">🎤</button>
+<button class="ctrl-btn" id="btnCam" onclick="toggleCam()">📹</button>
+<button class="ctrl-btn" id="btnBlur" onclick="toggleBackgroundBlur()" title="پس‌زمینه تار">🌫️</button>
+<button class="ctrl-btn" id="btnScreen" onclick="toggleScreen()">🖥️</button>
+<button class="ctrl-btn" id="btnWhiteboard" onclick="openWhiteboard()">📝</button>
+<button class="ctrl-btn" id="btnProjector" onclick="openProjector()">📽️</button>
+<button class="ctrl-btn" id="btnHand" onclick="toggleHand()">✋</button>
+<button class="ctrl-btn" id="btnBandwidth" onclick="toggleLowBandwidth()">📶</button>
+<button class="ctrl-btn" id="btnChat" onclick="toggleChat()">💬</button>
+<button class="ctrl-btn end" onclick="leaveMeeting()">📞 خروج</button>
+</div>
+</div>
+
+<div id="chat">
+<div class="panel-header"><strong>💬 چت</strong><button class="close-btn" onclick="toggleChat()">✕</button></div>
+<div class="chat-tabs">
+<button class="chat-tab active" onclick="switchChatTab('public')">عمومی</button>
+<button class="chat-tab" onclick="switchChatTab('private')">خصوصی</button>
+</div>
+<div id="privateRecipient"><select id="privateRecipientSelect"></select></div>
+<div id="chatMessages"></div>
+<div id="chatInput">
+<input type="text" id="msgInput" placeholder="پیام..." onkeypress="if(event.key==='Enter') sendMessage()" />
+<button class="emoji-toggle" onclick="toggleEmojiPicker()">😊</button>
+<button onclick="sendMessage()">➤</button>
+<div id="emojiPicker"><div class="emoji-grid" id="emojiGrid"></div></div>
+</div>
+</div>
+
+<div id="whiteboardModal"><div id="whiteboardContainer"><div id="whiteboardHeader"><h3>📝 تخته سفید</h3><button class="close-btn" onclick="closeWhiteboard()">✕</button></div>
+<div id="whiteboardTools">
+<span class="wb-tool-label">رنگ:</span>
+<button class="color-btn active" style="background:#000" onclick="setPenColor('#000000',this)"></button>
+<button class="color-btn" style="background:#ea4335" onclick="setPenColor('#ea4335',this)"></button>
+<button class="color-btn" style="background:#1a73e8" onclick="setPenColor('#1a73e8',this)"></button>
+<button class="color-btn" style="background:#34a853" onclick="setPenColor('#34a853',this)"></button>
+<button class="color-btn" style="background:#fbbc04" onclick="setPenColor('#fbbc04',this)"></button>
+<span class="wb-tool-label" style="margin-right:10px;">ضخامت:</span>
+<button class="size-btn" onclick="setPenSize(2,this)">—</button>
+<button class="size-btn active" onclick="setPenSize(4,this)">•</button>
+<button class="size-btn" onclick="setPenSize(8,this)">⬤</button>
+<button class="wb-action-btn save" onclick="saveWhiteboardAsImage()">📥 ذخیره عکس</button>
+<button class="wb-action-btn undo" onclick="undoLastStroke()">↶ واگرد</button>
+<button class="wb-action-btn" onclick="clearWhiteboard()">🗑️ پاک</button>
+</div>
+<div id="whiteboardCanvasWrapper"><canvas id="whiteboardCanvas"></canvas></div>
+</div></div>
+
+<div id="projectorModal"><div id="projectorContainer">
+<div id="projectorHeader"><h3>📽️ ویدیو پروژکتور</h3><button class="close-btn" onclick="closeProjector()">✕</button></div>
+<div id="projectorTeacherTools" style="display:none;padding:8px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:8px;align-items:center;">
+<input type="file" id="projectorFileInput" accept="video/*,image/*" style="display:none;" onchange="loadProjectorFile(event)" />
+<button class="projector-btn primary" id="projUploadBtn" onclick="document.getElementById('projectorFileInput').click()">📤 آپلود</button>
+<button class="projector-btn" id="projPlayBtn" onclick="toggleProjectorPlay()">▶️ پخش</button>
+<button class="projector-btn" id="projBackBtn" onclick="seekProjectorBy(-5)">⏪ 5s</button>
+<button class="projector-btn" id="projFwdBtn" onclick="seekProjectorBy(5)">5s ⏩</button>
+<span id="projTimeDisplay" style="font-size:12px;font-family:monospace;color:var(--text-secondary);">00:00 / 00:00</span>
+</div>
+<div id="projectorDrawTools" style="display:none;padding:8px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:8px;align-items:center;">
+<span class="wb-tool-label">رنگ:</span>
+<button class="color-btn active" style="background:#ea4335" onclick="setProjPenColor('#ea4335',this)"></button>
+<button class="color-btn" style="background:#fbbc04" onclick="setProjPenColor('#fbbc04',this)"></button>
+<button class="color-btn" style="background:#34a853" onclick="setProjPenColor('#34a853',this)"></button>
+<button class="color-btn" style="background:#1a73e8" onclick="setProjPenColor('#1a73e8',this)"></button>
+<button class="color-btn" style="background:#fff" onclick="setProjPenColor('#ffffff',this)"></button>
+<button class="color-btn" style="background:#000" onclick="setProjPenColor('#000000',this)"></button>
+<span class="wb-tool-label" style="margin-right:10px;">ضخامت:</span>
+<button class="size-btn" onclick="setProjPenSize(3,this)">—</button>
+<button class="size-btn active" onclick="setProjPenSize(6,this)">•</button>
+<button class="size-btn" onclick="setProjPenSize(12,this)">⬤</button>
+<button class="wb-action-btn undo" onclick="undoProjectorStroke()">↶ واگرد</button>
+<button class="wb-action-btn" onclick="clearProjectorCanvas()">🗑️ پاک</button>
+</div>
+<div id="projectorCanvasWrapper">
+<div id="projectorEmptyState"><div style="text-align:center;color:var(--text-secondary);padding:40px;"><div style="font-size:60px;margin-bottom:20px;">📽️</div><h3>ویدیو پروژکتور خالی</h3><p id="projectorEmptyHint">منتظر آپلود مدرس...</p></div></div>
+<video id="projectorVideo" style="display:none;" playsinline></video>
+<img id="projectorImage" style="display:none;" alt="projector" />
+<canvas id="projectorCanvas"></canvas>
+</div>
+<div id="projectorSeekBar"><span id="projCurrentTime" style="font-size:12px;font-family:monospace;">00:00</span><input type="range" id="projectorSeek" min="0" max="100" value="0" step="0.1" style="flex:1;accent-color:var(--accent);" oninput="onProjectorSeekInput(this.value)" onchange="onProjectorSeekChange(this.value)" /><span id="projDuration" style="font-size:12px;font-family:monospace;">00:00</span></div>
+</div></div>
+
+<div id="screenShareModal"><div id="screenShareContainer">
+<div id="screenShareHeader">
+<h3>🖥️ اشتراک صفحه</h3>
+<span id="screenShareWho" style="font-size:12px;color:var(--text-secondary);"></span>
+<button id="screenShareFullscreenBtn" onclick="toggleScreenShareFullscreen()">⛶ تمام صفحه</button>
+<button class="close-btn" onclick="closeScreenShareModal()">✕</button>
+</div>
+<div id="screenShareWrapper"><video id="screenShareVideo" autoplay playsinline></video></div>
+</div></div>
+
+<div id="kickModal" class="modal"><div class="modal-content"><h2>🚫 اخراج</h2><p id="kickReason">...</p><button onclick="leaveMeeting(true)">باشه</button></div></div>
+<div id="recordingModal" class="modal"><div class="modal-content"><h2>🎥 ضبط تمام شد</h2><p>آماده دانلود است.</p><button onclick="downloadRecording()">⬇️ دانلود</button><button class="secondary" onclick="discardRecording()">🗑️ حذف</button></div></div>
+<div id="pollModal" class="modal"><div class="modal-content"><h2>📝 نظرسنجی</h2><input type="text" id="pollQuestion" placeholder="سوال..." /><input type="text" class="poll-opt-input" placeholder="گزینه ۱" /><input type="text" class="poll-opt-input" placeholder="گزینه ۲" /><input type="text" class="poll-opt-input" placeholder="گزینه ۳" /><input type="text" class="poll-opt-input" placeholder="گزینه ۴" /><button onclick="createPoll()">ایجاد</button><button class="secondary" onclick="closeModal('pollModal')">لغو</button></div></div>
+<div id="fileUploadModal" class="modal"><div class="modal-content"><h2>📤 آپلود</h2><p>حداکثر ۱۰۰MB</p><input type="file" id="fileInput" style="padding:8px;" /><button onclick="uploadFile()">آپلود</button><button class="secondary" onclick="closeModal('fileUploadModal')">لغو</button></div></div>
+<div id="filesPanelModal" class="modal"><div class="modal-content"><h2>📎 فایل‌ها</h2><div id="filesList" style="text-align:right;max-height:400px;overflow-y:auto;"></div><button class="secondary" onclick="closeModal('filesPanelModal')">بستن</button></div></div>
+<div id="passwordModal" class="modal"><div class="modal-content"><h2>🔐 رمز اتاق</h2><p>رمز را وارد کنید.</p><input type="password" id="passwordInput" placeholder="رمز..." /><button onclick="submitPassword()">تأیید</button><button class="secondary" onclick="cancelPassword()">لغو</button></div></div>
+<div id="giftCodeModal" class="modal">
+  <div class="modal-content">
+    <div style="font-size:60px;margin-bottom:12px;">🎁</div>
+    <h2>کد هدیه</h2>
+    <p>کد هدیه خود را وارد کنید تا به اعتبار شما اضافه شود</p>
+    <input type="text" id="giftCodeModalInput" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;font-size:16px;font-weight:700;" />
+    <div id="giftCodeModalStatus" style="font-size:13px;min-height:20px;margin-bottom:10px;font-weight:600;"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="secondary" onclick="closeModal('giftCodeModal')" style="flex:1;min-width:100px;">لغو</button>
+      <button onclick="submitGiftCode()" style="flex:1;min-width:100px;background:var(--success);">🎁 فعال کردن</button>
+    </div>
+  </div>
+</div>
+<div id="passwordRecoveryModal" class="modal" style="z-index:10001;">
+  <div class="modal-content">
+    <div style="font-size:60px;margin-bottom:12px;">🔐</div>
+    <h2>بازیابی رمز عبور</h2>
+    <p>برای بازیابی رمز عبور خود، به آیدی زیر در پیام‌رسان <b style="color:var(--accent);">بله</b> پیام دهید:</p>
+    <div onclick="openBaleChat()" style="cursor:pointer;background:linear-gradient(135deg,var(--accent),#4285f4);color:#fff;padding:14px 24px;border-radius:12px;font-size:18px;font-weight:700;margin:16px auto;display:inline-block;direction:ltr;transition:transform .2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">@mohammadmahdimma</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">👆 برای باز شدن در پیام‌رسان بله کلیک کنید</p>
+    <button class="secondary" onclick="closeModal('passwordRecoveryModal')" style="margin-top:8px;">بستن</button>
+  </div>
+</div>
+<div id="activityTimerModal" class="modal"><div class="modal-content"><h2>⏳ تایمر فعالیت</h2><p>مدت زمان به دقیقه.</p><input type="number" id="activityMinutes" min="1" max="120" value="5" /><button onclick="startActivityTimer()">شروع</button><button class="secondary" onclick="stopActivityTimer()">توقف</button><button class="secondary" onclick="closeModal('activityTimerModal')">لغو</button></div></div>
+<div id="announceModal" class="modal"><div class="modal-content"><h2>📢 اعلان به همه</h2><p>پیام بالای صفحه ظاهر می‌شود.</p><textarea id="announceText" rows="3" placeholder="متن اعلان..."></textarea><button onclick="sendAnnouncement()">ارسال</button><button class="secondary" onclick="hideAnnouncement(true)">حذف اعلان</button><button class="secondary" onclick="closeModal('announceModal')">لغو</button></div></div>
+<div id="profileModal" class="modal"><div class="modal-content">
+<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px">
+<div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">?</div>
+<div id="profileName" style="font-size:20px;font-weight:700">-</div>
+<div id="profileRole" style="font-size:12px;color:var(--text-secondary);padding:4px 14px;border-radius:12px;background:var(--bg-tertiary)">-</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px 6px;text-align:center"><div id="profileMic" style="font-size:16px;font-weight:700;color:var(--accent)">-</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">🎤 میکروفون</div></div>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px 6px;text-align:center"><div id="profileCam" style="font-size:16px;font-weight:700;color:var(--accent)">-</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">📹 دوربین</div></div>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px 6px;text-align:center"><div id="profileHand" style="font-size:16px;font-weight:700;color:var(--accent)">-</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">✋ دست</div></div>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px 6px;text-align:center"><div id="profileJoin" style="font-size:16px;font-weight:700;color:var(--accent)">-</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">⏰ ورود</div></div>
+</div>
+<div id="profileActions"></div>
+<button class="secondary" onclick="closeModal('profileModal')" style="margin-top:12px;">بستن</button>
+</div></div>
+
+<div id="waitingRoomOverlay">
+  <div style="font-size:80px;margin-bottom:10px;">⏳</div>
+  <div class="waiting-spinner"></div>
+  <h2 style="font-size:22px;margin-bottom:12px;">در انتظار تأیید مدرس</h2>
+  <p style="font-size:18px;color:#8ab4f8;font-weight:600;margin-bottom:8px;" id="waitingTeacherName"></p>
+  <p style="color:#9aa0a6;font-size:15px;max-width:400px;line-height:1.8;">لطفاً صبر کنید، مدرس به‌زودی شما را به کلاس راه می‌دهد...</p>
+  <button onclick="cancelWaiting()" style="margin-top:30px;padding:12px 32px;background:var(--danger);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">انصراف</button>
+</div>
+
+<div id="permissionRequestModal" class="modal">
+  <div class="modal-content">
+    <div id="permReqIcon" style="font-size:60px;margin-bottom:12px;">🎤</div>
+    <h2 id="permReqTitle">درخواست روشن کردن میکروفون</h2>
+    <p id="permReqDesc">مدرس می‌خواهد میکروفون شما را روشن کند. آیا موافق هستید؟</p>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+      <button onclick="rejectPermissionRequest()" style="flex:1;background:var(--danger);color:#fff;min-width:120px;">🚫 رد کردن</button>
+      <button onclick="acceptPermissionRequest()" style="flex:1;min-width:120px;">✅ باز کردن</button>
+    </div>
+  </div>
+</div>
+
+<div id="permModal">
+  <div id="permBox">
+    <div class="perm-icon" id="permIcon">📷</div>
+    <h2 id="permTitle">دسترسی به دوربین و میکروفون</h2>
+    <p id="permDesc"></p>
+    <div id="permInstructions"></div>
+    <div class="perm-btns">
+      <button class="retry" onclick="retryCameraPermission()" id="btnSendPermRequest">📨 ارسال درخواست</button>
+      <button class="cancel" onclick="cancelCameraPermission()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminPanelModal">
+  <div id="adminPanelContainer">
+    <div id="adminPanelHeader"><h2>👑 پنل مدیریت ادمین</h2><button class="close-btn" onclick="closeAdminPanel()">✕</button></div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('dashboard')">📊 داشبورد</button>
+      <button class="admin-tab" onclick="switchAdminTab('users')">👥 کاربران</button>
+      <button class="admin-tab" onclick="switchAdminTab('discounts')">🎁 کد هدیه</button>
+      <button class="admin-tab" onclick="switchAdminTab('announce')">📢 اعلان همگانی</button>
+    </div>
+    <div id="adminPanelBody">
+      <div class="admin-section active" id="adminSec-dashboard">
+        <div class="admin-stat-grid" id="adminStatsGrid"></div>
+        <div class="admin-card"><h3>📈 آمار کلی</h3><div id="adminDashboardInfo"></div></div>
+      </div>
+      <div class="admin-section" id="adminSec-users">
+        <div class="admin-card"><h3>🔍 جستجو</h3><input class="admin-input" id="adminUserSearch" placeholder="جستجو بر اساس نام یا ایمیل یا شماره..." oninput="renderAdminUsers()" /></div>
+        <div id="adminUsersList"></div>
+      </div>
+      <div class="admin-section" id="adminSec-discounts">
+        <div class="admin-card">
+          <h3>➕ ساخت کد هدیه جدید</h3>
+          <input class="admin-input" id="discCodeInput" placeholder="کد (خالی = خودکار)" style="direction:ltr;text-align:center;font-family:monospace;font-size:16px;letter-spacing:2px;" />
+          <input class="admin-input" type="number" id="discDaysInput" placeholder="تعداد روز هدیه (مثلاً 30)" value="30" min="1" />
+          <input class="admin-input" type="number" id="discLimitInput" placeholder="حداکثر تعداد استفاده (خالی = نامحدود)" min="1" />
+          <button class="admin-btn" onclick="createDiscountCode()">🎁 ساخت کد هدیه</button>
+        </div>
+        <div class="admin-card"><h3>📋 لیست کدهای هدیه</h3><div id="adminDiscountsList"></div></div>
+      </div>
+      <div class="admin-section" id="adminSec-announce">
+        <div class="admin-card">
+          <h3>📢 ارسال اعلان همگانی</h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.7;">این اعلان به همه‌ی کاربران (حتی کسانی که آنلاین نیستند) نمایش داده می‌شود.</p>
+          <textarea class="admin-textarea" id="adminAnnounceText" placeholder="متن اعلان..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="admin-btn" onclick="sendGlobalAnnouncement()">📤 ارسال به همه</button>
+            <button class="admin-btn danger" onclick="clearGlobalAnnouncement()">🗑️ حذف اعلان فعال</button>
+          </div>
+        </div>
+        <div class="admin-card"><h3>📜 تاریخچه اعلان‌ها</h3><div id="adminAnnounceHistory"></div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="adminGlobalBanner">
@@ -1091,664 +1675,181 @@ setTimeout(function(){
 </body>
 </html>
 <script>
-const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
-const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud'; // 👈 اگر سرور خریدی، آدرس خودت را بگذار
-const LIVEKIT_API_KEY = 'APIRuoEKCKzj9S2';
-const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S';
-const ADMIN_EMAIL = 'mmastudio.s.m@gmail.com';
-const BALE_ID = '@sobhan101095';
-const DEFAULT_SUBSCRIPTION_DAYS = 20;
-const PROJECTOR_BUCKET = 'projector-media';
-
-let sb = null;
-let currentUser = null;
-let livekitRoom = null;
-let localStream = null;
-let myName = '', myRole = '', roomId = '', myId = '', teacherId = '';
-let selectedLobbyRole = 'teacher';
-let qualitySettings = { studentCam: 'auto', screenShare: 'auto', projector: 'auto' };
-let lastAutoApplied = '';
-const remoteParticipants = new Map();
-const studentPermissions = new Map();
-let isMicOn = false, isCamOn = false, isSharing = false, isHandRaised = false;
-let isRoomLocked = false;
-const myPermissions = { mic: false, cam: false, whiteboard: false, projector: false };
-const attendanceLog = new Map();
-let currentPoll = null, myPollVote = -1;
-const pollVotes = new Map();
-let breakoutGroups = null, myGroupId = null;
-const sharedFiles = [];
-let wbCanvas = null, wbCtx = null;
-let wbIsDrawing = false, wbLastX = 0, wbLastY = 0;
-let wbPenColor = '#000000', wbPenSize = 4;
-let wbStrokes = [], wbCurrentStroke = null;
-let mediaRecorder = null, recordedChunks = [];
-let isRecording = false, recordingStartTime = 0;
-let recordingTimerInterval = null;
-let compositeCanvas = null, compositeCtx = null;
-let compositeAnimationId = null;
-let audioContext = null, audioDestination = null;
-let recordingBlob = null, recordingMimeType = 'video/webm';
-let currentChatTab = 'public';
-let projCanvas = null, projCtx = null, projVideo = null, projImage = null;
-let projIsDrawing = false, projLastX = 0, projLastY = 0, projPenColor = '#ea4335', projPenSize = 6;
-let projStrokes = [], projCurrentStroke = null, projCurrentMedia = null;
-let projCurrentState = { isPlaying: false, currentTime: 0, mediaId: null }, projPendingState = null, projSyncInterval = null, projIsSeeking = false;
-let isCoTeacher = false, isLowBandwidth = false;
-let classStartTime = 0, classTimerInterval = null;
-let activityTimerInterval = null, activityTimeLeft = 0;
-let vadContext = null, vadAnalyser = null, vadDataArray = null, vadInterval = null, lastSpeakingState = false;
-let qualityCheckInterval = null; const qualityCache = new Map();
-let stats = { userStats: new Map(), startTime: 0 };
-let bellAudioCtx = null;
-let currentTheme = localStorage.getItem('lroom_theme') || 'dark';
-let waitingList = new Map();
-let isWaitingForApproval = false;
-let pendingPermissionRequest = null;
-let currentScreenShareTrack = null;
-let currentScreenShareIdentity = null;
-let adminActiveAnnouncement = null;
-let realtimeChannel = null;
-let waitingAudioBlockInterval = null;
-let isGuestMode = false;
-let guestName = '';
-let spotlightedId = null;
-let spotlightModeActive = false;
-let blurProcessor = null;
-let isBlurEnabled = false;
-let connectBarTimer = null;
-let currentAuthMethod = 'email';
-const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
-
-// ═══════════════ توابع کمکی ═══════════════
-const DAY_MS = 86400000;
-function addDaysSafe(date, days) { const d = (date instanceof Date) ? date : new Date(date); return new Date(d.getTime() + days * DAY_MS); }
-function parseDateSafe(v) { if (!v) return null; if (v instanceof Date) return v; const s = String(v).trim(); if (!s) return null; if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(s)) return new Date(s); return new Date(s.replace(' ', 'T') + 'Z'); }
-function calcDaysLeft(endVal) { const end = parseDateSafe(endVal); if (!end) return 0; const ms = end.getTime() - Date.now(); if (ms <= 0) return 0; return Math.ceil(ms / DAY_MS); }
-function calcEndDateFromNow(days) { return new Date(Date.now() + days * DAY_MS); }
-function getRenewalBase(endVal) { const end = parseDateSafe(endVal); if (end && end.getTime() > Date.now()) return end; return new Date(); }
-
-function normalizePhone(input) {
-    let p = String(input || '').trim().replace(/[\s\-\(\)]/g, '');
-    p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-    if (p.startsWith('+98')) return p;
-    if (p.startsWith('0098')) return '+98' + p.slice(4);
-    if (p.startsWith('98') && p.length >= 12) return '+' + p;
-    if (p.startsWith('0')) return '+98' + p.slice(1);
-    if (p.length === 10) return '+98' + p;
-    return p.startsWith('+') ? p : '+' + p;
-}
-function phoneToFakeEmail(phone) { const digits = phone.replace(/\D/g, ''); return `p${digits}@${PHONE_EMAIL_DOMAIN}`; }
-function showToast(txt) { if (!txt) return; const to = document.getElementById('toast'); if (window._toastTimer) clearTimeout(window._toastTimer); to.textContent = txt; void to.offsetWidth; to.classList.add('show'); window._toastTimer = setTimeout(() => to.classList.remove('show'), 3500); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function fmtTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); return `${m}:${(s % 60).toString().padStart(2, '0')}`; }
-function sanitize(r) { return String(r || '').replace(/[^a-zA-Z0-9]/g, '') || 'default'; }
-function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
-
-// ═══════════════ احراز هویت ═══════════════
-function switchAuthMethod(method) {
-    currentAuthMethod = method;
-    document.getElementById('methodBtnEmail').classList.toggle('active', method === 'email');
-    document.getElementById('methodBtnPhone').classList.toggle('active', method === 'phone');
-    document.getElementById('emailAuthSection').style.display = method === 'email' ? 'block' : 'none';
-    document.getElementById('phoneAuthSection').style.display = method === 'phone' ? 'block' : 'none';
-}
-function switchPhoneTab(tab) {
-    document.getElementById('phoneTabLogin').classList.toggle('active', tab === 'login');
-    document.getElementById('phoneTabRegister').classList.toggle('active', tab === 'register');
-    document.getElementById('phoneLoginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('phoneRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('phoneLoginError').classList.remove('show');
-    document.getElementById('phoneRegError').classList.remove('show');
-}
-async function handleLogin(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPassword').value;
-    const errEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
-    errEl.classList.remove('show'); btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message);
-        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (!profile) throw new Error('پروفایل یافت نشد');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-        isGuestMode = false;
-        try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
-        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ورود'; }
-}
-async function handlePhoneLogin(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const phoneRaw = document.getElementById('phoneLoginInput').value;
-    const password = document.getElementById('phoneLoginPassword').value;
-    const errEl = document.getElementById('phoneLoginError');
-    const btn = document.getElementById('phoneLoginBtn');
-    errEl.classList.remove('show');
-    const phone = normalizePhone(phoneRaw);
-    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const email = phoneToFakeEmail(phone);
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error('شماره یا رمز عبور اشتباه است');
-        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (!profile) throw new Error('پروفایل یافت نشد');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-        isGuestMode = false;
-        try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
-        showToast('✅ ورود موفق');
-        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ورود'; }
-}
-async function handleRegister(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim().toLowerCase();
-    const phone = (document.getElementById('regPhone')?.value || '').trim();
-    const password = document.getElementById('regPassword').value;
-    const userType = document.getElementById('regUserType').value;
-    const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
-    const errEl = document.getElementById('regError'); const okEl = document.getElementById('regSuccess'); const btn = document.getElementById('regBtn');
-    errEl.classList.remove('show'); okEl.classList.remove('show');
-    if (password.length < 6) { errEl.textContent = '⚠️ ۶ کاراکتر'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        let disc = null, discUsedCount = 0;
-        if (discCode) { const { data: d } = await sb.from('discount_codes').select('*').eq('code', discCode).maybeSingle(); if (!d) throw new Error('کد نامعتبر'); discUsedCount = (d.used_by || []).length; if (d.max_uses > 0 && discUsedCount >= d.max_uses) throw new Error('کد تمام شد'); disc = d; }
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name } } });
-        if (authErr) throw new Error(authErr.message);
-        if (!authData.session) throw new Error('Confirm email رو خاموش کن');
-        await new Promise(r => setTimeout(r, 1500));
-        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) { 
-            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
-            await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', user_type: userType, phone: phone || null, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' }); 
-            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; 
-        }
-        if (disc && prof) { const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, disc.days); await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', authData.user.id); await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id); }
-        try { await sb.auth.signOut(); } catch (e) {}
-        okEl.textContent = '✅ ثبت‌نام موفق!';
-        okEl.classList.add('show');
-        setTimeout(() => { switchAuthTab('login'); document.getElementById('loginEmail').value = email; }, 2500);
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
-}
-async function handlePhoneRegister(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const name = document.getElementById('phoneRegName').value.trim();
-    const phoneRaw = document.getElementById('phoneRegInput').value;
-    const password = document.getElementById('phoneRegPassword').value;
-    const userType = document.getElementById('phoneRegUserType').value;
-    const errEl = document.getElementById('phoneRegError'); const okEl = document.getElementById('phoneRegSuccess'); const btn = document.getElementById('phoneRegBtn');
-    errEl.classList.remove('show'); okEl.classList.remove('show');
-    const phone = normalizePhone(phoneRaw);
-    if (!name || name.length < 2) { errEl.textContent = '⚠️ نام را وارد کنید'; errEl.classList.add('show'); return; }
-    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
-    if (password.length < 6) { errEl.textContent = '⚠️ رمز عبور حداقل ۶ کاراکتر باشد'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const email = phoneToFakeEmail(phone);
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name, phone } } });
-        if (authErr) throw new Error(authErr.message);
-        if (!authData.session) throw new Error('تنظیمات تأیید ایمیل در Supabase باید خاموش شود');
-        await new Promise(r => setTimeout(r, 1000));
-        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) {
-            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
-            await sb.from('profiles').insert({ id: authData.user.id, email: email, name: name, role: 'user', user_type: userType, phone: phone, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' });
-            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data;
-        }
-        okEl.textContent = '✅ ثبت‌نام موفق!';
-        okEl.classList.add('show');
-        setTimeout(async () => {
-            try {
-                const { data: loginData } = await sb.auth.signInWithPassword({ email, password });
-                if (loginData?.user) {
-                    const { data: profile } = await sb.from('profiles').select('*').eq('id', loginData.user.id).maybeSingle();
-                    if (profile) {
-                        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-                        isGuestMode = false;
-                        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-                    }
-                }
-            } catch (e) {}
-        }, 1500);
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
-}
-async function applyDiscountCode(inputId) {
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const id = inputId || 'regDiscountCode'; const input = document.getElementById(id); if (!input) return;
-    const code = (input.value || '').trim().toUpperCase(); if (!code) return showToast('⚠️ کد را وارد کنید');
-    const { data: d, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
-    if (error || !d) return showToast('❌ کد نامعتبر');
-    const usedCount = (d.used_by || []).length; if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔ این کد تمام شده');
-    showToast(`✅ ${d.days} روز هدیه`);
-}
-async function logout() {
-    if (isGuestMode) { localStorage.removeItem('lroom_guest_name'); isGuestMode = false; guestName = ''; currentUser = null; if (livekitRoom) { try { livekitRoom.disconnect(); } catch(e){} } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); return; }
-    try { if (sb) await sb.auth.signOut(); } catch (e) {}
-    sessionStorage.removeItem('lroom_admin_auth'); currentUser = null;
-    if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} }
-    if (livekitRoom) { try { livekitRoom.disconnect(); } catch (e) {} }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-    location.reload();
+// ═══════════════ پنل ادمین (رتبه‌بندی) ═══════════════
+function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
+function openAdminPanel() { if (!isAdminUser()) { showToast('⛔'); return; } document.getElementById('adminPanelModal').classList.add('open'); switchAdminTab('dashboard'); }
+function closeAdminPanel() { document.getElementById('adminPanelModal').classList.remove('open'); }
+function switchAdminTab(tab) {
+    const tabs = ['dashboard','users','discounts','announce'];
+    document.querySelectorAll('.admin-tab').forEach((el, i) => el.classList.toggle('active', tabs[i] === tab));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById('adminSec-' + tab); if (sec) sec.classList.add('active');
+    if (tab === 'dashboard') renderAdminDashboard(); else if (tab === 'users') renderAdminUsers(); else if (tab === 'discounts') renderAdminDiscounts(); else if (tab === 'announce') renderAdminAnnouncements();
 }
 
-// ═══════════════ مدیریت لابی ═══════════════
-function setLobbyRole(role) {
-    selectedLobbyRole = role;
-    const btnT = document.getElementById('roleBtnTeacher'); const btnS = document.getElementById('roleBtnStudent');
-    const teacherBox = document.getElementById('teacherSessionBox'); const studentBox = document.getElementById('studentJoinBox');
-    if (currentUser && currentUser.userType === 'student' && role === 'teacher') { showToast('⛔ شما فقط به عنوان دانشجو مجاز هستید'); role = 'student'; }
-    if (role === 'teacher') { 
-        btnT.classList.add('active'); btnS.classList.remove('active'); teacherBox.style.display = 'block'; studentBox.style.display = 'none'; 
-        (async () => { const code = await ensureSessionCode(); const el = document.getElementById('userSessionCodeDisplay'); if (el) el.textContent = code || '—'; })(); 
-    } else { 
-        btnT.classList.remove('active'); btnS.classList.add('active'); teacherBox.style.display = 'none'; studentBox.style.display = 'block'; 
-    }
-}
-function checkAndShow() {
-    if (!currentUser) return;
-    document.getElementById('authScreen').style.display = 'none'; document.getElementById('expiredScreen').style.display = 'none'; document.getElementById('lobby').style.display = 'none'; document.getElementById('guestJoinScreen').style.display = 'none';
-    if (isGuestMode) { document.getElementById('lobby').style.display = 'flex'; document.getElementById('userBadgeName').textContent = currentUser.name + ' (مهمان)'; document.getElementById('userBadgeDays').textContent = ''; document.getElementById('userBadgeCrown').style.display = 'none'; updateAdminButtons(); setLobbyRole('student'); return; }
-    const isAdmin = currentUser.role === 'admin';
-    const end = parseDateSafe(currentUser.subscriptionEnd);
-    const isExpired = end && end.getTime() < Date.now();
-    const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
-    const isStudentOnly = currentUser.userType === 'student';
-    if (isAdmin || isStudentOnly || !isExpired) {
-        document.getElementById('lobby').style.display = 'flex';
-        document.getElementById('userBadgeName').textContent = currentUser.name;
-        if (isAdmin) { document.getElementById('userBadgeDays').textContent = ''; }
-        else if (isStudentOnly) { document.getElementById('userBadgeDays').textContent = '(دانشجو - رایگان)'; }
-        else { document.getElementById('userBadgeDays').textContent = `(سطح ${currentUser.planLevel || 1} - ${daysLeft} روز)`; }
-        document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
-        updateAdminButtons(); setLobbyRole(currentUser.userType === 'both' ? 'teacher' : (currentUser.userType === 'student' ? 'student' : 'teacher'));
-    } else {
-        document.getElementById('expiredScreen').style.display = 'flex';
-        document.getElementById('expUserName').textContent = currentUser.name;
-        const gs = document.getElementById('giftStatus'); if (gs) { gs.textContent = ''; gs.className = ''; }
-        const inp = document.getElementById('expiredDiscountCode'); if (inp) inp.value = '';
-    }
+async function renderAdminDashboard() {
+    if (!sb) return;
+    const { data: users } = await sb.from('profiles').select('*');
+    const { data: discs } = await sb.from('discount_codes').select('*');
+    const { data: anns } = await sb.from('announcements').select('*').eq('is_active', true).maybeSingle();
+    const allUsers = users || []; const allDiscs = discs || []; const now = Date.now();
+    const activeUsers = allUsers.filter(u => { const e = parseDateSafe(u.subscription_end); return e && e.getTime() > now; }).length;
+    const expiredUsers = allUsers.length - activeUsers;
+    const admins = allUsers.filter(u => u.role === 'admin').length;
+    const usedDiscounts = allDiscs.filter(d => (d.used_by || []).length > 0).length;
+    document.getElementById('adminStatsGrid').innerHTML = `<div class="admin-stat-box"><div class="num">${allUsers.length}</div><div class="lbl">👥 کاربران</div></div><div class="admin-stat-box"><div class="num" style="color:var(--success)">${activeUsers}</div><div class="lbl">✅ فعال</div></div><div class="admin-stat-box"><div class="num" style="color:var(--danger)">${expiredUsers}</div><div class="lbl">⛔ منقضی</div></div><div class="admin-stat-box"><div class="num" style="color:#ffd700">${admins}</div><div class="lbl">👑 ادمین</div></div><div class="admin-stat-box"><div class="num" style="color:var(--accent)">${allDiscs.length}</div><div class="lbl">🎁 کد</div></div><div class="admin-stat-box"><div class="num" style="color:var(--warning)">${usedDiscounts}</div><div class="lbl">📌 استفاده</div></div>`;
+    const totalDays = allUsers.reduce((sum, u) => sum + calcDaysLeft(u.subscription_end), 0);
+    document.getElementById('adminDashboardInfo').innerHTML = `<div class="stat-row"><span class="label">📅 مجموع روزها</span><span class="value">${totalDays} روز</span></div><div class="stat-row"><span class="label">🆕 آخرین</span><span class="value">${allUsers.length ? escapeHtml(allUsers[allUsers.length-1].name) : '-'}</span></div><div class="stat-row"><span class="label">📢 اعلان</span><span class="value">${anns ? 'دارد' : 'ندارد'}</span></div>`;
 }
 
-// ═══════════════ WebRTC P2P (برای رتبه ۱) ═══════════════
-async function joinMeetingWebRTC(roomId) {
-    showToast('🌐 اتصال با تکنولوژی وب (P2P)...');
-    myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-    teacherId = `teacher-${roomId}`;
+async function renderAdminUsers() {
+    if (!sb) return;
+    const q = (document.getElementById('adminUserSearch')?.value || '').trim();
+    let query = sb.from('profiles').select('*').order('created_at', { ascending: false });
+    if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`);
+    const { data: users, error } = await query;
+    const list = document.getElementById('adminUsersList');
+    if (error) { list.innerHTML = '<div class="admin-empty">خطا: ' + escapeHtml(error.message) + '</div>'; return; }
+    if (!users || users.length === 0) { list.innerHTML = '<div class="admin-empty">کاربری یافت نشد</div>'; return; }
     
-    window.p2pPeer = new Peer(myId, { debug: 1 });
-    window.p2pCalls = new Map();
-
-    window.p2pPeer.on('open', (id) => {
-        showMeetingUI();
-        hideConnectCountdown();
-        showToast('✅ متصل شدید (وب)');
-        sendData({ type: 'hello', name: myName, role: myRole });
-        if (myRole === 'student') {
-            setTimeout(() => {
-                if (window.p2pPeer) {
-                    const call = window.p2pPeer.call(teacherId, localStream);
-                    if (call) {
-                        call.on('stream', (remoteStream) => { addP2PRemoteVideo(teacherId, remoteStream, 'مدرس'); });
-                        window.p2pCalls.set(teacherId, call);
-                    }
-                }
-            }, 1000);
-        }
-    });
-    window.p2pPeer.on('call', (call) => {
-        call.answer(localStream);
-        call.on('stream', (remoteStream) => { addP2PRemoteVideo(call.peer, remoteStream, remoteStream.id); });
-        window.p2pCalls.set(call.peer, call);
-    });
-    window.p2pPeer.on('error', (err) => { showToast('❌ خطای وب: ' + err.message); hideConnectCountdown(); });
+    list.innerHTML = users.map(u => {
+        const end = parseDateSafe(u.subscription_end); 
+        const daysLeft = calcDaysLeft(u.subscription_end);
+        const isAdmin = u.role === 'admin';
+        const statusText = isAdmin ? '👑 ادمین' : (u.user_type === 'student' ? '👨‍🎓 دانشجو' : (daysLeft > 0 ? `✅ رتبه ${u.plan_level || 1} (${daysLeft} روز)` : '⛔ منقضی'));
+        const statusColor = isAdmin ? '#ffd700' : (u.user_type === 'student' || daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
+        
+        const phoneDisplay = u.phone ? `<b style="color:var(--accent);user-select:all;direction:ltr;display:inline-block;font-family:monospace;">${escapeHtml(u.phone)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.phone)}');showToast('📋 شماره کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>` : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        const passDisplay = u.password_plain ? `<b style="color:var(--warning);font-family:monospace;user-select:all;display:inline-block;">${escapeHtml(u.password_plain)}</b> <button onclick="navigator.clipboard.writeText('${escapeHtml(u.password_plain)}');showToast('📋 رمز کپی شد')" style="background:var(--bg-hover);border:none;color:var(--text-primary);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;margin-right:6px;">📋 کپی</button>` : '<span style="color:var(--text-muted);">— ثبت نشده —</span>';
+        
+        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name || '—')} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : `<span class="role-badge-user">${u.user_type === 'student' ? 'STUDENT' : 'TEACHER'}</span>`}</div><div class="admin-user-email">📧 ${escapeHtml(u.email || '—')}</div><div class="admin-user-meta" style="margin-top:6px;">📱 شماره: ${phoneDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">🔑 رمز: ${passDisplay}</div><div class="admin-user-meta" style="margin-top:6px;">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد جلسه: <b>${escapeHtml(u.session_code)}</b>` : ''}</div><div class="admin-user-meta">📅 عضویت: ${u.created_at ? new Date(u.created_at).toLocaleDateString('fa-IR') : '—'}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:#8ab4f8;color:#202124;" onclick="adminPromptSubscription('${u.id}', '${u.name}', 1)">رتبه ۱ (وب)</button><button class="add-days" style="background:#34a853;color:#fff;" onclick="adminPromptSubscription('${u.id}', '${u.name}', 2)">رتبه ۲</button><button class="add-days" style="background:#fbbc04;color:#202124;" onclick="adminPromptSubscription('${u.id}', '${u.name}', 3)">رتبه ۳</button><button class="add-days" style="background:#ea4335;color:#fff;" onclick="adminPromptSubscription('${u.id}', '${u.name}', 4)">رتبه ۴</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
+    }).join('');
 }
-function addP2PRemoteVideo(peerId, stream, name) {
-    let box = document.getElementById(`video-${peerId}`);
-    if (!box) { box = document.createElement('div'); box.className = 'video-box'; box.id = `video-${peerId}`; document.getElementById('videos').appendChild(box); }
-    const video = document.createElement('video'); video.srcObject = stream; video.autoplay = true; video.playsInline = true; box.appendChild(video);
+
+async function adminPromptSubscription(userId, name, rank) {
+    if (!isAdminUser() || !sb) return;
+    const daysStr = prompt(`اشتراک رتبه ${rank} برای ${name} برای چند روز فعال باشد؟`, "30");
+    if (!daysStr) return;
+    const days = parseInt(daysStr);
+    if (isNaN(days) || days <= 0) return showToast('⚠️ عدد نامعتبر');
+
+    let limits = { max_students: 10, max_mics: 4, max_cams: 4 };
+    if (rank === 1) limits = { max_students: 10, max_mics: 4, max_cams: 4 }; // وب
+    if (rank === 2) limits = { max_students: 20, max_mics: 4, max_cams: 4 }; // LiveKit
+    if (rank === 3) limits = { max_students: 10, max_mics: 10, max_cams: 10 }; // LiveKit
+    if (rank === 4) limits = { max_students: 30, max_mics: 30, max_cams: 30 }; // LiveKit
+
+    const { data: u } = await sb.from('profiles').select('subscription_end').eq('id', userId).single();
+    const base = getRenewalBase(u.subscription_end);
+    const newEnd = addDaysSafe(base, days);
+    
+    const { error } = await sb.from('profiles').update({
+        subscription_end: newEnd.toISOString(),
+        plan_level: rank,
+        ...limits
+    }).eq('id', userId);
+    
+    if (error) return showToast('❌ خطا: ' + error.message);
+    showToast(`✅ رتبه ${rank} برای ${days} روز فعال شد`);
+    renderAdminUsers();
+}
+
+async function adminDeleteUser(userId, name) {
+    if (!isAdminUser() || !sb) return;
+    if (currentUser.id === userId) return showToast('⛔ خودتان');
+    if (!confirm(`حذف "${name}"؟`)) return;
+    try { await sb.from('profiles').delete().eq('id', userId); renderAdminUsers(); renderAdminDashboard(); showToast(`🗑️ حذف شد`); } catch (e) { showToast('❌ ' + e.message); }
+}
+
+// ═══════════════ آپلود پروژکتور (رفع باگ حجم) ═══════════════
+async function loadProjectorFile(e) { 
+    if (!hasProjectorAccess()) { showToast('🔒 دسترسی ندارید'); return; } 
+    const f = e.target.files[0]; if (!f) return; 
+    if (f.size > 104857600) { showToast('⚠️ حداکثر 100MB'); return; } // 👈 ۱۰۰ مگابایت
+    const iv = f.type.startsWith('video/'); const ii = f.type.startsWith('image/'); 
+    if (!iv && !ii) return; 
+    showToast('⏳ در حال آپلود...'); 
+    try { 
+        const mediaId = 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); 
+        const ext = f.name.split('.').pop() || (iv ? 'mp4' : 'jpg'); 
+        const fileName = `${mediaId}.${ext}`; 
+        const { error: upErr } = await sb.storage.from(PROJECTOR_BUCKET).upload(fileName, f, { cacheControl: '3600', upsert: false, contentType: f.type }); 
+        if (upErr) throw new Error(upErr.message); 
+        const { data: urlData } = sb.storage.from(PROJECTOR_BUCKET).getPublicUrl(fileName); 
+        const publicUrl = urlData.publicUrl; 
+        projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: publicUrl, from: myName, mediaId, storagePath: fileName }; 
+        projCurrentState = { isPlaying: false, currentTime: 0, mediaId }; 
+        displayProjectorMedia(projCurrentMedia); 
+        broadcast({ type: 'proj-media', media: projCurrentMedia, state: projCurrentState }); 
+    } catch (err) { showToast('❌ ' + err.message); } 
+}
+
+// ═══════════════ مدیریت کیفیت و کلاس ═══════════════
+function getAutoQualityRules(participantCount) {
+    const slow = isSlowConnection();
+    if (slow) return { studentCam: 'low', screenShare: 'low', projector: 'low', label: '📶 اینترنت ضعیف (' + participantCount + ' نفر)' };
+    if (participantCount <= 4) return { studentCam: 'high', screenShare: 'high', projector: 'high', label: 'کیفیت بالا (≤۴ نفر)' };
+    if (participantCount <= 8) return { studentCam: 'medium', screenShare: 'high', projector: 'medium', label: 'کیفیت متوسط' };
+    return { studentCam: 'low', screenShare: 'medium', projector: 'low', label: 'کیفیت کم' };
+}
+function applyQualitySettings() { if (myRole !== 'teacher') return; qualitySettings.studentCam = document.getElementById('qStudentCam').value; qualitySettings.screenShare = document.getElementById('qScreenShare').value; qualitySettings.projector = document.getElementById('qProjector').value; broadcast({ type: 'quality-settings', settings: qualitySettings, from: myId }); showToast('⚙️ کیفیت اعمال شد'); }
+
+function updateMicUI() { const b = document.getElementById('btnMic'); b.classList.toggle('off', !isMicOn); b.textContent = isMicOn ? '🎤' : '🔇'; if (myRole === 'student' && !isCoTeacher && !myPermissions.mic && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.mic || isCoTeacher)) b.classList.remove('waiting'); const m = document.getElementById('mic-me'); if (m) { m.classList.toggle('muted', !isMicOn); m.textContent = isMicOn ? '🎤' : '🔇'; } }
+function updateCamUI() { const b = document.getElementById('btnCam'); b.classList.toggle('off', !isCamOn); if (myRole === 'student' && !isCoTeacher && !myPermissions.cam && !b.classList.contains('waiting')) { b.classList.remove('off'); b.classList.add('waiting'); b.textContent = '🔒'; b.disabled = false; } else if (myRole === 'student' && (myPermissions.cam || isCoTeacher)) b.classList.remove('waiting'); const v = document.querySelector('#video-me video:not(.ss-video)'); const box = document.getElementById('video-me'); if (!box) return; let av = box.querySelector('.avatar'); if (!isCamOn && !isSharing) { if (v) v.style.display = 'none'; if (!av) { av = document.createElement('div'); av.className = 'avatar'; av.textContent = myName[0].toUpperCase(); box.insertBefore(av, box.firstChild); } } else if (!isSharing) { if (v) v.style.display = 'block'; if (av) av.remove(); } }
+
+// ═══════════════ راه اندازی اولیه ═══════════════
+window._appInit = async function() {
+    if (typeof window.supabase !== 'undefined') {
+        try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' }, realtime: { params: { eventsPerSecond: 2 } } }); } catch(e) {}
+    }
+    
+    document.body.classList.toggle('light-theme', currentTheme === 'light');
+    const i = currentTheme === 'light' ? '☀️' : '🌙';
+    const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i;
+    const t2 = document.getElementById('themeToggleMeeting'); if (t2) t2.textContent = i;
+    
+    initWhiteboard(); initProjector(); setupEmojiPicker();
+    const savedLang = localStorage.getItem('lroom_lang') || 'fa';
+    const ls = document.getElementById('langSelect'); if (ls) ls.value = savedLang;
+    try { applyLanguage(savedLang); } catch (e) {}
+    
+    const urlParams = new URLSearchParams(location.search);
+    const roomFromUrl = urlParams.get('room');
+    const shouldJoin = urlParams.get('join') === '1';
+    
+    try {
+        if (sb) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session && session.user) {
+                let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+                if (profile) {
+                    currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams };
+                    isGuestMode = false;
+                    checkAndShow(); initRealtime(); loadActiveAnnouncement();
+                    const _loader = document.getElementById('appLoader'); if (_loader) _loader.style.display = 'none';
+                    if (roomFromUrl && shouldJoin && profile.role !== 'admin') {
+                        setTimeout(async () => {
+                            selectedLobbyRole = 'student'; setLobbyRole('student');
+                            document.getElementById('joinRoomCode').value = roomFromUrl;
+                            try { await joinMeeting(); } catch(e) {}
+                        }, 800);
+                    }
+                    return;
+                }
+            }
+        }
+    } catch (e) { console.error('Init error:', e); }
+    
+    if (roomFromUrl && shouldJoin) { showGuestJoinScreen(roomFromUrl); }
+    else { document.getElementById('authScreen').style.display = 'flex'; }
+    const loader = document.getElementById('appLoader'); if (loader) loader.style.display = 'none';
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { if (typeof window._appInit === 'function' && typeof window.supabase !== 'undefined') window._appInit(); });
+} else {
+    if (typeof window._appInit === 'function' && typeof window.supabase !== 'undefined') window._appInit();
 }
 </script>
-<script>
-const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
-const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud'; // 👈 اگر سرور خریدی، آدرس خودت را بگذار
-const LIVEKIT_API_KEY = 'APIRuoEKCKzj9S2';
-const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S';
-const ADMIN_EMAIL = 'mmastudio.s.m@gmail.com';
-const BALE_ID = '@sobhan101095';
-const DEFAULT_SUBSCRIPTION_DAYS = 20;
-const PROJECTOR_BUCKET = 'projector-media';
-
-let sb = null;
-let currentUser = null;
-let livekitRoom = null;
-let localStream = null;
-let myName = '', myRole = '', roomId = '', myId = '', teacherId = '';
-let selectedLobbyRole = 'teacher';
-let qualitySettings = { studentCam: 'auto', screenShare: 'auto', projector: 'auto' };
-let lastAutoApplied = '';
-const remoteParticipants = new Map();
-const studentPermissions = new Map();
-let isMicOn = false, isCamOn = false, isSharing = false, isHandRaised = false;
-let isRoomLocked = false;
-const myPermissions = { mic: false, cam: false, whiteboard: false, projector: false };
-const attendanceLog = new Map();
-let currentPoll = null, myPollVote = -1;
-const pollVotes = new Map();
-let breakoutGroups = null, myGroupId = null;
-const sharedFiles = [];
-let wbCanvas = null, wbCtx = null;
-let wbIsDrawing = false, wbLastX = 0, wbLastY = 0;
-let wbPenColor = '#000000', wbPenSize = 4;
-let wbStrokes = [], wbCurrentStroke = null;
-let mediaRecorder = null, recordedChunks = [];
-let isRecording = false, recordingStartTime = 0;
-let recordingTimerInterval = null;
-let compositeCanvas = null, compositeCtx = null;
-let compositeAnimationId = null;
-let audioContext = null, audioDestination = null;
-let recordingBlob = null, recordingMimeType = 'video/webm';
-let currentChatTab = 'public';
-let projCanvas = null, projCtx = null, projVideo = null, projImage = null;
-let projIsDrawing = false, projLastX = 0, projLastY = 0, projPenColor = '#ea4335', projPenSize = 6;
-let projStrokes = [], projCurrentStroke = null, projCurrentMedia = null;
-let projCurrentState = { isPlaying: false, currentTime: 0, mediaId: null }, projPendingState = null, projSyncInterval = null, projIsSeeking = false;
-let isCoTeacher = false, isLowBandwidth = false;
-let classStartTime = 0, classTimerInterval = null;
-let activityTimerInterval = null, activityTimeLeft = 0;
-let vadContext = null, vadAnalyser = null, vadDataArray = null, vadInterval = null, lastSpeakingState = false;
-let qualityCheckInterval = null; const qualityCache = new Map();
-let stats = { userStats: new Map(), startTime: 0 };
-let bellAudioCtx = null;
-let currentTheme = localStorage.getItem('lroom_theme') || 'dark';
-let waitingList = new Map();
-let isWaitingForApproval = false;
-let pendingPermissionRequest = null;
-let currentScreenShareTrack = null;
-let currentScreenShareIdentity = null;
-let adminActiveAnnouncement = null;
-let realtimeChannel = null;
-let waitingAudioBlockInterval = null;
-let isGuestMode = false;
-let guestName = '';
-let spotlightedId = null;
-let spotlightModeActive = false;
-let blurProcessor = null;
-let isBlurEnabled = false;
-let connectBarTimer = null;
-let currentAuthMethod = 'email';
-const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
-
-// ═══════════════ توابع کمکی ═══════════════
-const DAY_MS = 86400000;
-function addDaysSafe(date, days) { const d = (date instanceof Date) ? date : new Date(date); return new Date(d.getTime() + days * DAY_MS); }
-function parseDateSafe(v) { if (!v) return null; if (v instanceof Date) return v; const s = String(v).trim(); if (!s) return null; if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(s)) return new Date(s); return new Date(s.replace(' ', 'T') + 'Z'); }
-function calcDaysLeft(endVal) { const end = parseDateSafe(endVal); if (!end) return 0; const ms = end.getTime() - Date.now(); if (ms <= 0) return 0; return Math.ceil(ms / DAY_MS); }
-function calcEndDateFromNow(days) { return new Date(Date.now() + days * DAY_MS); }
-function getRenewalBase(endVal) { const end = parseDateSafe(endVal); if (end && end.getTime() > Date.now()) return end; return new Date(); }
-
-function normalizePhone(input) {
-    let p = String(input || '').trim().replace(/[\s\-\(\)]/g, '');
-    p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-    if (p.startsWith('+98')) return p;
-    if (p.startsWith('0098')) return '+98' + p.slice(4);
-    if (p.startsWith('98') && p.length >= 12) return '+' + p;
-    if (p.startsWith('0')) return '+98' + p.slice(1);
-    if (p.length === 10) return '+98' + p;
-    return p.startsWith('+') ? p : '+' + p;
-}
-function phoneToFakeEmail(phone) { const digits = phone.replace(/\D/g, ''); return `p${digits}@${PHONE_EMAIL_DOMAIN}`; }
-function showToast(txt) { if (!txt) return; const to = document.getElementById('toast'); if (window._toastTimer) clearTimeout(window._toastTimer); to.textContent = txt; void to.offsetWidth; to.classList.add('show'); window._toastTimer = setTimeout(() => to.classList.remove('show'), 3500); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function fmtTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); return `${m}:${(s % 60).toString().padStart(2, '0')}`; }
-function sanitize(r) { return String(r || '').replace(/[^a-zA-Z0-9]/g, '') || 'default'; }
-function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
-
-// ═══════════════ احراز هویت ═══════════════
-function switchAuthMethod(method) {
-    currentAuthMethod = method;
-    document.getElementById('methodBtnEmail').classList.toggle('active', method === 'email');
-    document.getElementById('methodBtnPhone').classList.toggle('active', method === 'phone');
-    document.getElementById('emailAuthSection').style.display = method === 'email' ? 'block' : 'none';
-    document.getElementById('phoneAuthSection').style.display = method === 'phone' ? 'block' : 'none';
-}
-function switchPhoneTab(tab) {
-    document.getElementById('phoneTabLogin').classList.toggle('active', tab === 'login');
-    document.getElementById('phoneTabRegister').classList.toggle('active', tab === 'register');
-    document.getElementById('phoneLoginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('phoneRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
-    document.getElementById('phoneLoginError').classList.remove('show');
-    document.getElementById('phoneRegError').classList.remove('show');
-}
-async function handleLogin(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPassword').value;
-    const errEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
-    errEl.classList.remove('show'); btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message);
-        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (!profile) throw new Error('پروفایل یافت نشد');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-        isGuestMode = false;
-        try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
-        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ورود'; }
-}
-async function handlePhoneLogin(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const phoneRaw = document.getElementById('phoneLoginInput').value;
-    const password = document.getElementById('phoneLoginPassword').value;
-    const errEl = document.getElementById('phoneLoginError');
-    const btn = document.getElementById('phoneLoginBtn');
-    errEl.classList.remove('show');
-    const phone = normalizePhone(phoneRaw);
-    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const email = phoneToFakeEmail(phone);
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error('شماره یا رمز عبور اشتباه است');
-        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (!profile) throw new Error('پروفایل یافت نشد');
-        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-        isGuestMode = false;
-        try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
-        showToast('✅ ورود موفق');
-        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ورود'; }
-}
-async function handleRegister(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim().toLowerCase();
-    const phone = (document.getElementById('regPhone')?.value || '').trim();
-    const password = document.getElementById('regPassword').value;
-    const userType = document.getElementById('regUserType').value;
-    const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
-    const errEl = document.getElementById('regError'); const okEl = document.getElementById('regSuccess'); const btn = document.getElementById('regBtn');
-    errEl.classList.remove('show'); okEl.classList.remove('show');
-    if (password.length < 6) { errEl.textContent = '⚠️ ۶ کاراکتر'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        let disc = null, discUsedCount = 0;
-        if (discCode) { const { data: d } = await sb.from('discount_codes').select('*').eq('code', discCode).maybeSingle(); if (!d) throw new Error('کد نامعتبر'); discUsedCount = (d.used_by || []).length; if (d.max_uses > 0 && discUsedCount >= d.max_uses) throw new Error('کد تمام شد'); disc = d; }
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name } } });
-        if (authErr) throw new Error(authErr.message);
-        if (!authData.session) throw new Error('Confirm email رو خاموش کن');
-        await new Promise(r => setTimeout(r, 1500));
-        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) { 
-            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
-            await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', user_type: userType, phone: phone || null, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' }); 
-            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; 
-        }
-        if (disc && prof) { const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, disc.days); await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', authData.user.id); await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id); }
-        try { await sb.auth.signOut(); } catch (e) {}
-        okEl.textContent = '✅ ثبت‌نام موفق!';
-        okEl.classList.add('show');
-        setTimeout(() => { switchAuthTab('login'); document.getElementById('loginEmail').value = email; }, 2500);
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
-}
-async function handlePhoneRegister(e) {
-    e.preventDefault();
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const name = document.getElementById('phoneRegName').value.trim();
-    const phoneRaw = document.getElementById('phoneRegInput').value;
-    const password = document.getElementById('phoneRegPassword').value;
-    const userType = document.getElementById('phoneRegUserType').value;
-    const errEl = document.getElementById('phoneRegError'); const okEl = document.getElementById('phoneRegSuccess'); const btn = document.getElementById('phoneRegBtn');
-    errEl.classList.remove('show'); okEl.classList.remove('show');
-    const phone = normalizePhone(phoneRaw);
-    if (!name || name.length < 2) { errEl.textContent = '⚠️ نام را وارد کنید'; errEl.classList.add('show'); return; }
-    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
-    if (password.length < 6) { errEl.textContent = '⚠️ رمز عبور حداقل ۶ کاراکتر باشد'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
-    try {
-        const email = phoneToFakeEmail(phone);
-        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name, phone } } });
-        if (authErr) throw new Error(authErr.message);
-        if (!authData.session) throw new Error('تنظیمات تأیید ایمیل در Supabase باید خاموش شود');
-        await new Promise(r => setTimeout(r, 1000));
-        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
-        if (!prof) {
-            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
-            await sb.from('profiles').insert({ id: authData.user.id, email: email, name: name, role: 'user', user_type: userType, phone: phone, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' });
-            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data;
-        }
-        okEl.textContent = '✅ ثبت‌نام موفق!';
-        okEl.classList.add('show');
-        setTimeout(async () => {
-            try {
-                const { data: loginData } = await sb.auth.signInWithPassword({ email, password });
-                if (loginData?.user) {
-                    const { data: profile } = await sb.from('profiles').select('*').eq('id', loginData.user.id).maybeSingle();
-                    if (profile) {
-                        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
-                        isGuestMode = false;
-                        checkAndShow(); initRealtime(); loadActiveAnnouncement();
-                    }
-                }
-            } catch (e) {}
-        }, 1500);
-    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
-    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
-}
-async function applyDiscountCode(inputId) {
-    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
-    const id = inputId || 'regDiscountCode'; const input = document.getElementById(id); if (!input) return;
-    const code = (input.value || '').trim().toUpperCase(); if (!code) return showToast('⚠️ کد را وارد کنید');
-    const { data: d, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
-    if (error || !d) return showToast('❌ کد نامعتبر');
-    const usedCount = (d.used_by || []).length; if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔ این کد تمام شده');
-    showToast(`✅ ${d.days} روز هدیه`);
-}
-async function logout() {
-    if (isGuestMode) { localStorage.removeItem('lroom_guest_name'); isGuestMode = false; guestName = ''; currentUser = null; if (livekitRoom) { try { livekitRoom.disconnect(); } catch(e){} } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); return; }
-    try { if (sb) await sb.auth.signOut(); } catch (e) {}
-    sessionStorage.removeItem('lroom_admin_auth'); currentUser = null;
-    if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} }
-    if (livekitRoom) { try { livekitRoom.disconnect(); } catch (e) {} }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-    location.reload();
-}
-
-// ═══════════════ مدیریت لابی ═══════════════
-function setLobbyRole(role) {
-    selectedLobbyRole = role;
-    const btnT = document.getElementById('roleBtnTeacher'); const btnS = document.getElementById('roleBtnStudent');
-    const teacherBox = document.getElementById('teacherSessionBox'); const studentBox = document.getElementById('studentJoinBox');
-    if (currentUser && currentUser.userType === 'student' && role === 'teacher') { showToast('⛔ شما فقط به عنوان دانشجو مجاز هستید'); role = 'student'; }
-    if (role === 'teacher') { 
-        btnT.classList.add('active'); btnS.classList.remove('active'); teacherBox.style.display = 'block'; studentBox.style.display = 'none'; 
-        (async () => { const code = await ensureSessionCode(); const el = document.getElementById('userSessionCodeDisplay'); if (el) el.textContent = code || '—'; })(); 
-    } else { 
-        btnT.classList.remove('active'); btnS.classList.add('active'); teacherBox.style.display = 'none'; studentBox.style.display = 'block'; 
-    }
-}
-function checkAndShow() {
-    if (!currentUser) return;
-    document.getElementById('authScreen').style.display = 'none'; document.getElementById('expiredScreen').style.display = 'none'; document.getElementById('lobby').style.display = 'none'; document.getElementById('guestJoinScreen').style.display = 'none';
-    if (isGuestMode) { document.getElementById('lobby').style.display = 'flex'; document.getElementById('userBadgeName').textContent = currentUser.name + ' (مهمان)'; document.getElementById('userBadgeDays').textContent = ''; document.getElementById('userBadgeCrown').style.display = 'none'; updateAdminButtons(); setLobbyRole('student'); return; }
-    const isAdmin = currentUser.role === 'admin';
-    const end = parseDateSafe(currentUser.subscriptionEnd);
-    const isExpired = end && end.getTime() < Date.now();
-    const daysLeft = calcDaysLeft(currentUser.subscriptionEnd);
-    const isStudentOnly = currentUser.userType === 'student';
-    if (isAdmin || isStudentOnly || !isExpired) {
-        document.getElementById('lobby').style.display = 'flex';
-        document.getElementById('userBadgeName').textContent = currentUser.name;
-        if (isAdmin) { document.getElementById('userBadgeDays').textContent = ''; }
-        else if (isStudentOnly) { document.getElementById('userBadgeDays').textContent = '(دانشجو - رایگان)'; }
-        else { document.getElementById('userBadgeDays').textContent = `(سطح ${currentUser.planLevel || 1} - ${daysLeft} روز)`; }
-        document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
-        updateAdminButtons(); setLobbyRole(currentUser.userType === 'both' ? 'teacher' : (currentUser.userType === 'student' ? 'student' : 'teacher'));
-    } else {
-        document.getElementById('expiredScreen').style.display = 'flex';
-        document.getElementById('expUserName').textContent = currentUser.name;
-        const gs = document.getElementById('giftStatus'); if (gs) { gs.textContent = ''; gs.className = ''; }
-        const inp = document.getElementById('expiredDiscountCode'); if (inp) inp.value = '';
-    }
-}
-
-// ═══════════════ WebRTC P2P (برای رتبه ۱) ═══════════════
-async function joinMeetingWebRTC(roomId) {
-    showToast('🌐 اتصال با تکنولوژی وب (P2P)...');
-    myId = myRole === 'teacher' ? `teacher-${roomId}` : `student-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
-    teacherId = `teacher-${roomId}`;
-    
-    window.p2pPeer = new Peer(myId, { debug: 1 });
-    window.p2pCalls = new Map();
-
-    window.p2pPeer.on('open', (id) => {
-        showMeetingUI();
-        hideConnectCountdown();
-        showToast('✅ متصل شدید (وب)');
-        sendData({ type: 'hello', name: myName, role: myRole });
-        if (myRole === 'student') {
-            setTimeout(() => {
-                if (window.p2pPeer) {
-                    const call = window.p2pPeer.call(teacherId, localStream);
-                    if (call) {
-                        call.on('stream', (remoteStream) => { addP2PRemoteVideo(teacherId, remoteStream, 'مدرس'); });
-                        window.p2pCalls.set(teacherId, call);
-                    }
-                }
-            }, 1000);
-        }
-    });
-    window.p2pPeer.on('call', (call) => {
-        call.answer(localStream);
-        call.on('stream', (remoteStream) => { addP2PRemoteVideo(call.peer, remoteStream, remoteStream.id); });
-        window.p2pCalls.set(call.peer, call);
-    });
-    window.p2pPeer.on('error', (err) => { showToast('❌ خطای وب: ' + err.message); hideConnectCountdown(); });
-}
-function addP2PRemoteVideo(peerId, stream, name) {
-    let box = document.getElementById(`video-${peerId}`);
-    if (!box) { box = document.createElement('div'); box.className = 'video-box'; box.id = `video-${peerId}`; document.getElementById('videos').appendChild(box); }
-    const video = document.createElement('video'); video.srcObject = stream; video.autoplay = true; video.playsInline = true; box.appendChild(video);
-}
-</script>
+</body>
+</html>
