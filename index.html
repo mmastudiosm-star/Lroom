@@ -1744,3 +1744,271 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+// ═══════════════ ثابت‌ها و متغیرها ═══════════════
+const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
+const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud'; 
+const LIVEKIT_API_KEY = 'APIRuoEKCKzj9S2';
+const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S';
+const ADMIN_EMAIL = 'mmastudio.s.m@gmail.com';
+const BALE_ID = '@sobhan101095';
+const DEFAULT_SUBSCRIPTION_DAYS = 20;
+const PROJECTOR_BUCKET = 'projector-media';
+
+let sb = null;
+let currentUser = null;
+let livekitRoom = null;
+let localStream = null;
+let myName = '', myRole = '', roomId = '', myId = '', teacherId = '';
+let selectedLobbyRole = 'teacher';
+let qualitySettings = { studentCam: 'auto', screenShare: 'auto', projector: 'auto' };
+let lastAutoApplied = '';
+const remoteParticipants = new Map();
+const studentPermissions = new Map();
+let isMicOn = false, isCamOn = false, isSharing = false, isHandRaised = false;
+let isRoomLocked = false;
+const myPermissions = { mic: false, cam: false, whiteboard: false, projector: false };
+const attendanceLog = new Map();
+let currentPoll = null, myPollVote = -1;
+const pollVotes = new Map();
+let breakoutGroups = null, myGroupId = null;
+const sharedFiles = [];
+let wbCanvas = null, wbCtx = null;
+let wbIsDrawing = false, wbLastX = 0, wbLastY = 0, wbPenColor = '#000000', wbPenSize = 4;
+let wbStrokes = [], wbCurrentStroke = null;
+let mediaRecorder = null, recordedChunks = [], isRecording = false, recordingStartTime = 0;
+let recordingTimerInterval = null;
+let compositeCanvas = null, compositeCtx = null, compositeAnimationId = null;
+let audioContext = null, audioDestination = null, recordingBlob = null, recordingMimeType = 'video/webm';
+let currentChatTab = 'public';
+let projCanvas = null, projCtx = null, projVideo = null, projImage = null;
+let projIsDrawing = false, projLastX = 0, projLastY = 0, projPenColor = '#ea4335', projPenSize = 6;
+let projStrokes = [], projCurrentStroke = null, projCurrentMedia = null;
+let projCurrentState = { isPlaying: false, currentTime: 0, mediaId: null }, projPendingState = null, projSyncInterval = null, projIsSeeking = false;
+let isCoTeacher = false, isLowBandwidth = false;
+let classStartTime = 0, classTimerInterval = null;
+let activityTimerInterval = null, activityTimeLeft = 0;
+let vadContext = null, vadAnalyser = null, vadDataArray = null, vadInterval = null, lastSpeakingState = false;
+let qualityCheckInterval = null; const qualityCache = new Map();
+let stats = { userStats: new Map(), startTime: 0 };
+let bellAudioCtx = null;
+let currentTheme = localStorage.getItem('lroom_theme') || 'dark';
+let waitingList = new Map();
+let isWaitingForApproval = false;
+let pendingPermissionRequest = null;
+let adminActiveAnnouncement = null;
+let realtimeChannel = null;
+let waitingAudioBlockInterval = null;
+let isGuestMode = false, guestName = '';
+let spotlightedId = null, spotlightModeActive = false;
+let blurProcessor = null, isBlurEnabled = false, connectBarTimer = null;
+let currentAuthMethod = 'email';
+const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
+
+// ═══════════════ توابع کمکی ═══════════════
+const DAY_MS = 86400000;
+function addDaysSafe(date, days) { const d = (date instanceof Date) ? date : new Date(date); return new Date(d.getTime() + days * DAY_MS); }
+function parseDateSafe(v) { if (!v) return null; if (v instanceof Date) return v; const s = String(v).trim(); if (!s) return null; if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(s)) return new Date(s); return new Date(s.replace(' ', 'T') + 'Z'); }
+function calcDaysLeft(endVal) { const end = parseDateSafe(endVal); if (!end) return 0; const ms = end.getTime() - Date.now(); if (ms <= 0) return 0; return Math.ceil(ms / DAY_MS); }
+function calcEndDateFromNow(days) { return new Date(Date.now() + days * DAY_MS); }
+function getRenewalBase(endVal) { const end = parseDateSafe(endVal); if (end && end.getTime() > Date.now()) return end; return new Date(); }
+function normalizePhone(input) {
+    let p = String(input || '').trim().replace(/[\s\-\(\)]/g, '');
+    p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    if (p.startsWith('+98')) return p;
+    if (p.startsWith('0098')) return '+98' + p.slice(4);
+    if (p.startsWith('98') && p.length >= 12) return '+' + p;
+    if (p.startsWith('0')) return '+98' + p.slice(1);
+    if (p.length === 10) return '+98' + p;
+    return p.startsWith('+') ? p : '+' + p;
+}
+function phoneToFakeEmail(phone) { const digits = phone.replace(/\D/g, ''); return `p${digits}@${PHONE_EMAIL_DOMAIN}`; }
+function showToast(txt) { if (!txt) return; const to = document.getElementById('toast'); if (window._toastTimer) clearTimeout(window._toastTimer); to.textContent = txt; void to.offsetWidth; to.classList.add('show'); window._toastTimer = setTimeout(() => to.classList.remove('show'), 3500); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function fmtTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); return `${m}:${(s % 60).toString().padStart(2, '0')}`; }
+function fmtDT(d) { const dt = new Date(d); return `${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}:${dt.getSeconds().toString().padStart(2,'0')}`; }
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(2) + ' MB'; }
+function sanitize(r) { return String(r || '').replace(/[^a-zA-Z0-9]/g, '') || 'default'; }
+function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
+
+// ═══════════════ مدیریت رسانه و مجوزها ═══════════════
+function showConnectCountdown() {
+    let el = document.getElementById('connectOverlay');
+    if (!el) { el = document.createElement('div'); el.id = 'connectOverlay'; el.innerHTML = '<div id="connectBar"><div id="connectBarFill"></div></div>'; document.body.appendChild(el); }
+    el.classList.add('show');
+    const barEl = document.getElementById('connectBarFill');
+    barEl.style.transition = 'none'; barEl.style.width = '0%'; let progress = 0;
+    if (connectBarTimer) clearInterval(connectBarTimer);
+    connectBarTimer = setInterval(() => { if (progress < 90) { progress += Math.random() * 4 + 1.5; if (progress > 90) progress = 90; barEl.style.transition = 'width .4s ease-out'; barEl.style.width = progress + '%'; } }, 200);
+}
+function hideConnectCountdown() {
+    const el = document.getElementById('connectOverlay');
+    if (!el) return;
+    const barEl = document.getElementById('connectBarFill');
+    if (barEl) { barEl.style.transition = 'width .3s ease-out'; barEl.style.width = '100%'; }
+    if (connectBarTimer) { clearInterval(connectBarTimer); connectBarTimer = null; }
+    setTimeout(() => { el.classList.remove('show'); }, 350);
+}
+
+async function requestMediaPermission() {
+    if (localStream && (localStream.getVideoTracks().length > 0 || localStream.getAudioTracks().length > 0)) return true;
+    if (localStream) { try { localStream.getTracks().forEach(t => t.stop()); } catch(e){} localStream = null; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('⚠️ مرورگر شما پشتیبانی نمی‌کند (HTTPS نیاز است)'); return false; }
+    let stream = null;
+    try {
+        showToast('🎤📹 درخواست دسترسی...');
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: 'user' } });
+    } catch (e) {
+        if (e.name === 'NotAllowedError') { showToast('❌ دسترسی رد شد'); return false; }
+        try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); showToast('⚠️ فقط میکروفون فعال شد'); } 
+        catch (e2) { showToast('❌ دسترسی داده نشد'); return false; }
+    }
+    localStream = stream;
+    localStream.getAudioTracks().forEach(t => t.enabled = false);
+    localStream.getVideoTracks().forEach(t => t.enabled = false);
+    const pv = document.getElementById('previewVideo'); if (pv) { pv.srcObject = localStream; pv.play().catch(() => {}); }
+    return true;
+}
+
+// ═══════════════ احراز هویت ═══════════════
+function switchAuthMethod(method) {
+    currentAuthMethod = method;
+    document.getElementById('methodBtnEmail').classList.toggle('active', method === 'email');
+    document.getElementById('methodBtnPhone').classList.toggle('active', method === 'phone');
+    document.getElementById('emailAuthSection').style.display = method === 'email' ? 'block' : 'none';
+    document.getElementById('phoneAuthSection').style.display = method === 'phone' ? 'block' : 'none';
+}
+function switchPhoneTab(tab) {
+    document.getElementById('phoneTabLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('phoneTabRegister').classList.toggle('active', tab === 'register');
+    document.getElementById('phoneLoginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('phoneRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
+}
+async function handleLogin(e) {
+    e.preventDefault(); if (!sb) return showToast('⚠️ سرور در دسترس نیست');
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError'); const btn = document.getElementById('loginBtn');
+    errEl.classList.remove('show'); btn.disabled = true; btn.textContent = '⏳...';
+    try {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(error.message);
+        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
+        if (!profile) throw new Error('پروفایل یافت نشد');
+        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
+        isGuestMode = false; try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
+        checkAndShow(); initRealtime(); loadActiveAnnouncement();
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ورود'; }
+}
+async function handlePhoneLogin(e) {
+    e.preventDefault(); if (!sb) return showToast('⚠️ سرور در دسترس نیست');
+    const phoneRaw = document.getElementById('phoneLoginInput').value;
+    const password = document.getElementById('phoneLoginPassword').value;
+    const errEl = document.getElementById('phoneLoginError'); const btn = document.getElementById('phoneLoginBtn');
+    errEl.classList.remove('show'); const phone = normalizePhone(phoneRaw);
+    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
+    btn.disabled = true; btn.textContent = '⏳...';
+    try {
+        const email = phoneToFakeEmail(phone);
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw new Error('شماره یا رمز عبور اشتباه است');
+        let { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
+        if (!profile) throw new Error('پروفایل یافت نشد');
+        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
+        isGuestMode = false; try { await sb.from('profiles').update({ password_plain: password }).eq('id', data.user.id); } catch (e) {}
+        showToast('✅ ورود موفق'); checkAndShow(); initRealtime(); loadActiveAnnouncement();
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ورود'; }
+}
+async function handleRegister(e) {
+    e.preventDefault(); if (!sb) return showToast('⚠️ سرور در دسترس نیست');
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const phone = (document.getElementById('regPhone')?.value || '').trim();
+    const password = document.getElementById('regPassword').value;
+    const userType = document.getElementById('regUserType').value;
+    const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
+    const errEl = document.getElementById('regError'); const okEl = document.getElementById('regSuccess'); const btn = document.getElementById('regBtn');
+    errEl.classList.remove('show'); okEl.classList.remove('show');
+    if (password.length < 6) { errEl.textContent = '⚠️ ۶ کاراکتر'; errEl.classList.add('show'); return; }
+    btn.disabled = true; btn.textContent = '⏳...';
+    try {
+        let disc = null, discUsedCount = 0;
+        if (discCode) { const { data: d } = await sb.from('discount_codes').select('*').eq('code', discCode).maybeSingle(); if (!d) throw new Error('کد نامعتبر'); discUsedCount = (d.used_by || []).length; if (d.max_uses > 0 && discUsedCount >= d.max_uses) throw new Error('کد تمام شد'); disc = d; }
+        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+        if (authErr) throw new Error(authErr.message);
+        if (!authData.session) throw new Error('Confirm email رو خاموش کن');
+        await new Promise(r => setTimeout(r, 1500));
+        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
+        if (!prof) { 
+            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
+            await sb.from('profiles').insert({ id: authData.user.id, email: authData.user.email, name: name, role: email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', user_type: userType, phone: phone || null, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' }); 
+            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data; 
+        }
+        if (disc && prof) { const base = getRenewalBase(prof.subscription_end); const newEnd = addDaysSafe(base, disc.days); await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', authData.user.id); await sb.from('discount_codes').update({ used_count: discUsedCount + 1, used_by: [...(disc.used_by || []), authData.user.id] }).eq('id', disc.id); }
+        try { await sb.auth.signOut(); } catch (e) {}
+        okEl.textContent = '✅ ثبت‌نام موفق!'; okEl.classList.add('show');
+        setTimeout(() => { switchAuthTab('login'); document.getElementById('loginEmail').value = email; }, 2500);
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
+}
+async function handlePhoneRegister(e) {
+    e.preventDefault(); if (!sb) return showToast('⚠️ سرور در دسترس نیست');
+    const name = document.getElementById('phoneRegName').value.trim();
+    const phoneRaw = document.getElementById('phoneRegInput').value;
+    const password = document.getElementById('phoneRegPassword').value;
+    const userType = document.getElementById('phoneRegUserType').value;
+    const errEl = document.getElementById('phoneRegError'); const okEl = document.getElementById('phoneRegSuccess'); const btn = document.getElementById('phoneRegBtn');
+    errEl.classList.remove('show'); okEl.classList.remove('show'); const phone = normalizePhone(phoneRaw);
+    if (!name || name.length < 2) { errEl.textContent = '⚠️ نام را وارد کنید'; errEl.classList.add('show'); return; }
+    if (!/^\+98\d{10}$/.test(phone)) { errEl.textContent = '⚠️ شماره معتبر نیست'; errEl.classList.add('show'); return; }
+    if (password.length < 6) { errEl.textContent = '⚠️ رمز عبور حداقل ۶ کاراکتر باشد'; errEl.classList.add('show'); return; }
+    btn.disabled = true; btn.textContent = '⏳...';
+    try {
+        const email = phoneToFakeEmail(phone);
+        const { data: authData, error: authErr } = await sb.auth.signUp({ email, password, options: { data: { name, phone } } });
+        if (authErr) throw new Error(authErr.message);
+        if (!authData.session) throw new Error('تنظیمات تأیید ایمیل در Supabase باید خاموش شود');
+        await new Promise(r => setTimeout(r, 1000));
+        let { data: prof } = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle();
+        if (!prof) {
+            const endDate = userType === 'student' ? null : calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString();
+            await sb.from('profiles').insert({ id: authData.user.id, email: email, name: name, role: 'user', user_type: userType, phone: phone, subscription_end: endDate, password_plain: password, plan_level: 1, max_students: 10, max_mics: 4, max_cams: 4, tech_type: 'livekit' });
+            const r2 = await sb.from('profiles').select('*').eq('id', authData.user.id).maybeSingle(); prof = r2.data;
+        }
+        okEl.textContent = '✅ ثبت‌نام موفق!'; okEl.classList.add('show');
+        setTimeout(async () => {
+            try {
+                const { data: loginData } = await sb.auth.signInWithPassword({ email, password });
+                if (loginData?.user) {
+                    const { data: profile } = await sb.from('profiles').select('*').eq('id', loginData.user.id).maybeSingle();
+                    if (profile) {
+                        currentUser = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, sessionCode: profile.session_code, subscriptionEnd: profile.subscription_end, userType: profile.user_type, planLevel: profile.plan_level, maxStudents: profile.max_students, maxMics: profile.max_mics, maxCams: profile.max_cams, techType: profile.tech_type };
+                        isGuestMode = false; checkAndShow(); initRealtime(); loadActiveAnnouncement();
+                    }
+                }
+            } catch (e) {}
+        }, 1500);
+    } catch (err) { errEl.textContent = '❌ ' + (err.message || 'خطا'); errEl.classList.add('show'); }
+    finally { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
+}
+async function applyDiscountCode(inputId) {
+    if (!sb) return showToast('⚠️ سرور در دسترس نیست');
+    const id = inputId || 'regDiscountCode'; const input = document.getElementById(id); if (!input) return;
+    const code = (input.value || '').trim().toUpperCase(); if (!code) return showToast('⚠️ کد را وارد کنید');
+    const { data: d, error } = await sb.from('discount_codes').select('*').eq('code', code).maybeSingle();
+    if (error || !d) return showToast('❌ کد نامعتبر');
+    const usedCount = (d.used_by || []).length; if (d.max_uses > 0 && usedCount >= d.max_uses) return showToast('⛔ این کد تمام شده');
+    showToast(`✅ ${d.days} روز هدیه`);
+}
+async function logout() {
+    if (isGuestMode) { localStorage.removeItem('lroom_guest_name'); isGuestMode = false; guestName = ''; currentUser = null; if (livekitRoom) { try { livekitRoom.disconnect(); } catch(e){} } if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } const u = new URL(location.href); u.searchParams.delete('room'); u.searchParams.delete('join'); location.href = u.toString(); return; }
+    try { if (sb) await sb.auth.signOut(); } catch (e) {}
+    sessionStorage.removeItem('lroom_admin_auth'); currentUser = null;
+    if (realtimeChannel) { try { sb.removeChannel(realtimeChannel); } catch(e){} }
+    if (livekitRoom) { try { livekitRoom.disconnect(); } catch (e) {} }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    location.reload();
+}
