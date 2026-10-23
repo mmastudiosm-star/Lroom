@@ -450,30 +450,6 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
-<script>
-// 🛡️ Fallback: اگه CDN لود نشد، بعد از ۸ ثانیه لودر رو مخفی کن
-setTimeout(function(){
-    var loader = document.getElementById('appLoader');
-    if (loader) loader.style.display = 'none';
-    var auth = document.getElementById('authScreen');
-    var lobby = document.getElementById('lobby');
-    var meeting = document.getElementById('meeting');
-    var guest = document.getElementById('guestJoinScreen');
-    var lobbyOpen = lobby && lobby.style.display === 'flex';
-    var meetingOpen = meeting && meeting.classList.contains('active');
-    var guestOpen = guest && guest.style.display === 'flex';
-    if (!lobbyOpen && !meetingOpen && !guestOpen && auth && auth.style.display === 'none') {
-        auth.style.display = 'flex';
-        if (typeof window.supabase === 'undefined') {
-            var warn = document.createElement('div');
-            warn.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ea4335;color:#fff;padding:12px 20px;border-radius:8px;z-index:999999;font-size:13px;text-align:center;max-width:90%;';
-            warn.textContent = '⚠️ اتصال به سرور برقرار نشد. لطفاً صفحه را رفرش کنید.';
-            document.body.appendChild(warn);
-        }
-    }
-}, 8000);
-</script>
-
 <div id="appLoader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-primary);z-index:999999;gap:20px;">
     <div class="logo-icon" style="width:80px;height:80px;font-size:50px;border-radius:22px;">L</div>
     <div style="color:var(--text-secondary);font-size:14px;">⏳ در حال بارگذاری...</div>
@@ -1008,7 +984,6 @@ setTimeout(function(){
   </div>
 </div>
 
-<!-- 👇 مودال اشتراک سفارشی -->
 <div id="customSubModal" class="modal" style="z-index: 4000;">
     <div class="modal-content" style="text-align: right;">
         <h2 style="text-align: center;">⚙️ تنظیم اشتراک سفارشی</h2>
@@ -1049,43 +1024,7 @@ setTimeout(function(){
 <div id="reactionsContainer"></div>
 <div id="connBanner"></div>
 <div id="toast"></div>
-
-<!-- اسکریپت‌ها با CDNهای جایگزین -->
-(function(){
-    function loadScript(urls, callback) {
-        if (urls.length === 0) { if (callback) callback(false); return; }
-        var s = document.createElement('script');
-        s.src = urls[0];
-        s.onload = function(){ if (callback) callback(true); };
-        s.onerror = function(){ 
-            console.warn('CDN failed:', urls[0]);
-            loadScript(urls.slice(1), callback); 
-        };
-        document.head.appendChild(s);
-    }
-    window._loadScript = loadScript;
-    
-    loadScript([
-        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-        'https://unpkg.com/@supabase/supabase-js@2',
-        'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js'
-    ], function(ok1){
-        loadScript([
-            'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js',
-            'https://unpkg.com/livekit-client@2.5.7/dist/livekit-client.umd.min.js'
-        ], function(ok2){
-            loadScript([
-                'https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js',
-                'https://unpkg.com/@livekit/track-processors@latest/dist/track-processors.umd.min.js'
-            ], function(ok3){
-                var mainScript = document.createElement('script');
-                mainScript.textContent = window._mainAppCode || '';
-                document.body.appendChild(mainScript);
-                if (typeof window._appInit === 'function') window._appInit();
-            });
-        });
-    });
-})();
+<script>
 const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
 // 👇 اگر سرور پارس‌پک خریدی، آدرس زیر رو به دامنه خودت تغییر بده (مثلاً wss://livekit.lroom.ir)
