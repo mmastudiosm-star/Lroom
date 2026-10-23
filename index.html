@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>Lroom | کلاس آنلاین | ال روم</title>
+<title>Lroom | کلاس آنلاین</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238ab4f8'/><text x='50' y='72' font-size='70' font-weight='900' text-anchor='middle' fill='%23202124' font-family='Tahoma'>L</text></svg>" />
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 <style>
@@ -1008,7 +1008,7 @@ setTimeout(function(){
   </div>
 </div>
 
-<!-- 👇 مودال اشتراک سفارشی (این بخش جدید اضافه شده) -->
+<!-- 👇 مودال اشتراک سفارشی -->
 <div id="customSubModal" class="modal" style="z-index: 4000;">
     <div class="modal-content" style="text-align: right;">
         <h2 style="text-align: center;">⚙️ تنظیم اشتراک سفارشی</h2>
@@ -1093,7 +1093,8 @@ setTimeout(function(){
 <script>
 const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
-const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud'; // 👈 اگر سرور خریدی، آدرس خودت را بگذار
+// 👇 اگر سرور پارس‌پک خریدی، آدرس زیر رو به دامنه خودت تغییر بده (مثلاً wss://livekit.lroom.ir)
+const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud'; 
 const LIVEKIT_API_KEY = 'APIRuoEKCKzj9S2';
 const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S';
 const ADMIN_EMAIL = 'mmastudio.s.m@gmail.com';
@@ -1371,7 +1372,7 @@ function checkAndShow() {
         document.getElementById('userBadgeName').textContent = currentUser.name;
         if (isAdmin) { document.getElementById('userBadgeDays').textContent = ''; }
         else if (isStudentOnly) { document.getElementById('userBadgeDays').textContent = '(دانشجو - رایگان)'; }
-        else { document.getElementById('userBadgeDays').textContent = `(سطح ${currentUser.planLevel || 1} - ${daysLeft} روز)`; }
+        else { document.getElementById('userBadgeDays').textContent = `(رتبه ${currentUser.planLevel || 1} - ${daysLeft} روز)`; }
         document.getElementById('userBadgeCrown').style.display = isAdmin ? 'inline' : 'none';
         updateAdminButtons(); setLobbyRole(currentUser.userType === 'both' ? 'teacher' : (currentUser.userType === 'student' ? 'student' : 'teacher'));
     } else {
@@ -1548,27 +1549,43 @@ async function adminDeleteUser(userId, name) {
     try { await sb.from('profiles').delete().eq('id', userId); renderAdminUsers(); renderAdminDashboard(); showToast(`🗑️ حذف شد`); } catch (e) { showToast('❌ ' + e.message); }
 }
 
-// ═══════════════ پروژکتور (رفع باگ حجم) ═══════════════
+// ═══════════════ استریم پروژکتور با LiveKit ═══════════════
 async function loadProjectorFile(e) { 
     if (!hasProjectorAccess()) { showToast('🔒 دسترسی ندارید'); return; } 
     const f = e.target.files[0]; if (!f) return; 
-    if (f.size > 104857600) { showToast('⚠️ حداکثر 100MB'); return; } 
     const iv = f.type.startsWith('video/'); const ii = f.type.startsWith('image/'); 
     if (!iv && !ii) return; 
-    showToast('⏳ در حال آپلود...'); 
-    try { 
-        const mediaId = 'media_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); 
-        const ext = f.name.split('.').pop() || (iv ? 'mp4' : 'jpg'); 
-        const fileName = `${mediaId}.${ext}`; 
-        const { error: upErr } = await sb.storage.from(PROJECTOR_BUCKET).upload(fileName, f, { cacheControl: '3600', upsert: false, contentType: f.type }); 
-        if (upErr) throw new Error(upErr.message); 
-        const { data: urlData } = sb.storage.from(PROJECTOR_BUCKET).getPublicUrl(fileName); 
-        const publicUrl = urlData.publicUrl; 
-        projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: publicUrl, from: myName, mediaId, storagePath: fileName }; 
-        projCurrentState = { isPlaying: false, currentTime: 0, mediaId }; 
-        displayProjectorMedia(projCurrentMedia); 
-        broadcast({ type: 'proj-media', media: projCurrentMedia, state: projCurrentState }); 
-    } catch (err) { showToast('❌ ' + err.message); } 
+    
+    showToast('🎥 در حال آماده‌سازی استریم...'); 
+    const url = URL.createObjectURL(f);
+    projCurrentMedia = { type: iv ? 'video' : 'image', name: f.name, data: url, from: myName, mediaId: Date.now() };
+    
+    displayProjectorMedia(projCurrentMedia); 
+    
+    if (livekitRoom && livekitRoom.localParticipant && iv) {
+        try {
+            const videoElement = document.getElementById('projectorVideo');
+            videoElement.muted = true; 
+            await videoElement.play();
+            
+            const oldPub = livekitRoom.localParticipant.getTrackPublication(LivekitClient.Track.Source.ScreenShare);
+            if (oldPub) await livekitRoom.localParticipant.unpublishTrack(oldPub.track);
+
+            const stream = videoElement.captureStream ? videoElement.captureStream() : videoElement.mozCaptureStream();
+            const videoTrack = stream.getVideoTracks()[0];
+            const audioTrack = stream.getAudioTracks()[0];
+
+            await livekitRoom.localParticipant.publishTrack(videoTrack, { name: 'projector-video', source: LivekitClient.Track.Source.ScreenShare });
+            if (audioTrack) {
+                await livekitRoom.localParticipant.publishTrack(audioTrack, { name: 'projector-audio', source: LivekitClient.Track.Source.ScreenShareAudio });
+            }
+            broadcast({ type: 'proj-stream-started', mediaId: projCurrentMedia.mediaId, name: f.name });
+            showToast('✅ استریم شروع شد');
+        } catch(err) { 
+            console.error('Stream Error:', err);
+            showToast('❌ خطا در استریم (کنسول را چک کنید)'); 
+        }
+    }
 }
 
 // ═══════════════ اتصال اصلی (joinMeeting) ═══════════════
@@ -1670,7 +1687,7 @@ async function joinMeeting() {
     }
 }
 
-// ═══════════════ سایر توابع لایوکیت و رابط کاربری ═══════════════
+// ═══════════════ سایر توابع لایوکیت ═══════════════
 function generateLiveKitToken(roomName, identity, name, canPublish) {
     const now = Math.floor(Date.now() / 1000);
     const header = { alg: 'HS256', typ: 'JWT' };
@@ -1693,11 +1710,27 @@ function setupLiveKitEvents() {
     const R = LivekitClient.RoomEvent;
     livekitRoom.on(R.ParticipantConnected, (p) => { if (isWaitingForApproval && p.identity && p.identity.startsWith('teacher-')) { const el = document.getElementById('waitingTeacherName'); if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity); } updateParticipantCount(); });
     livekitRoom.on(R.ParticipantDisconnected, (p) => { removeVideo(p.identity); remoteParticipants.delete(p.identity); qualityCache.delete(p.identity); waitingList.delete(p.identity); updateWaitingPanel(); const s = stats.userStats.get(p.identity); if (s) s.isOnline = false; updateParticipantCount(); updateAttendanceUI(); updateTeacherPanel(); updateParticipantsPanel(); updatePrivateRecipientList(); });
+    
     livekitRoom.on(R.TrackSubscribed, (track, pub, p) => {
+        // 👈 دریافت استریم پروژکتور برای دانشجوها
+        if (pub.name === 'projector-video') {
+            const v = document.getElementById('projectorVideo');
+            v.srcObject = new MediaStream([track.mediaStreamTrack]);
+            v.muted = false;
+            v.play().catch(()=>{});
+            document.getElementById('projectorEmptyState').style.display = 'none';
+            return;
+        }
+        if (pub.name === 'projector-audio') {
+            const el = track.attach(); el.autoplay = true; el.style.display = 'none'; document.body.appendChild(el);
+            return;
+        }
+
         if (track.kind === LivekitClient.Track.Kind.Video && pub.source === LivekitClient.Track.Source.ScreenShare) { showScreenShareInline(p.identity, track, pub, p.name || p.identity); return; }
         if (track.kind === LivekitClient.Track.Kind.Audio) { const el = track.attach(); el.autoplay = true; el.style.display = 'none'; el.dataset.identity = p.identity; if (isWaitingForApproval) { el.muted = true; } document.body.appendChild(el); return; }
         const el = track.attach(); el.autoplay = true; el.playsInline = true; el.muted = true; addRemoteVideo(p.identity, el, p.name || p.identity);
     });
+    
     livekitRoom.on(R.TrackUnsubscribed, (track, pub, p) => { track.detach().forEach(el => el.remove()); if (track.kind === LivekitClient.Track.Kind.Video && remoteParticipants.has(p.identity)) showAvatar(p.identity); });
     livekitRoom.on(R.TrackMuted, (pub, p) => { if (pub.kind === LivekitClient.Track.Kind.Audio) updateRemoteMicUI(p.identity, false); else if (pub.kind === LivekitClient.Track.Kind.Video) showAvatar(p.identity); });
     livekitRoom.on(R.TrackUnmuted, (pub, p) => { if (pub.kind === LivekitClient.Track.Kind.Audio) updateRemoteMicUI(p.identity, true); else if (pub.kind === LivekitClient.Track.Kind.Video) hideAvatar(p.identity); });
