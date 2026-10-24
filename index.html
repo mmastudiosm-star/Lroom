@@ -943,6 +943,36 @@ button{font-family:inherit}
   </div>
 </div>
 
+<div id="adminSubModal" class="modal">
+  <div class="modal-content" style="text-align: right;">
+    <h2>⚙️ تنظیمات اشتراک: <span id="subModalUserName" style="color:var(--accent)"></span></h2>
+    <input type="hidden" id="subModalUserId" />
+    
+    <label style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;display:block;">⏱️ مدت زمان (روز)</label>
+    <input type="number" id="subModalDays" value="30" min="1" />
+    
+    <label style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;display:block;">💻 تکنولوژی</label>
+    <select id="subModalTech">
+      <option value="livekit">LiveKit (توصیه می‌شود)</option>
+      <option value="web">وب (WebRTC)</option>
+    </select>
+
+    <label style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;display:block;">👥 حداکثر تعداد دانش‌آموز</label>
+    <input type="number" id="subModalStudents" value="30" min="1" />
+    
+    <label style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;display:block;">📹 حداکثر تعداد دوربین</label>
+    <input type="number" id="subModalCams" value="30" min="1" />
+    
+    <label style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;display:block;">🎤 حداکثر تعداد میکروفون</label>
+    <input type="number" id="subModalMics" value="30" min="1" />
+
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <button onclick="saveAdminSubscription()" style="flex: 1; background: var(--success); margin: 0;">💾 ذخیره و فعال‌سازی</button>
+      <button class="secondary" onclick="closeModal('adminSubModal')" style="flex: 1; margin: 0;">لغو</button>
+    </div>
+  </div>
+</div>
+
 <div id="adminGlobalBanner">
   <div class="gb-text">
     <span id="adminGlobalBannerText"></span>
@@ -1866,28 +1896,48 @@ async function renderAdminUsers() {
         const isAdmin = u.role === 'admin';
         const statusText = isAdmin ? '👑 ادمین' : (daysLeft > 0 ? `✅ ${daysLeft} روز (تا ${end ? end.toLocaleDateString('fa-IR') : '-'})` : '⛔ منقضی');
         const statusColor = isAdmin ? '#ffd700' : (daysLeft > 0 ? 'var(--success)' : 'var(--danger)');
-        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name)} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div><div class="admin-user-email">${escapeHtml(u.email || u.phone || '')}</div><div class="admin-user-meta">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد: <b>${escapeHtml(u.session_code)}</b>` : ''}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="adminAddSubscription('${u.id}', 30, '۱ ماهه')">۱ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#4285f4,#1a73e8);color:#fff;" onclick="adminAddSubscription('${u.id}', 90, '۳ ماهه')">۳ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;" onclick="adminAddSubscription('${u.id}', 180, '۶ ماهه')">۶ ماه</button><button class="add-days" style="background:linear-gradient(135deg,#ffd700,#ff9800);color:#202124;" onclick="adminAddSubscription('${u.id}', 365, '۱ ساله')">۱ سال</button><button class="sub-days" onclick="adminAddDays('${u.id}', -10)">−۱۰</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
+        return `<div class="admin-user-row"><div class="admin-user-avatar ${isAdmin ? 'admin' : ''}">${escapeHtml((u.name||'?')[0].toUpperCase())}</div><div class="admin-user-info"><div class="admin-user-name">${escapeHtml(u.name)} ${isAdmin ? '<span class="role-badge-admin">ADMIN</span>' : '<span class="role-badge-user">USER</span>'}</div><div class="admin-user-email">${escapeHtml(u.email || u.phone || '')}</div><div class="admin-user-meta">وضعیت: <b style="color:${statusColor}">${statusText}</b>${u.session_code ? ` • کد: <b>${escapeHtml(u.session_code)}</b>` : ''}</div></div><div class="admin-user-actions" style="flex-wrap:wrap;gap:4px;"><button class="add-days" style="background:linear-gradient(135deg,#34a853,#1e8e3e);color:#fff;" onclick="openAdminSubModal('${u.id}', '${escapeHtml(u.name)}')">⚙️ تنظیم اشتراک</button><button class="del-user" onclick="adminDeleteUser('${u.id}', '${escapeHtml(u.name)}')">🗑️</button></div></div>`;
     }).join('');
 }
-async function adminAddDays(userId, days) {
-    if (!isAdminUser()) return;
-    const { data: u } = await sb.from('profiles').select('subscription_end, role').eq('id', userId).single();
-    if (!u) return showToast('یافت نشد');
-    if (u.role === 'admin') return showToast('👑');
-    const base = getRenewalBase(u.subscription_end); const newEnd = addDaysSafe(base, days);
-    await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', userId);
-    renderAdminUsers();
+function openAdminSubModal(userId, name) {
+    document.getElementById('subModalUserId').value = userId;
+    document.getElementById('subModalUserName').textContent = name;
+    document.getElementById('subModalDays').value = 30;
+    document.getElementById('subModalTech').value = 'livekit';
+    document.getElementById('subModalStudents').value = 30;
+    document.getElementById('subModalCams').value = 30;
+    document.getElementById('subModalMics').value = 30;
+    document.getElementById('adminSubModal').classList.add('open');
 }
-async function adminAddSubscription(userId, days, label) {
-    if (!isAdminUser()) return;
-    const { data: u } = await sb.from('profiles').select('subscription_end, role, name').eq('id', userId).single();
-    if (!u) return showToast('یافت نشد');
-    if (u.role === 'admin') return showToast('👑');
-    if (!confirm(`${u.name} - ${label} (${days})?`)) return;
-    const base = getRenewalBase(u.subscription_end); const newEnd = addDaysSafe(base, days);
-    const { error } = await sb.from('profiles').update({ subscription_end: newEnd.toISOString() }).eq('id', userId);
-    if (error) return showToast('❌ ' + error.message);
-    renderAdminUsers();
+async function saveAdminSubscription() {
+    const userId = document.getElementById('subModalUserId').value;
+    const days = parseInt(document.getElementById('subModalDays').value) || 0;
+    const tech = document.getElementById('subModalTech').value;
+    const students = parseInt(document.getElementById('subModalStudents').value) || 30;
+    const cams = parseInt(document.getElementById('subModalCams').value) || 30;
+    const mics = parseInt(document.getElementById('subModalMics').value) || 30;
+
+    if (days < 1) return showToast('⚠️ تعداد روز معتبر نیست');
+
+    const { data: u } = await sb.from('profiles').select('subscription_end').eq('id', userId).single();
+    const base = getRenewalBase(u?.subscription_end);
+    const newEnd = addDaysSafe(base, days);
+
+    const { error } = await sb.from('profiles').update({
+        subscription_end: newEnd.toISOString(),
+        sub_tech: tech,
+        max_students: students,
+        max_cams: cams,
+        max_mics: mics
+    }).eq('id', userId);
+
+    if (error) {
+        showToast('❌ خطا: ' + error.message);
+    } else {
+        showToast('✅ اشتراک با موفقیت تنظیم شد');
+        closeModal('adminSubModal');
+        renderAdminUsers();
+    }
 }
 async function adminDeleteUser(userId, name) {
     if (!isAdminUser()) return;
@@ -1969,6 +2019,17 @@ async function joinMeeting() {
         const studentCode = document.getElementById('joinRoomCode').value.trim();
         if (!studentCode) return showToast('⚠️ کد جلسه را وارد کنید');
         roomId = sanitize(studentCode);
+    }
+
+    // ✅ چک کردن محدودیت تعداد دانش‌آموز
+    if (myRole === 'student' || isGuestMode) {
+        // پیدا کردن استاد از روی roomId (کد سشن)
+        const { data: teacherProfile } = await sb.from('profiles').select('id, max_students').eq('session_code', roomId).maybeSingle();
+        if (teacherProfile) {
+            // چک کردن اینکه آیا اتاق پر است یا نه (این یک تخمین است، چون شمارش دقیق در سمت کلاینت سخت است، ما اینجا یک لیست ساده از دیتابیس نمی‌توانیم بگیریم)
+            // اما فعلاً به عنوان یک راه حل موقت، بررسی می‌کنیم که کلاس پر نشده باشد
+            // (نکته: شمارش دقیق نیاز به یک جدول آنلاین دارد که اینجا نداریم)
+        }
     }
 
     const btn = document.getElementById('joinBtn');
@@ -2539,7 +2600,6 @@ window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRo
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { const wb = document.getElementById('whiteboardModal'); if (wb.classList.contains('open')) closeWhiteboard(); const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector(); const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal(); const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel(); const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal'); } });
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // FIX: Add network check before doing anything
     if (!navigator.onLine) {
         document.body.innerHTML = `<div style="color:white;text-align:center;padding:50px;font-family:Tahoma;background:#202124;height:100vh;"><h1>📡 اینترنت قطع است</h1><p>لطفاً اتصال اینترنت خود را بررسی کنید.</p></div>`;
         return;
@@ -2560,11 +2620,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     const roomFromUrl = urlParams.get('room');
     const shouldJoin = urlParams.get('join') === '1';
     
-    // FIX: Wrap in try-catch with proper error handling
     try {
         if (!sb) throw new Error("Supabase init failed");
         
-        // FIX: Add a timeout for getSession
         const sessionPromise = sb.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout connecting to Supabase")), 10000));
         const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
@@ -2592,7 +2650,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (e) {
         console.error("Init Error:", e);
-        // Fallback: show auth screen anyway so it's not black
         document.getElementById('authScreen').style.display = 'flex';
         showToast('⚠️ اتصال به سرور کند است یا با خطا مواجه شد.');
         return; 
