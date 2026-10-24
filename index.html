@@ -465,13 +465,11 @@ button{font-family:inherit}
     <div class="auth-box">
         <div class="auth-logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
 
-        <!-- 🔀 سوییچ بین ایمیل و شماره همراه -->
         <div class="auth-method-toggle">
             <button type="button" class="method-btn active" id="methodBtnEmail" onclick="switchAuthMethod('email')">📧 ایمیل</button>
             <button type="button" class="method-btn" id="methodBtnPhone" onclick="switchAuthMethod('phone')">📱 شماره همراه</button>
         </div>
 
-        <!-- 📧 بخش ایمیل -->
         <div id="emailAuthSection">
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">ورود</button>
@@ -502,7 +500,6 @@ button{font-family:inherit}
             </form>
         </div>
 
-        <!-- 📱 بخش شماره همراه -->
         <div id="phoneAuthSection" style="display:none;">
             <div class="auth-tabs">
                 <button class="auth-tab active" id="phoneTabLogin" onclick="switchPhoneTab('login')">ورود</button>
@@ -963,6 +960,33 @@ button{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
 <script>
+// --- FIX: Catch any fatal errors and show them instead of a black screen ---
+window.onerror = function(msg, url, line, col, error) {
+    console.error("Global Error:", msg, error);
+    document.body.innerHTML = `
+        <div style="color:#fff; background:#202124; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:Tahoma; padding:20px; text-align:center;">
+            <h1 style="color:#ea4335; margin-bottom:20px;">⚠️ خطای جدی</h1>
+            <p style="font-size:16px; margin-bottom:20px;">متأسفانه برنامه با خطا مواجه شد. لطفاً اینترنت خود را بررسی کرده و صفحه را رفرش کنید.</p>
+            <p style="font-size:12px; color:#9aa0a6; direction:ltr;">Error: ${msg}</p>
+            <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#8ab4f8; color:#000; border:none; border-radius:8px; cursor:pointer; font-family:inherit;">رفرش صفحه</button>
+        </div>
+    `;
+    return false;
+};
+
+// --- FIX: Check if libraries are loaded before initializing ---
+if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'undefined') {
+    document.body.innerHTML = `
+        <div style="color:#fff; background:#202124; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:Tahoma; padding:20px; text-align:center;">
+            <h1 style="color:#fbbc04; margin-bottom:20px;">📡 مشکل در اتصال به سرور</h1>
+            <p style="font-size:16px; margin-bottom:20px;">کتابخانه‌های ارتباطی (Supabase یا LiveKit) لود نشدند.</p>
+            <p style="font-size:14px; color:#9aa0a6; margin-bottom:20px;">لطفاً از روشن بودن VPN خود مطمئن شوید و صفحه را رفرش کنید.</p>
+            <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#8ab4f8; color:#000; border:none; border-radius:8px; cursor:pointer; font-family:inherit;">تلاش مجدد</button>
+        </div>
+    `;
+    throw new Error("Libraries failed to load");
+}
+
 const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
 const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud';
@@ -973,15 +997,20 @@ const BALE_ID = '@sobhan101095';
 const DEFAULT_SUBSCRIPTION_DAYS = 20;
 const PROJECTOR_BUCKET = 'projector-media';
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-        flowType: 'implicit'
-    },
-    realtime: { params: { eventsPerSecond: 2 } }
-});
+let sb;
+try {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: false,
+            flowType: 'implicit'
+        },
+        realtime: { params: { eventsPerSecond: 2 } }
+    });
+} catch (e) {
+    console.error("Failed to init Supabase", e);
+}
 
 let currentUser = null;
 let livekitRoom = null;
@@ -2510,6 +2539,12 @@ window.addEventListener('beforeunload', () => { try { if (livekitRoom) livekitRo
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { const wb = document.getElementById('whiteboardModal'); if (wb.classList.contains('open')) closeWhiteboard(); const pj = document.getElementById('projectorModal'); if (pj.classList.contains('open')) closeProjector(); const ss = document.getElementById('screenShareModal'); if (ss.classList.contains('open')) closeScreenShareModal(); const ap = document.getElementById('adminPanelModal'); if (ap.classList.contains('open')) closeAdminPanel(); const gc = document.getElementById('giftCodeModal'); if (gc.classList.contains('open')) closeModal('giftCodeModal'); } });
 
 window.addEventListener('DOMContentLoaded', async () => {
+    // FIX: Add network check before doing anything
+    if (!navigator.onLine) {
+        document.body.innerHTML = `<div style="color:white;text-align:center;padding:50px;font-family:Tahoma;background:#202124;height:100vh;"><h1>📡 اینترنت قطع است</h1><p>لطفاً اتصال اینترنت خود را بررسی کنید.</p></div>`;
+        return;
+    }
+
     document.body.classList.toggle('light-theme', currentTheme === 'light');
     const i = currentTheme === 'light' ? '☀️' : '🌙';
     const t1 = document.getElementById('themeToggle'); if (t1) t1.textContent = i;
@@ -2524,8 +2559,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(location.search);
     const roomFromUrl = urlParams.get('room');
     const shouldJoin = urlParams.get('join') === '1';
+    
+    // FIX: Wrap in try-catch with proper error handling
     try {
-        const { data: { session } } = await sb.auth.getSession();
+        if (!sb) throw new Error("Supabase init failed");
+        
+        // FIX: Add a timeout for getSession
+        const sessionPromise = sb.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout connecting to Supabase")), 10000));
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+
         if (session && session.user) {
             let { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
             if (!profile) { const endDate = calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS); await sb.from('profiles').insert({ id: session.user.id, email: session.user.email, name: session.user.user_metadata?.name || 'User', role: session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user', subscription_end: endDate.toISOString() }); const r2 = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(); profile = r2.data; }
@@ -2547,7 +2590,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error("Init Error:", e);
+        // Fallback: show auth screen anyway so it's not black
+        document.getElementById('authScreen').style.display = 'flex';
+        showToast('⚠️ اتصال به سرور کند است یا با خطا مواجه شد.');
+        return; 
+    }
+    
     if (roomFromUrl && shouldJoin) { showGuestJoinScreen(roomFromUrl); }
     else { document.getElementById('authScreen').style.display = 'flex'; }
 });
