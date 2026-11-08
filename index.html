@@ -454,8 +454,7 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
-<!-- ═══════════ صفحه ورود مهمان (لینک اشتراک‌گذاری) ═══════════ -->
-<div id="guestJoinScreen">
+  <div id="guestJoinScreen">
   <div class="guest-box">
     <div class="guest-icon">🎓</div>
     <h2>ورود به کلاس</h2>
@@ -467,7 +466,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- ═══════════ صفحه احراز هویت ═══════════ -->
 <div id="authScreen">
     <div class="auth-box">
         <div class="auth-logo"><div class="logo-icon">L</div><div class="logo-text"><strong>room</strong></div></div>
@@ -477,7 +475,6 @@ button{font-family:inherit}
             <button type="button" class="method-btn" id="methodBtnPhone" onclick="switchAuthMethod('phone')">📱 شماره همراه</button>
         </div>
 
-        <!-- ─── ایمیل ─── -->
         <div id="emailAuthSection">
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">ورود</button>
@@ -508,12 +505,12 @@ button{font-family:inherit}
             </form>
         </div>
 
-        <!-- ─── شماره همراه ─── -->
         <div id="phoneAuthSection" style="display:none;">
             <div class="auth-tabs">
                 <button class="auth-tab active" id="phoneTabLogin" onclick="switchPhoneTab('login')">ورود</button>
                 <button class="auth-tab" id="phoneTabRegister" onclick="switchPhoneTab('register')">ثبت‌نام</button>
             </div>
+
             <form class="auth-form" id="phoneLoginForm" onsubmit="handlePhoneLogin(event)">
                 <label>شماره همراه</label>
                 <input type="tel" id="phoneLoginInput" placeholder="09123456789" dir="ltr" required autocomplete="tel" />
@@ -522,6 +519,7 @@ button{font-family:inherit}
                 <div class="auth-error" id="phoneLoginError"></div>
                 <button type="submit" class="submit" id="phoneLoginBtn">ورود</button>
             </form>
+
             <form class="auth-form" id="phoneRegisterForm" style="display:none;" onsubmit="handlePhoneRegister(event)">
                 <label>نام و نام خانوادگی</label>
                 <input type="text" id="phoneRegName" required autocomplete="name" />
@@ -541,7 +539,6 @@ button{font-family:inherit}
     </div>
 </div>
 
-<!-- ═══════════ صفحه انقضای اعتبار ═══════════ -->
 <div id="expiredScreen">
     <div class="expired-box">
         <h1>⛔ اعتبار شما تمام شده است</h1>
@@ -563,7 +560,6 @@ button{font-family:inherit}
     </div>
 </div>
 
-<!-- ═══════════ لابی ═══════════ -->
 <div id="lobby">
 <div class="top-bar">
 <div></div>
@@ -627,7 +623,6 @@ button{font-family:inherit}
 <div class="row"><button class="primary" id="joinBtn" onclick="joinMeeting()">ورود به جلسه</button></div>
 </div>
 
-<!-- ═══════════ اتاق جلسه ═══════════ -->
 <div id="meeting">
 <div id="header">
 <div id="roomTitle">
@@ -659,7 +654,6 @@ button{font-family:inherit}
 </div>
 
 <div id="mainArea">
-<!-- ─── پنل مدرس ─── -->
 <div id="teacherPanel">
 <div class="panel-header"><h3>🎓 پنل مدیریت کلاس</h3><button class="close-btn" onclick="toggleTeacherPanel()">✕</button></div>
 <div id="pendingRequests"><h4>📩 درخواست‌ها</h4><div id="pendingRequestsList"></div></div>
@@ -707,7 +701,6 @@ button{font-family:inherit}
 <div class="panel-body" style="border-top:1px solid var(--border-color);flex:1;"><div id="studentsList"></div></div>
 </div>
 
-<!-- ─── پنل حضور ─── -->
 <div id="attendancePanel"><div class="panel-header"><h3>📊 گزارش حضور</h3><button class="close-btn" onclick="toggleAttendancePanel()">✕</button></div>
 <div class="panel-body">
 <button class="teacher-action-btn" onclick="exportAttendanceCSV()" id="btnExportCSV" style="display:none;">⬇️ دانلود CSV</button>
@@ -716,36 +709,28 @@ button{font-family:inherit}
 </div>
 </div>
 
-<!-- ─── پنل آمار ─── -->
 <div id="statsPanel"><div class="panel-header"><h3>📈 آمار کلاس</h3><button class="close-btn" onclick="toggleStatsPanel()">✕</button></div>
 <div class="panel-body" id="statsPanelBody"></div></div>
 
-<!-- ─── پنل نظرسنجی ─── -->
 <div id="pollPanel"><div class="panel-header"><h3>📝 نظرسنجی</h3><button class="close-btn" onclick="togglePollPanel()">✕</button></div><div class="panel-body" id="pollPanelBody"></div></div>
 
-<!-- ─── پنل گروه‌ها ─── -->
 <div id="breakoutPanel"><div class="panel-header"><h3>👥 اتاق‌های شکست</h3><button class="close-btn" onclick="toggleBreakoutPanel()">✕</button></div><div class="panel-body" id="breakoutPanelBody"></div></div>
 
-<!-- ─── پنل گواهی ─── -->
 <div id="certPanel"><div class="panel-header"><h3>🎓 گواهی‌نامه</h3><button class="close-btn" onclick="toggleCertPanel()">✕</button></div><div class="panel-body" id="certPanelBody"></div></div>
 
-<!-- ─── پنل شرکت‌کننده‌ها ─── -->
 <div id="participantsPanel">
 <div class="panel-header"><h3>👥 شرکت‌کننده‌ها</h3><button class="close-btn" onclick="toggleParticipantsPanel()">✕</button></div>
 <div class="panel-body" id="participantsListBody"></div>
 </div>
 
-<!-- ─── پنل اتاق انتظار ─── -->
 <div id="waitingPanel">
 <div class="panel-header"><h3>🚪 اتاق انتظار</h3><button class="close-btn" onclick="toggleWaitingPanel()">✕</button></div>
 <div class="panel-body" id="waitingPanelBody"></div>
 </div>
 
-<!-- ─── ویدیوها ─── -->
 <div id="videos"></div>
 </div>
 
-<!-- ─── نوار واکنش ─── -->
 <div id="reactionsBar">
 <button onclick="sendReaction('👍')">👍</button>
 <button onclick="sendReaction('❤️')">❤️</button>
@@ -755,7 +740,6 @@ button{font-family:inherit}
 <button onclick="sendReaction('🙋')">🙋</button>
 </div>
 
-<!-- ─── کنترل‌ها ─── -->
 <div id="controls">
 <button class="ctrl-btn" id="btnMic" onclick="toggleMic()">🎤</button>
 <button class="ctrl-btn" id="btnCam" onclick="toggleCam()">📹</button>
@@ -770,7 +754,6 @@ button{font-family:inherit}
 </div>
 </div>
 
-<!-- ═══════════ چت ═══════════ -->
 <div id="chat">
 <div class="panel-header"><strong>💬 چت</strong><button class="close-btn" onclick="toggleChat()">✕</button></div>
 <div class="chat-tabs">
@@ -787,7 +770,6 @@ button{font-family:inherit}
 </div>
 </div>
 
-<!-- ═══════════ تخته سفید ═══════════ -->
 <div id="whiteboardModal"><div id="whiteboardContainer"><div id="whiteboardHeader"><h3>📝 تخته سفید</h3><button class="close-btn" onclick="closeWhiteboard()">✕</button></div>
 <div id="whiteboardTools">
 <span class="wb-tool-label">رنگ:</span>
@@ -807,7 +789,6 @@ button{font-family:inherit}
 <div id="whiteboardCanvasWrapper"><canvas id="whiteboardCanvas"></canvas></div>
 </div></div>
 
-<!-- ═══════════ پروژکتور ═══════════ -->
 <div id="projectorModal"><div id="projectorContainer">
 <div id="projectorHeader"><h3>📽️ ویدیو پروژکتور</h3><button class="close-btn" onclick="closeProjector()">✕</button></div>
 <div id="projectorTeacherTools" style="display:none;padding:8px 16px;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:8px;align-items:center;">
@@ -842,7 +823,6 @@ button{font-family:inherit}
 <div id="projectorSeekBar"><span id="projCurrentTime" style="font-size:12px;font-family:monospace;">00:00</span><input type="range" id="projectorSeek" min="0" max="100" value="0" step="0.1" style="flex:1;accent-color:var(--accent);" oninput="onProjectorSeekInput(this.value)" onchange="onProjectorSeekChange(this.value)" /><span id="projDuration" style="font-size:12px;font-family:monospace;">00:00</span></div>
 </div></div>
 
-<!-- ═══════════ اشتراک صفحه (Full Modal - legacy) ═══════════ -->
 <div id="screenShareModal"><div id="screenShareContainer">
 <div id="screenShareHeader">
 <h3>🖥️ اشتراک صفحه</h3>
@@ -853,19 +833,12 @@ button{font-family:inherit}
 <div id="screenShareWrapper"><video id="screenShareVideo" autoplay playsinline></video></div>
 </div></div>
 
-<!-- ═══════════ مودال‌ها ═══════════ -->
 <div id="kickModal" class="modal"><div class="modal-content"><h2>🚫 اخراج</h2><p id="kickReason">...</p><button onclick="leaveMeeting(true)">باشه</button></div></div>
-
 <div id="recordingModal" class="modal"><div class="modal-content"><h2>🎥 ضبط تمام شد</h2><p>آماده دانلود است.</p><button onclick="downloadRecording()">⬇️ دانلود</button><button class="secondary" onclick="discardRecording()">🗑️ حذف</button></div></div>
-
 <div id="pollModal" class="modal"><div class="modal-content"><h2>📝 نظرسنجی</h2><input type="text" id="pollQuestion" placeholder="سوال..." /><input type="text" class="poll-opt-input" placeholder="گزینه ۱" /><input type="text" class="poll-opt-input" placeholder="گزینه ۲" /><input type="text" class="poll-opt-input" placeholder="گزینه ۳" /><input type="text" class="poll-opt-input" placeholder="گزینه ۴" /><button onclick="createPoll()">ایجاد</button><button class="secondary" onclick="closeModal('pollModal')">لغو</button></div></div>
-
 <div id="fileUploadModal" class="modal"><div class="modal-content"><h2>📤 آپلود</h2><p>حداکثر ۵MB</p><input type="file" id="fileInput" style="padding:8px;" /><button onclick="uploadFile()">آپلود</button><button class="secondary" onclick="closeModal('fileUploadModal')">لغو</button></div></div>
-
 <div id="filesPanelModal" class="modal"><div class="modal-content"><h2>📎 فایل‌ها</h2><div id="filesList" style="text-align:right;max-height:400px;overflow-y:auto;"></div><button class="secondary" onclick="closeModal('filesPanelModal')">بستن</button></div></div>
-
 <div id="passwordModal" class="modal"><div class="modal-content"><h2>🔐 رمز اتاق</h2><p>رمز را وارد کنید.</p><input type="password" id="passwordInput" placeholder="رمز..." /><button onclick="submitPassword()">تأیید</button><button class="secondary" onclick="cancelPassword()">لغو</button></div></div>
-
 <div id="giftCodeModal" class="modal">
   <div class="modal-content">
     <div style="font-size:60px;margin-bottom:12px;">🎁</div>
@@ -879,11 +852,8 @@ button{font-family:inherit}
     </div>
   </div>
 </div>
-
 <div id="activityTimerModal" class="modal"><div class="modal-content"><h2>⏳ تایمر فعالیت</h2><p>مدت زمان به دقیقه.</p><input type="number" id="activityMinutes" min="1" max="120" value="5" /><button onclick="startActivityTimer()">شروع</button><button class="secondary" onclick="stopActivityTimer()">توقف</button><button class="secondary" onclick="closeModal('activityTimerModal')">لغو</button></div></div>
-
 <div id="announceModal" class="modal"><div class="modal-content"><h2>📢 اعلان به همه</h2><p>پیام بالای صفحه ظاهر می‌شود.</p><textarea id="announceText" rows="3" placeholder="متن اعلان..."></textarea><button onclick="sendAnnouncement()">ارسال</button><button class="secondary" onclick="hideAnnouncement(true)">حذف اعلان</button><button class="secondary" onclick="closeModal('announceModal')">لغو</button></div></div>
-
 <div id="profileModal" class="modal"><div class="modal-content">
 <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px">
 <div id="profileAvatar" style="width:88px;height:88px;border-radius:50%;background:var(--accent);color:#202124;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700">?</div>
@@ -900,7 +870,6 @@ button{font-family:inherit}
 <button class="secondary" onclick="closeModal('profileModal')" style="margin-top:12px;">بستن</button>
 </div></div>
 
-<!-- ═══════════ اتاق انتظار (Overlay) ═══════════ -->
 <div id="waitingRoomOverlay">
   <div style="font-size:80px;margin-bottom:10px;">⏳</div>
   <div class="waiting-spinner"></div>
@@ -910,7 +879,6 @@ button{font-family:inherit}
   <button onclick="cancelWaiting()" style="margin-top:30px;padding:12px 32px;background:var(--danger);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">انصراف</button>
 </div>
 
-<!-- ═══════════ درخواست دسترسی (Modal) ═══════════ -->
 <div id="permissionRequestModal" class="modal">
   <div class="modal-content">
     <div id="permReqIcon" style="font-size:60px;margin-bottom:12px;">🎤</div>
@@ -923,7 +891,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- ═══════════ دسترسی مرورگر (Overlay) ═══════════ -->
 <div id="permModal">
   <div id="permBox">
     <div class="perm-icon" id="permIcon">📷</div>
@@ -937,7 +904,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- ═══════════ پنل ادمین ═══════════ -->
 <div id="adminPanelModal">
   <div id="adminPanelContainer">
     <div id="adminPanelHeader"><h2>👑 پنل مدیریت ادمین</h2><button class="close-btn" onclick="closeAdminPanel()">✕</button></div>
@@ -982,7 +948,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- ═══════════ مودال تنظیم اشتراک ═══════════ -->
 <div id="adminSubModal" class="modal">
   <div class="modal-content" style="text-align: right;">
     <h2>⚙️ تنظیمات اشتراک: <span id="subModalUserName" style="color:var(--accent)"></span></h2>
@@ -1013,7 +978,6 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- ═══════════ بنر اعلان سراسری ادمین ═══════════ -->
 <div id="adminGlobalBanner">
   <div class="gb-text">
     <span id="adminGlobalBannerText"></span>
@@ -1022,41 +986,22 @@ button{font-family:inherit}
   <button onclick="dismissGlobalBanner()">✕</button>
 </div>
 
-<!-- ═══════════ عناصر شناور ═══════════ -->
 <div id="activityTimerDisplay"></div>
 <div id="reactionsContainer"></div>
 <div id="connBanner"></div>
 <div id="toast"></div>
 
-<!-- ═══════════ کتابخانه‌های خارجی ═══════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
-
 <script>
-// ═══════════════════════════════════════════════════════════
-//  بخش ۳ (JavaScript) در پیام بعدی قرار می‌گیرد
-// ═══════════════════════════════════════════════════════════
-</script>
-</body>
-</html>
-<script>
-// ═══════════════════════════════════════════════════════════
-//  بخش ۳: پیکربندی، State، Utils، Auth
-// ═══════════════════════════════════════════════════════════
-
-// ───────────────────────────────────────────────────────────
-// ✅ FIX: خطاگیری سراسری — دیگر کل UI را نابود نمی‌کند
-// ───────────────────────────────────────────────────────────
 window.onerror = function(msg, url, line, col, error) {
     console.error('[Lroom Error]', msg, 'at', url, ':', line, error);
-    // اگر در جلسه هستیم، فقط toast کوچک بده
     const meeting = document.getElementById('meeting');
     if (meeting && meeting.classList.contains('active')) {
         try { showToast('⚠️ خطای داخلی — لطفاً رفرش کنید'); } catch(e) {}
-        return true; // جلوی رفتار پیش‌فرض را بگیر
+        return true;
     }
-    // فقط در صفحه auth، خطا رو نشون بده
     try {
         const auth = document.getElementById('authScreen');
         if (auth && auth.style.display !== 'none') {
@@ -1066,13 +1011,8 @@ window.onerror = function(msg, url, line, col, error) {
     return true;
 };
 
-window.addEventListener('unhandledrejection', (e) => {
-    console.error('[Lroom Unhandled]', e.reason);
-});
+window.addEventListener('unhandledrejection', (e) => { console.error('[Lroom Unhandled]', e.reason); });
 
-// ───────────────────────────────────────────────────────────
-// ✅ بررسی لود شدن کتابخانه‌ها
-// ───────────────────────────────────────────────────────────
 if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'undefined') {
     document.body.innerHTML = `
         <div style="color:#fff;background:#202124;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Tahoma;padding:20px;text-align:center;">
@@ -1085,13 +1025,15 @@ if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'u
 }
 
 // ───────────────────────────────────────────────────────────
-// ⚙️ پیکربندی
+// ⚙️ پیکربندی (سرور جدید)
 // ───────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://sjtkkxlibxzcblrhwneb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqdGtreGxpYnh6Y2Jscmh3bmViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Njg3ODAsImV4cCI6MjEwNTU0NDc4MH0.vzYTnQNJ1RBr7dUY7xC6FpkS1fYhsNrxMMOd5iIdBww';
+const SUPABASE_URL = 'https://ocrhrewusdmjaptfcsfh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Cpm1ibcjH4do9vr7dgzyDQ_BxhsSvgK';
+
 const LIVEKIT_URL = 'wss://lroom-ga2waw3o.livekit.cloud';
 const LIVEKIT_API_KEY = 'APIRuoEKCKzj9S2';
-const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S'; // ⚠️ هشدار امنیتی: باید به Edge Function منتقل شود
+const LIVEKIT_API_SECRET = 'bSeODjRdhQPlnoSueldHwJoojaz3hrngLyDZPGSlc2S'; 
+
 const ADMIN_EMAIL = 'mmastudio.s.m@gmail.com';
 const BALE_ID = '@sobhan101095';
 const DEFAULT_SUBSCRIPTION_DAYS = 20;
@@ -1104,13 +1046,8 @@ try {
         auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
         realtime: { params: { eventsPerSecond: 2 } }
     });
-} catch (e) {
-    console.error('Supabase init failed:', e);
-}
+} catch (e) { console.error('Supabase init failed:', e); }
 
-// ───────────────────────────────────────────────────────────
-// 🧠 State
-// ───────────────────────────────────────────────────────────
 let currentUser = null;
 let livekitRoom = null;
 let localStream = null;
@@ -1121,7 +1058,7 @@ let lastAutoApplied = '';
 
 const remoteParticipants = new Map();
 const studentPermissions = new Map();
-const pendingAdmits = new Map(); // ✅ FIX: ردیابی admitهای در حال retry
+const pendingAdmits = new Map();
 
 let isMicOn = false, isCamOn = false, isSharing = false, isHandRaised = false;
 let isRoomLocked = false;
@@ -1165,8 +1102,6 @@ let currentTheme = localStorage.getItem('lroom_theme') || 'dark';
 let waitingList = new Map();
 let isWaitingForApproval = false;
 let pendingPermissionRequest = null;
-let currentScreenShareTrack = null;
-let currentScreenShareIdentity = null;
 let adminActiveAnnouncement = null;
 let realtimeChannel = null;
 let waitingAudioBlockInterval = null;
@@ -1181,9 +1116,6 @@ let currentAuthMethod = 'email';
 
 const DAY_MS = 86400000;
 
-// ───────────────────────────────────────────────────────────
-// 🛠️ Utils
-// ───────────────────────────────────────────────────────────
 function addDaysSafe(date, days) {
     const d = (date instanceof Date) ? date : new Date(date);
     return new Date(d.getTime() + days * DAY_MS);
@@ -1241,10 +1173,6 @@ function closeModal(id) {
     const el = document.getElementById(id);
     if (el) el.classList.remove('open');
 }
-
-// ───────────────────────────────────────────────────────────
-// ✅ FIX: Trust helpers (جلوگیری از حمله‌ی پیام جعلی)
-// ───────────────────────────────────────────────────────────
 function isTrustedSender(senderId) {
     if (!senderId) return false;
     if (senderId === teacherId) return true;
@@ -1256,17 +1184,12 @@ function isTrustedSender(senderId) {
 }
 function isPrivileged() { return myRole === 'teacher' || isCoTeacher; }
 
-// ✅ FIX: Whitelist emojiها (جلوگیری از XSS)
 const ALLOWED_REACTIONS = ['👍','❤️','😂','👏','🎉','🙋'];
 function getSafeEmoji(e) { return ALLOWED_REACTIONS.includes(e) ? e : '👍'; }
 
-// ✅ FIX: Sanitize ایمن برای نام
 function sanitizeName(n) { return String(n || '').slice(0, 40).trim(); }
 function sanitizeMessage(m) { return String(m || '').slice(0, 2000); }
 
-// ───────────────────────────────────────────────────────────
-// 🌐 i18n
-// ───────────────────────────────────────────────────────────
 const I18N = {
     fa: {
         subtitle:'پلتفرم کلاس آنلاین و وبینار', roleTeacher:'👨‍🏫 مدرس', roleStudent:'👨‍🎓 دانشجو',
@@ -1343,9 +1266,6 @@ function applyLanguage(lang) {
 }
 function changeLanguage(l) { applyLanguage(l); showToast(t('langChanged')); }
 
-// ───────────────────────────────────────────────────────────
-// 🎨 Theme + Device
-// ───────────────────────────────────────────────────────────
 function toggleTheme() {
     currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.body.classList.toggle('light-theme', currentTheme === 'light');
@@ -1369,9 +1289,6 @@ function changeDevice(mode) {
     }, 150);
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔗 Connection Banners
-// ───────────────────────────────────────────────────────────
 function showConnBanner(msg) {
     const b = document.getElementById('connBanner');
     if (!b) return;
@@ -1383,7 +1300,6 @@ function hideConnBanner() {
     if (b) b.classList.remove('show');
 }
 
-// ✅ FIX: progress bar با cleanup
 function showConnectCountdown() {
     let el = document.getElementById('connectOverlay');
     if (!el) {
@@ -1419,9 +1335,6 @@ function hideConnectCountdown() {
     setTimeout(() => el.classList.remove('show'), 350);
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔐 Permission helpers
-// ───────────────────────────────────────────────────────────
 function getPermissionHelp(errorName, isIOS, isAndroid, isFirefox) {
     let title = 'دسترسی به دوربین و میکروفون';
     let desc = '';
@@ -1476,7 +1389,6 @@ function hidePermissionModal() {
     document.getElementById('permModal').classList.remove('show');
 }
 
-// ✅ FIX: retryCameraPermission با cleanup کامل
 async function retryCameraPermission() {
     const btn = document.getElementById('btnSendPermRequest');
     if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ارسال...'; }
@@ -1501,7 +1413,6 @@ async function retryCameraPermission() {
     }
 }
 
-// ✅ FIX: cancelCameraPermission ترک‌ها را می‌بندد
 function cancelCameraPermission() {
     hidePermissionModal();
     if (localStream) {
@@ -1567,9 +1478,6 @@ async function requestMediaPermission() {
     return true;
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔊 Sound
-// ───────────────────────────────────────────────────────────
 function playJoinSound() {
     try {
         if (!bellAudioCtx) bellAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1615,9 +1523,6 @@ function playBell() {
     } catch (e) {}
 }
 
-// ───────────────────────────────────────────────────────────
-// 🌐 Network quality detection
-// ───────────────────────────────────────────────────────────
 function isSlowConnection() {
     try {
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
@@ -1640,9 +1545,6 @@ function checkRealConnectionQuality() {
     } catch (e) {}
 }
 
-// ───────────────────────────────────────────────────────────
-// 📹 LiveKit Token Generation
-// ───────────────────────────────────────────────────────────
 async function generateLiveKitToken(roomName, identity, name, isTeacher) {
     const now = Math.floor(Date.now() / 1000);
     const header = { alg: 'HS256', typ: 'JWT' };
@@ -1680,9 +1582,6 @@ async function generateLiveKitToken(roomName, identity, name, isTeacher) {
     return `${data}.${sigB64}`;
 }
 
-// ───────────────────────────────────────────────────────────
-// 📱 Phone Auth Utils
-// ───────────────────────────────────────────────────────────
 function normalizePhone(input) {
     let p = String(input || '').trim().replace(/[\s\-\(\)]/g, '');
     p = p.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
@@ -1734,9 +1633,6 @@ function switchAuthTab(tab) {
     const re = document.getElementById('regError'); if (re) re.classList.remove('show');
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔑 Auth: Email Login / Register
-// ───────────────────────────────────────────────────────────
 async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('regName').value.trim();
@@ -1845,9 +1741,6 @@ async function handleLogin(e) {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 📱 Auth: Phone Login / Register
-// ───────────────────────────────────────────────────────────
 async function handlePhoneLogin(e) {
     e.preventDefault();
     const phoneRaw = document.getElementById('phoneLoginInput').value;
@@ -1975,9 +1868,6 @@ async function handlePhoneRegister(e) {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎁 Gift Code helpers (UI)
-// ───────────────────────────────────────────────────────────
 async function applyDiscountCode(inputId) {
     const id = inputId || 'regDiscountCode';
     const input = document.getElementById(id);
@@ -2065,9 +1955,6 @@ async function submitGiftCode() {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 👤 User Menu / Badge / Profile Info
-// ───────────────────────────────────────────────────────────
 function toggleUserMenu() {
     document.getElementById('userMenu').classList.toggle('open');
 }
@@ -2093,9 +1980,6 @@ function showSubscriptionInfo() {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🚪 Logout
-// ───────────────────────────────────────────────────────────
 async function logout() {
     if (isGuestMode) {
         localStorage.removeItem('lroom_guest_name');
@@ -2118,9 +2002,6 @@ async function logout() {
     location.reload();
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔑 Session Code
-// ───────────────────────────────────────────────────────────
 function copySessionCode() {
     const code = currentUser?.sessionCode;
     if (!code) return showToast('⚠️ کد موجود نیست');
@@ -2165,11 +2046,7 @@ function setLobbyRole(role) {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// ✅ FIX: checkAndShow — مدیریت تمام حالات
-// ───────────────────────────────────────────────────────────
 function checkAndShow() {
-    // پنهان‌کردن همه‌ی صفحات
     const screens = ['authScreen', 'expiredScreen', 'lobby', 'guestJoinScreen'];
     screens.forEach(id => {
         const el = document.getElementById(id);
@@ -2182,12 +2059,10 @@ function checkAndShow() {
         return;
     }
 
-    // ✅ FIX: اگر نام خالی باشد، از ایمیل استخراج کن
     if (!currentUser.name || currentUser.name.trim().length < 2) {
         currentUser.name = (currentUser.email || '').split('@')[0] || 'کاربر';
     }
 
-    // حالت مهمان
     if (isGuestMode) {
         const lobby = document.getElementById('lobby');
         if (lobby) lobby.style.display = 'flex';
@@ -2223,9 +2098,6 @@ function checkAndShow() {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 👤 Preview controls
-// ───────────────────────────────────────────────────────────
 function togglePreviewMic() {
     const b = document.getElementById('previewMicBtn');
     const tr = localStream?.getAudioTracks()[0];
@@ -2243,9 +2115,6 @@ function togglePreviewCam() {
     b.textContent = tr.enabled ? '📹' : '📷';
 }
 
-// ───────────────────────────────────────────────────────────
-// 👑 Admin Panel — placeholder (پیاده‌سازی کامل در بخش ۴)
-// ───────────────────────────────────────────────────────────
 function isAdminUser() { return currentUser && currentUser.role === 'admin' && !isGuestMode; }
 
 function updateAdminButtons() {
@@ -2258,9 +2127,6 @@ function updateAdminButtons() {
     if (m1) m1.style.display = show ? 'flex' : 'none';
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔔 Global Announcement (real-time)
-// ───────────────────────────────────────────────────────────
 function showGlobalBanner(ann) {
     if (!ann) return;
     const b = document.getElementById('adminGlobalBanner');
@@ -2304,9 +2170,6 @@ async function loadActiveAnnouncement() {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎓 Guest Join Screen
-// ───────────────────────────────────────────────────────────
 function showGuestJoinScreen(roomCode) {
     ['authScreen', 'lobby', 'expiredScreen'].forEach(id => {
         const el = document.getElementById(id);
@@ -2354,15 +2217,8 @@ async function submitGuestJoin() {
         btn.textContent = '🚀 ورود به اتاق انتظار';
     }
 }
-</script>
-<script>
-// ═══════════════════════════════════════════════════════════
-//  بخش ۴: پنل ادمین + اتصال + handleIncomingData
-// ═══════════════════════════════════════════════════════════
 
-// ───────────────────────────────────────────────────────────
-// 👑 ADMIN PANEL
-// ───────────────────────────────────────────────────────────
+// ADMIN PANEL
 function openAdminPanel() {
     if (!isAdminUser()) { showToast('⛔ دسترسی ندارید'); return; }
     document.getElementById('adminPanelModal').classList.add('open');
@@ -2418,7 +2274,6 @@ async function renderAdminUsers() {
     const q = (document.getElementById('adminUserSearch')?.value || '').trim();
     let query = sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(200);
     if (q) {
-        // ✅ FIX: escape کاراکترهای خاص برای جلوگیری از injection
         const safeQ = q.replace(/[%,.()'"\\]/g, '\\$&');
         query = query.or(`name.ilike.%${safeQ}%,email.ilike.%${safeQ}%`);
     }
@@ -2449,7 +2304,6 @@ async function renderAdminUsers() {
         </div>`;
     }).join('');
 
-    // ✅ FIX: event delegation به جای inline (برای نام‌های دارای ')
     list.querySelectorAll('button[data-uid]').forEach(btn => {
         btn.addEventListener('click', () => {
             const uid = btn.dataset.uid;
@@ -2613,13 +2467,9 @@ async function renderAdminAnnouncements() {
     </div>`).join('');
 }
 
-// ───────────────────────────────────────────────────────────
-// 🚪 JOIN MEETING (قلب سیستم)
-// ───────────────────────────────────────────────────────────
+// JOIN
 async function joinMeeting() {
     if (!currentUser) return showToast('⚠️ لطفاً وارد شوید');
-
-    // چک اعتبار
     if (!isGuestMode && currentUser.role !== 'admin') {
         const end = parseDateSafe(currentUser.subscriptionEnd);
         if (end && end.getTime() < Date.now()) {
@@ -2748,7 +2598,6 @@ async function joinMeeting() {
         const lp = livekitRoom.localParticipant;
 
         if (myRole === 'teacher') {
-            // معلم: میکروفون و دوربین روشن
             (async () => {
                 if (localStream.getAudioTracks()[0]) {
                     try {
@@ -2771,7 +2620,6 @@ async function joinMeeting() {
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
             })();
         } else {
-            // ✅ FIX: دانشجو با retry چندلایه hello
             isMicOn = false;
             isCamOn = false;
             myPermissions.mic = false;
@@ -2789,7 +2637,6 @@ async function joinMeeting() {
                 }
             });
 
-            // ✅ FIX: چند بار hello بفرست تا مدرس حتماً ببیند
             const sendWaitingHello = () => {
                 if (!isWaitingForApproval || !livekitRoom) return;
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: false, camOn: false, isWaiting: true });
@@ -2801,7 +2648,6 @@ async function joinMeeting() {
         hideConnectCountdown();
         showToast('❌ ' + (err.message || 'خطای اتصال'));
         if (btn) { btn.disabled = false; btn.textContent = I18N[currentLang].joinMeeting; }
-        // ✅ FIX: مخفی‌کردن overlay اتاق انتظار در صورت خطا
         const wro = document.getElementById('waitingRoomOverlay');
         if (wro) wro.style.display = 'none';
         isWaitingForApproval = false;
@@ -2811,9 +2657,6 @@ async function joinMeeting() {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎨 Show Meeting UI
-// ───────────────────────────────────────────────────────────
 function showMeetingUI() {
     document.getElementById('lobby').style.display = 'none';
     document.getElementById('meeting').classList.add('active');
@@ -2858,19 +2701,14 @@ function showMeetingUI() {
     if (myRole === 'teacher') setTimeout(() => autoAdjustQuality(true), 3000);
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔌 LiveKit Events
-// ───────────────────────────────────────────────────────────
 function setupLiveKitEvents() {
     const R = LivekitClient.RoomEvent;
 
-    // ✅ FIX: ParticipantConnected — درخواست hello از دانشجوی گم‌شده
     livekitRoom.on(R.ParticipantConnected, (p) => {
         updateParticipantCount();
         if (!p.identity || p.identity === myId) return;
 
         if (myRole === 'teacher' || isCoTeacher) {
-            // به دانشجوی جدید درخواست hello بده
             setTimeout(() => {
                 if (remoteParticipants.has(p.identity) || waitingList.has(p.identity)) return;
                 sendTo(p.identity, { type: 'request-hello' });
@@ -2886,7 +2724,6 @@ function setupLiveKitEvents() {
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: false, camOn: false, isWaiting: true });
             }, 500);
         }
-        // اسم مدرس را در overlay نمایش بده
         if (isWaitingForApproval && p.identity.startsWith('teacher-')) {
             const el = document.getElementById('waitingTeacherName');
             if (el) el.textContent = '👨‍🏫 ' + (p.name || p.identity);
@@ -2982,9 +2819,6 @@ function setupLiveKitEvents() {
     });
 }
 
-// ───────────────────────────────────────────────────────────
-// 📡 Send helpers
-// ───────────────────────────────────────────────────────────
 function sendData(data, destinations) {
     if (!livekitRoom) return;
     try {
@@ -2997,9 +2831,6 @@ function sendData(data, destinations) {
 function broadcast(data) { sendData(data); }
 function sendTo(id, data) { sendData(data, [id]); }
 
-// ───────────────────────────────────────────────────────────
-// 🖥️ Screen Share inline
-// ───────────────────────────────────────────────────────────
 function showScreenShareInline(pid, track, pub, name) {
     const isSelf = pid === myId;
     let box = isSelf ? document.getElementById('video-me') : document.getElementById(`video-${pid}`);
@@ -3072,10 +2903,6 @@ function closeScreenShareModal() {
     document.getElementById('screenShareModal').classList.remove('open');
 }
 
-// ───────────────────────────────────────────────────────────
-// ✅ FIX: handleIncomingData — قلبی‌ترین تابع
-//     همه چک‌های امنیتی + retry + admit
-// ───────────────────────────────────────────────────────────
 function handleIncomingData(data, senderId) {
     if (!data || typeof data !== 'object') return;
     if (senderId === myId) return;
@@ -3084,14 +2911,11 @@ function handleIncomingData(data, senderId) {
     const trusted = isTrustedSender(senderId);
 
     switch (data.type) {
-
-        // ═══ Handshake ═══
         case 'hello': {
             if (!data.name || typeof data.name !== 'string') break;
             const safeName = sanitizeName(data.name);
             if (!safeName) break;
 
-            // دانشجو در انتظار
             if ((myRole === 'teacher' || isCoTeacher) && data.role === 'student' && data.isWaiting) {
                 waitingList.set(senderId, { name: safeName });
                 updateWaitingPanel();
@@ -3100,7 +2924,6 @@ function handleIncomingData(data, senderId) {
                 return;
             }
 
-            // ثبت در لیست
             remoteParticipants.set(senderId, {
                 name: safeName,
                 role: data.role || 'student',
@@ -3109,7 +2932,6 @@ function handleIncomingData(data, senderId) {
                 handRaised: false
             });
 
-            // معلم: آماده‌سازی دانشجو
             if ((myRole === 'teacher' || isCoTeacher) && data.role === 'student') {
                 if (!studentPermissions.has(senderId)) {
                     studentPermissions.set(senderId, {
@@ -3135,7 +2957,6 @@ function handleIncomingData(data, senderId) {
                 if (breakoutGroups) sendTo(senderId, { type: 'breakout-groups', groups: breakoutGroups });
                 sendTo(senderId, { type: 'quality-settings', settings: qualitySettings, from: myId });
             }
-            // دانشجو: از معلم بخواه
             if (myRole === 'student' && data.role === 'teacher') {
                 sendTo(senderId, { type: 'request-my-permissions' });
                 sendTo(senderId, { type: 'request-quality-settings' });
@@ -3154,18 +2975,13 @@ function handleIncomingData(data, senderId) {
         }
 
         case 'request-hello': {
-            // ✅ پاسخ به درخواست hello (وقتی معلم دیر می‌آید)
             sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: isWaitingForApproval });
             break;
         }
-
         case 'waiting-ack': {
-            // معلم درخواست را دید
             console.log('[Lroom] Waiting request seen by teacher');
             break;
         }
-
-        // ═══ Admit / Deny ═══
         case 'admit': {
             if (!trusted) return;
             isWaitingForApproval = false;
@@ -3173,22 +2989,18 @@ function handleIncomingData(data, senderId) {
             document.getElementById('guestJoinScreen').style.display = 'none';
             stopWaitingAudioBlocker();
             showToast('✅ به کلاس راه یافتی');
-            // ✅ FIX: ack برای متوقف کردن retry
             sendTo(senderId, { type: 'admit-ack' });
             setTimeout(() => {
                 sendData({ type: 'hello', name: myName, role: myRole, micOn: isMicOn, camOn: isCamOn, isWaiting: false });
             }, 300);
             break;
         }
-
         case 'admit-ack': {
-            // ✅ معلم: دانشجو admitted — retry رو متوقف کن
             if (pendingAdmits.has(senderId)) {
                 pendingAdmits.delete(senderId);
             }
             break;
         }
-
         case 'deny': {
             if (!trusted) return;
             isWaitingForApproval = false;
@@ -3198,8 +3010,6 @@ function handleIncomingData(data, senderId) {
             setTimeout(() => leaveMeeting(true), 1500);
             break;
         }
-
-        // ═══ Quality ═══
         case 'quality-settings':
             if (!trusted && data.from !== teacherId) return;
             receiveQualitySettings(data.settings);
@@ -3210,8 +3020,6 @@ function handleIncomingData(data, senderId) {
         case 'request-quality-settings':
             if (isPrivileged()) sendTo(senderId, { type: 'quality-settings', settings: qualitySettings, from: myId });
             break;
-
-        // ═══ Spotlight ═══
         case 'spotlight-set':
             if (!trusted) return;
             receiveSpotlight(data.id);
@@ -3220,8 +3028,6 @@ function handleIncomingData(data, senderId) {
             if (!trusted) return;
             receiveSpotlightClear();
             break;
-
-        // ═══ Screen Share ═══
         case 'screen-share-started':
             if (remoteParticipants.has(data.id)) {
                 const i = remoteParticipants.get(data.id);
@@ -3233,12 +3039,9 @@ function handleIncomingData(data, senderId) {
             break;
         case 'screen-share-stopped':
             break;
-
-        // ═══ Permissions ═══
         case 'permission-request':
             if (myRole === 'student') showPermissionRequestModal(data.permission);
             break;
-
         case 'permission-accepted': {
             if (!trusted) return;
             const perms = studentPermissions.get(senderId);
@@ -3251,7 +3054,6 @@ function handleIncomingData(data, senderId) {
             updateTeacherPanel();
             break;
         }
-
         case 'permission-rejected': {
             if (!trusted) return;
             const perms = studentPermissions.get(senderId);
@@ -3264,7 +3066,6 @@ function handleIncomingData(data, senderId) {
             updateTeacherPanel();
             break;
         }
-
         case 'student-list': {
             if (myRole !== 'student' || !trusted) return;
             (data.students || []).forEach(s => {
@@ -3279,21 +3080,19 @@ function handleIncomingData(data, senderId) {
             updateParticipantsPanel();
             break;
         }
-
         case 'request-permission': {
             if (!trusted) return;
             const perms = studentPermissions.get(senderId) || {
                 mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false,
                 pending: { mic: false, cam: false, whiteboard: false, projector: false }
             };
-            if (perms.pending && perms.pending[data.permission]) return; // جلوگیری از تکرار
+            if (perms.pending && perms.pending[data.permission]) return;
             perms.pending[data.permission] = true;
             studentPermissions.set(senderId, perms);
             updatePendingRequestsUI();
             updateTeacherPanel();
             break;
         }
-
         case 'request-my-permissions': {
             if (!trusted) return;
             const perms = studentPermissions.get(senderId) || { mic: false, cam: false, whiteboard: false, projector: false, coTeacher: false };
@@ -3307,7 +3106,6 @@ function handleIncomingData(data, senderId) {
             });
             break;
         }
-
         case 'sync-my-permissions': {
             if (myRole !== 'student') return;
             myPermissions.mic = !!data.permissions.mic;
@@ -3318,7 +3116,6 @@ function handleIncomingData(data, senderId) {
             updateMicUI(); updateCamUI(); updateProjectorToolsVisibility(); updateParticipantsPanel();
             break;
         }
-
         case 'coteacher-status': {
             if (myRole !== 'student') return;
             isCoTeacher = !!data.enabled;
@@ -3338,7 +3135,6 @@ function handleIncomingData(data, senderId) {
             updateParticipantsPanel();
             break;
         }
-
         case 'permission-granted': {
             if (myRole !== 'student') return;
             myPermissions[data.permission] = true;
@@ -3353,14 +3149,12 @@ function handleIncomingData(data, senderId) {
             }
             break;
         }
-
         case 'permission-denied': {
             if (myRole !== 'student') return;
             const b = data.permission === 'mic' ? document.getElementById('btnMic') : document.getElementById('btnCam');
             if (b) { b.classList.remove('waiting'); b.disabled = false; }
             break;
         }
-
         case 'permission-revoked': {
             if (myRole !== 'student') return;
             myPermissions[data.permission] = false;
@@ -3368,8 +3162,6 @@ function handleIncomingData(data, senderId) {
             updateCamUI();
             break;
         }
-
-        // ═══ Admin actions (trusted only) ═══
         case 'force-mute': {
             if (!trusted) return;
             if (isMicOn) {
@@ -3383,7 +3175,6 @@ function handleIncomingData(data, senderId) {
             broadcast({ type: 'mic', on: false });
             break;
         }
-
         case 'force-camera-off': {
             if (!trusted) return;
             if (isCamOn) {
@@ -3397,15 +3188,12 @@ function handleIncomingData(data, senderId) {
             broadcast({ type: 'cam', on: false });
             break;
         }
-
         case 'kick': {
             if (!trusted) return;
             document.getElementById('kickReason').textContent = data.reason || 'شما از کلاس اخراج شدید.';
             document.getElementById('kickModal').classList.add('open');
             break;
         }
-
-        // ═══ Chat / Hand / Mic / Cam / Speaking / Reaction ═══
         case 'chat': {
             const safeName = remoteParticipants.get(senderId)?.name || sanitizeName(data.name) || 'کاربر';
             const safeMsg = sanitizeMessage(data.message);
@@ -3418,7 +3206,6 @@ function handleIncomingData(data, senderId) {
             }
             break;
         }
-
         case 'hand':
             remoteParticipants.set(senderId, { ...info, handRaised: !!data.raised });
             updateHandUI(senderId, !!data.raised);
@@ -3430,20 +3217,17 @@ function handleIncomingData(data, senderId) {
                 playBell();
             }
             break;
-
         case 'mic':
             remoteParticipants.set(senderId, { ...info, micOn: !!data.on });
             updateRemoteMicUI(senderId, !!data.on);
             updateTeacherPanel();
             updateParticipantsPanel();
             break;
-
         case 'cam':
             remoteParticipants.set(senderId, { ...info, camOn: !!data.on });
             updateRemoteCamUI(senderId, !!data.on);
             updateParticipantsPanel();
             break;
-
         case 'speaking': {
             updateSpeakingBorder(senderId, !!data.speaking, false);
             const rs = stats.userStats.get(senderId);
@@ -3457,7 +3241,6 @@ function handleIncomingData(data, senderId) {
             }
             break;
         }
-
         case 'reaction': {
             const safeEmoji = getSafeEmoji(data.emoji);
             const safeName = remoteParticipants.get(senderId)?.name || '?';
@@ -3466,46 +3249,36 @@ function handleIncomingData(data, senderId) {
             if (rs) rs.reactions++;
             break;
         }
-
-        // ═══ Announcement / Timer / Lock ═══
         case 'announcement':
             if (!trusted) return;
             showAnnouncement(data.text, data.from);
             break;
-
         case 'announcement-hide':
             if (!trusted) return;
             hideAnnouncement(false);
             break;
-
         case 'activity-timer':
             if (trusted) return;
             runActivityTimer(data.seconds);
             break;
-
         case 'activity-stop':
             if (trusted) return;
             stopActivityTimer();
             break;
-
         case 'lock-room':
             if (!trusted) return;
             isRoomLocked = !!data.locked;
             break;
-
         case 'recording-started':
             if (!trusted) return;
             document.getElementById('recordingIndicator').classList.add('active');
             startFakeRecTimer();
             break;
-
         case 'recording-stopped':
             if (!trusted) return;
             document.getElementById('recordingIndicator').classList.remove('active');
             stopFakeRecTimer();
             break;
-
-        // ═══ Poll ═══
         case 'poll-new':
             if (!trusted) return;
             if (myRole === 'student') {
@@ -3515,13 +3288,11 @@ function handleIncomingData(data, senderId) {
                 document.getElementById('pollPanel').classList.add('open');
             }
             break;
-
         case 'poll-vote':
             if (!trusted) return;
             pollVotes.set(senderId, data.option);
             updatePollResults();
             break;
-
         case 'poll-close':
             if (!trusted) return;
             if (myRole === 'student') {
@@ -3529,8 +3300,6 @@ function handleIncomingData(data, senderId) {
                 document.getElementById('pollPanelBody').innerHTML = '<p style="text-align:center;color:var(--text-secondary);">نظرسنجی بسته شد</p>';
             }
             break;
-
-        // ═══ Breakout ═══
         case 'breakout-groups':
             if (!trusted) return;
             if (myRole === 'student') {
@@ -3544,31 +3313,23 @@ function handleIncomingData(data, senderId) {
                 applyGroupBadges();
             }
             break;
-
-        // ═══ Certificate ═══
         case 'cert-received':
             downloadCertificateImage(data.studentName, data.roomId, data.date);
             showToast('🎓 گواهی دریافت شد');
             break;
-
-        // ═══ Files ═══
         case 'file-shared':
             sharedFiles.push(data.file);
             updateFilesListUI();
             showToast('📎 ' + data.file.name);
             break;
-
-        // ═══ Whiteboard ═══
         case 'wb-open':
             if (!trusted) return;
             if (!document.getElementById('whiteboardModal').classList.contains('open')) openWhiteboard(true);
             break;
-
         case 'wb-close':
             if (!trusted) return;
             if (document.getElementById('whiteboardModal').classList.contains('open')) closeWhiteboard(true);
             break;
-
         case 'wb-start':
             wbCurrentStroke = {
                 color: data.color, size: data.size,
@@ -3576,7 +3337,6 @@ function handleIncomingData(data, senderId) {
                 sender: senderId
             };
             break;
-
         case 'wb-move':
             if (wbCurrentStroke && wbCurrentStroke.sender === senderId) {
                 wbCurrentStroke.points.push({ x: data.x, y: data.y });
@@ -3584,43 +3344,35 @@ function handleIncomingData(data, senderId) {
                 drawWBSegmentRel(wbCurrentStroke.points[l-2], { x: data.x, y: data.y }, wbCurrentStroke.color, wbCurrentStroke.size);
             }
             break;
-
         case 'wb-end':
             if (wbCurrentStroke && wbCurrentStroke.sender === senderId) {
                 wbStrokes.push(wbCurrentStroke);
                 wbCurrentStroke = null;
             }
             break;
-
         case 'wb-clear':
             if (!trusted) return;
             clearCanvasLocal();
             wbStrokes = [];
             wbCurrentStroke = null;
             break;
-
         case 'wb-undo':
             if (!trusted) return;
             if (wbStrokes.length > 0) { wbStrokes.pop(); redrawAllStrokes(); }
             break;
-
         case 'wb-sync-full':
             if (!trusted) return;
             wbStrokes = data.strokes || [];
             redrawAllStrokes();
             break;
-
-        // ═══ Projector ═══
         case 'proj-open':
             if (!trusted) return;
             if (!document.getElementById('projectorModal').classList.contains('open')) openProjector(true);
             break;
-
         case 'proj-close':
             if (!trusted) return;
             if (document.getElementById('projectorModal').classList.contains('open')) closeProjector(true);
             break;
-
         case 'proj-media':
             if (!trusted) return;
             projCurrentMedia = data.media;
@@ -3630,7 +3382,6 @@ function handleIncomingData(data, senderId) {
             document.getElementById('projectorEmptyState').style.display = 'none';
             if (!document.getElementById('projectorModal').classList.contains('open')) openProjector(true);
             break;
-
         case 'proj-state':
             if (!projVideo || !projCurrentMedia || projCurrentMedia.type !== 'video') return;
             if (projVideo.readyState < 2) { projPendingState = { ...data.state }; return; }
@@ -3640,20 +3391,17 @@ function handleIncomingData(data, senderId) {
             if (sp && projVideo.paused) projVideo.play().catch(() => {});
             if (!sp && !projVideo.paused) projVideo.pause();
             break;
-
         case 'proj-play':
             if (!projVideo || projCurrentMedia?.type !== 'video') return;
             if (data.mediaId && projCurrentMedia.mediaId && data.mediaId !== projCurrentMedia.mediaId) return;
             projVideo.currentTime = data.time || 0;
             projVideo.play().catch(() => {});
             break;
-
         case 'proj-pause':
             if (!projVideo) return;
             projVideo.pause();
             if (typeof data.time === 'number') projVideo.currentTime = data.time;
             break;
-
         case 'proj-draw-start':
             projCurrentStroke = {
                 color: data.color, size: data.size,
@@ -3661,7 +3409,6 @@ function handleIncomingData(data, senderId) {
                 sender: senderId
             };
             break;
-
         case 'proj-draw-move':
             if (projCurrentStroke && projCurrentStroke.sender === senderId) {
                 projCurrentStroke.points.push({ x: data.x, y: data.y });
@@ -3669,19 +3416,16 @@ function handleIncomingData(data, senderId) {
                 drawProjSegmentRel(projCurrentStroke.points[l-2], { x: data.x, y: data.y }, projCurrentStroke.color, projCurrentStroke.size);
             }
             break;
-
         case 'proj-draw-end':
             if (projCurrentStroke && projCurrentStroke.sender === senderId) {
                 projStrokes.push(projCurrentStroke);
                 projCurrentStroke = null;
             }
             break;
-
         case 'proj-draw-undo':
             if (!trusted) return;
             if (projStrokes.length > 0) { projStrokes.pop(); redrawProjectorStrokes(); }
             break;
-
         case 'proj-draw-clear':
             if (!trusted) return;
             if (projCtx) projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height);
@@ -3691,9 +3435,6 @@ function handleIncomingData(data, senderId) {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// 👥 Student list helper
-// ───────────────────────────────────────────────────────────
 function sendStudentListTo(pid) {
     if (!isPrivileged()) return;
     const st = [];
@@ -3703,9 +3444,6 @@ function sendStudentListTo(pid) {
     if (st.length > 0) sendTo(pid, { type: 'student-list', students: st });
 }
 
-// ───────────────────────────────────────────────────────────
-// 🚪 Waiting Panel + Admit with RETRY (✅ FIX اصلی)
-// ───────────────────────────────────────────────────────────
 function toggleWaitingPanel() {
     const p = document.getElementById('waitingPanel');
     p.classList.toggle('open');
@@ -3739,7 +3477,6 @@ function updateWaitingPanel() {
     `).join('');
 }
 
-// ✅ FIX: admitUser با retry تا دانشجو حتماً admit بگیرد
 function admitUser(pid) {
     if (!isPrivileged()) return;
     const w = waitingList.get(pid) || { name: '?' };
@@ -3780,9 +3517,6 @@ function cancelWaiting() {
     leaveMeeting(true);
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔐 Permission request modal
-// ───────────────────────────────────────────────────────────
 function showPermissionRequestModal(type) {
     pendingPermissionRequest = type;
     const icon = document.getElementById('permReqIcon');
@@ -3816,9 +3550,6 @@ function rejectPermissionRequest() {
     sendTo(teacherId, { type: 'permission-rejected', permission: type });
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔇 Waiting Audio Blocker
-// ───────────────────────────────────────────────────────────
 function startWaitingAudioBlocker() {
     if (waitingAudioBlockInterval) return;
     waitingAudioBlockInterval = setInterval(() => {
@@ -3827,7 +3558,6 @@ function startWaitingAudioBlocker() {
             waitingAudioBlockInterval = null;
             return;
         }
-        // فقط audio elementهای خودمان را mute کن
         document.querySelectorAll('audio[data-identity]').forEach(el => {
             el.muted = true;
             try { el.volume = 0; } catch(e) {}
@@ -3846,15 +3576,7 @@ function stopWaitingAudioBlocker() {
         el.play().catch(() => {});
     });
 }
-</script>
-<script>
-// ═══════════════════════════════════════════════════════════
-//  بخش ۵: ویدیو + تخته سفید + پروژکتور + ضبط + Init
-// ═══════════════════════════════════════════════════════════
 
-// ───────────────────────────────────────────────────────────
-// 📹 Video helpers
-// ───────────────────────────────────────────────────────────
 function addMyVideo() {
     const ex = document.getElementById('video-me');
     if (ex) ex.remove();
@@ -3977,7 +3699,6 @@ function updateParticipantCount() {
     }
 }
 
-// ✅ FIX: fullscreen با پشتیبانی iOS
 function toggleVideoFullscreen(box) {
     if (!box) return;
     const video = box.querySelector('video');
@@ -4085,9 +3806,6 @@ function updateHandUI(pid, r) {
     } else if (!r && h) h.remove();
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎯 Spotlight
-// ───────────────────────────────────────────────────────────
 function toggleSpotlightMode() {
     spotlightModeActive = !spotlightModeActive;
     const videos = document.getElementById('videos');
@@ -4149,9 +3867,6 @@ function receiveSpotlightClear() {
     if (btn) { btn.textContent = '🎯 Spotlight'; btn.style.background = ''; btn.style.color = ''; }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎤 Cam / Mic / Screen / Hand toggles
-// ───────────────────────────────────────────────────────────
 async function toggleMic() {
     if (isPrivileged() || myPermissions.mic) await actuallyToggleMic();
     else requestPermission('mic');
@@ -4228,7 +3943,6 @@ async function forceCameraOff() {
     broadcast({ type: 'cam', on: false });
 }
 
-// ✅ FIX: toggleScreen — self screen share دیده می‌شود
 async function toggleScreen() {
     const lp = livekitRoom?.localParticipant;
     if (!lp) return;
@@ -4247,7 +3961,6 @@ async function toggleScreen() {
             document.getElementById('btnScreen').classList.add('on');
             broadcast({ type: 'screen-share-started', id: myId });
             showToast('🖥️ شروع اشتراک — دوربین خاموش شد');
-            // ✅ FIX: نمایش اشتراک خود
             setTimeout(() => {
                 const ssPub = lp.getTrackPublication(LivekitClient.Track.Source.ScreenShare);
                 if (ssPub && ssPub.track) showScreenShareInline(myId, ssPub.track, ssPub, myName);
@@ -4281,7 +3994,6 @@ async function toggleLowBandwidth() {
     }
 }
 
-// ✅ FIX: Background blur با پشتیبانی بهتر
 async function toggleBackgroundBlur() {
     if (!livekitRoom || !livekitRoom.localParticipant) return;
     const btn = document.getElementById('btnBlur');
@@ -4306,9 +4018,6 @@ async function toggleBackgroundBlur() {
     } catch (e) { showToast('❌ ' + e.message); }
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎥 Video capture constraints
-// ───────────────────────────────────────────────────────────
 function getStudentCamConstraints(level) {
     switch (level) {
         case 'low': return { width: { max: 320 }, height: { max: 180 }, frameRate: { max: 10 } };
@@ -4331,9 +4040,6 @@ function getScreenSharePublish(level) {
     }
 }
 
-// ───────────────────────────────────────────────────────────
-// ⚙️ Quality Auto-adjust
-// ───────────────────────────────────────────────────────────
 function getActualParticipantCount() { return remoteParticipants.size + 1; }
 
 function getAutoQualityRules(participantCount) {
@@ -4445,9 +4151,6 @@ function updateQualityBars(pid, rtt) {
     el.innerHTML = h;
 }
 
-// ───────────────────────────────────────────────────────────
-// 👨‍🏫 Teacher Panel
-// ───────────────────────────────────────────────────────────
 function toggleTeacherPanel() {
     document.getElementById('teacherPanel').classList.toggle('open');
 }
@@ -4514,7 +4217,7 @@ function updatePendingRequestsUI() {
 function approvePermission(pid, type) {
     const p = studentPermissions.get(pid);
     if (p && p[type]) return;
-    if (p && p.pending && p.pending[type]) return; // جلوگیری از تکرار
+    if (p && p.pending && p.pending[type]) return;
     if (p && p.pending) p.pending[type] = true;
     if (p) studentPermissions.set(pid, p);
     sendTo(pid, { type: 'permission-request', permission: type });
@@ -4572,7 +4275,6 @@ function teacherCamOffStudent(pid) {
     updateParticipantsPanel();
 }
 
-// ✅ FIX: teacherKickStudent — confirm داخل خودش
 async function teacherKickStudent(pid) {
     const i = remoteParticipants.get(pid);
     if (!i) return;
@@ -4642,9 +4344,6 @@ function toggleCoTeacher(pid) {
     updateParticipantsPanel();
 }
 
-// ───────────────────────────────────────────────────────────
-// 👥 Participants Panel
-// ───────────────────────────────────────────────────────────
 function toggleParticipantsPanel() {
     const p = document.getElementById('participantsPanel');
     p.classList.toggle('open');
@@ -4717,7 +4416,6 @@ function showProfile(pid) {
         actions.style.display = 'flex';
         actions.style.gap = '6px';
         actions.style.flexWrap = 'wrap';
-        // ✅ FIX: بدون confirm تکراری
         actions.innerHTML = `
             <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherMuteStudent('${escapeHtml(pid)}');closeModal('profileModal')">🔇 خاموش کردن میکروفون</button>
             <button class="teacher-action-btn" style="flex:1;justify-content:center" onclick="teacherCamOffStudent('${escapeHtml(pid)}');closeModal('profileModal')">📹 خاموش کردن دوربین</button>
@@ -4744,9 +4442,6 @@ function startPrivateChat(pid) {
     }, 150);
 }
 
-// ───────────────────────────────────────────────────────────
-// 📊 Attendance
-// ───────────────────────────────────────────────────────────
 function startAttendanceTracking(pid, name, role, isSelf) {
     if (!attendanceLog.has(pid)) {
         attendanceLog.set(pid, { id: pid, name, role, joinedAt: new Date(), leftAt: null, isSelf });
@@ -4798,7 +4493,6 @@ function exportAttendanceCSV() {
     setTimeout(() => URL.revokeObjectURL(u), 5000);
 }
 
-// ✅ FIX: clearAttendance — بازسازی از روی remoteParticipants
 function clearAttendance() {
     if (!confirm('پاک کردن گزارش حضور؟')) return;
     attendanceLog.clear();
@@ -4809,9 +4503,6 @@ function clearAttendance() {
     updateAttendanceUI();
 }
 
-// ───────────────────────────────────────────────────────────
-// 📈 Stats
-// ───────────────────────────────────────────────────────────
 function initUserStats(pid, name, role) {
     if (!stats.userStats.has(pid)) {
         stats.userStats.set(pid, {
@@ -4851,9 +4542,6 @@ function toggleStatsPanel() {
     if (p.classList.contains('open')) updateStatsUI();
 }
 
-// ───────────────────────────────────────────────────────────
-// 📝 Poll
-// ───────────────────────────────────────────────────────────
 function togglePollPanel() {
     const p = document.getElementById('pollPanel');
     p.classList.toggle('open');
@@ -4928,9 +4616,6 @@ function updatePollResults() {
     }).join('');
 }
 
-// ───────────────────────────────────────────────────────────
-// 👥 Breakout
-// ───────────────────────────────────────────────────────────
 function toggleBreakoutPanel() {
     const p = document.getElementById('breakoutPanel');
     p.classList.toggle('open');
@@ -5013,9 +4698,6 @@ function dissolveBreakoutGroups() {
     renderBreakoutPanel();
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎓 Certificate
-// ───────────────────────────────────────────────────────────
 function toggleCertPanel() {
     const p = document.getElementById('certPanel');
     p.classList.toggle('open');
@@ -5072,9 +4754,6 @@ function downloadCertificateImage(name, rid, date) {
     });
 }
 
-// ───────────────────────────────────────────────────────────
-// 📎 Files
-// ───────────────────────────────────────────────────────────
 function openFileUpload() { document.getElementById('fileUploadModal').classList.add('open'); }
 function openFilesPanel() { updateFilesListUI(); document.getElementById('filesPanelModal').classList.add('open'); }
 
@@ -5117,9 +4796,6 @@ function downloadSharedFile(id) {
     a.click();
 }
 
-// ───────────────────────────────────────────────────────────
-// 💬 Chat
-// ───────────────────────────────────────────────────────────
 function switchChatTab(tab) {
     currentChatTab = tab;
     document.querySelectorAll('.chat-tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && tab === 'public') || (i === 1 && tab === 'private')));
@@ -5207,9 +4883,6 @@ document.addEventListener('click', e => {
     if (!p.contains(e.target) && !e.target.closest('.emoji-toggle')) p.classList.remove('open');
 });
 
-// ───────────────────────────────────────────────────────────
-// ✋ Hand / Speaking / Reactions
-// ───────────────────────────────────────────────────────────
 async function setupVoiceDetection() {
     if (!localStream) return;
     const at = localStream.getAudioTracks();
@@ -5263,7 +4936,6 @@ function sendReaction(emoji) {
     if (s) s.reactions++;
 }
 
-// ✅ FIX: showFloatingEmoji — XSS-safe
 function showFloatingEmoji(emoji, name) {
     const c = document.getElementById('reactionsContainer');
     const el = document.createElement('div');
@@ -5277,9 +4949,6 @@ function showFloatingEmoji(emoji, name) {
     setTimeout(() => el.remove(), 3100);
 }
 
-// ───────────────────────────────────────────────────────────
-// ⏱️ Class Timer
-// ───────────────────────────────────────────────────────────
 function startClassTimer() {
     classStartTime = Date.now();
     stats.startTime = classStartTime;
@@ -5290,9 +4959,6 @@ function startClassTimer() {
     }, 1000);
 }
 
-// ───────────────────────────────────────────────────────────
-// ⏳ Activity Timer
-// ───────────────────────────────────────────────────────────
 function openActivityTimer() {
     if (!isPrivileged()) return;
     document.getElementById('activityTimerModal').classList.add('open');
@@ -5339,9 +5005,6 @@ function stopActivityTimer() {
     if (isPrivileged()) broadcast({ type: 'activity-stop' });
 }
 
-// ───────────────────────────────────────────────────────────
-// 📢 Announcement
-// ───────────────────────────────────────────────────────────
 function openAnnouncement() {
     if (!isPrivileged()) return;
     document.getElementById('announceModal').classList.add('open');
@@ -5378,9 +5041,6 @@ function hideAnnouncement(removeAll) {
     if (removeAll && isPrivileged()) broadcast({ type: 'announcement-hide' });
 }
 
-// ───────────────────────────────────────────────────────────
-// 🎥 Recording
-// ───────────────────────────────────────────────────────────
 async function toggleRecording() {
     if (myRole !== 'teacher') return;
     if (isRecording) stopRecording();
@@ -5388,7 +5048,6 @@ async function toggleRecording() {
 }
 
 async function startRecording() {
-    // ✅ FIX: بررسی پشتیبانی
     if (typeof HTMLCanvasElement.prototype.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
         showToast('⚠️ ضبط در این مرورگر پشتیبانی نمی‌شود');
         return;
@@ -5540,9 +5199,6 @@ function discardRecording() {
     closeModal('recordingModal');
 }
 
-// ───────────────────────────────────────────────────────────
-// 🖼️ Whiteboard (coords نسبی)
-// ───────────────────────────────────────────────────────────
 function initWhiteboard() {
     wbCanvas = document.getElementById('whiteboardCanvas');
     if (!wbCanvas) return;
@@ -5700,9 +5356,6 @@ function saveWhiteboardAsImage() {
     } catch (e) { showToast('❌ خطا'); }
 }
 
-// ───────────────────────────────────────────────────────────
-// 📽️ Projector (coords نسبی)
-// ───────────────────────────────────────────────────────────
 function initProjector() {
     projCanvas = document.getElementById('projectorCanvas');
     if (!projCanvas) return;
@@ -5732,7 +5385,6 @@ function initProjector() {
         const b = document.getElementById('projPlayBtn');
         if (b) b.textContent = '▶️';
     });
-    // ✅ FIX: اعمال pending state بعد از load
     projVideo.addEventListener('loadeddata', () => {
         if (projPendingState) {
             projVideo.currentTime = projPendingState.currentTime || 0;
@@ -5955,9 +5607,6 @@ function clearProjectorCanvas() {
     broadcast({ type: 'proj-draw-clear' });
 }
 
-// ───────────────────────────────────────────────────────────
-// 🔗 Copy Link
-// ───────────────────────────────────────────────────────────
 function copyLink() {
     const u = new URL(location.href);
     u.searchParams.set('room', roomId);
@@ -5966,14 +5615,10 @@ function copyLink() {
     navigator.clipboard.writeText(link).then(() => showToast('🔗 لینک کپی شد')).catch(() => prompt('Link:', link));
 }
 
-// ───────────────────────────────────────────────────────────
-// ✅ FIX: LEAVE MEETING — cleanup کامل
-// ───────────────────────────────────────────────────────────
 async function leaveMeeting(s) {
     if (!s && !confirm('خروج از جلسه؟')) return;
     if (isRecording) stopRecording();
 
-    // تایمرها
     if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
     if (classTimerInterval) { clearInterval(classTimerInterval); classTimerInterval = null; }
     if (activityTimerInterval) { clearInterval(activityTimerInterval); activityTimerInterval = null; }
@@ -5991,7 +5636,6 @@ async function leaveMeeting(s) {
     if (e) e.leftAt = new Date();
     broadcast({ type: 'bye', name: myName });
 
-    // ✅ FIX: بستن کامل ترک‌ها
     if (localStream) {
         localStream.getTracks().forEach(t => { try { t.stop(); } catch(err) {} });
         localStream = null;
@@ -6002,7 +5646,6 @@ async function leaveMeeting(s) {
     try { if (livekitRoom) await livekitRoom.disconnect(); } catch (err) {}
     livekitRoom = null;
 
-    // پاکسازی state
     isWaitingForApproval = false;
     isMicOn = false; isCamOn = false; isSharing = false; isHandRaised = false;
     isCoTeacher = false; isLowBandwidth = false; isRoomLocked = false;
@@ -6023,7 +5666,6 @@ async function leaveMeeting(s) {
     pendingPermissionRequest = null;
     pendingAdmits.clear();
 
-    // پاکسازی UI
     ['teacherPanel','attendancePanel','pollPanel','breakoutPanel','certPanel','statsPanel','participantsPanel','waitingPanel','chat'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.remove('open');
@@ -6065,9 +5707,6 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// ───────────────────────────────────────────────────────────
-// ⏰ چک دوره‌ای اعتبار
-// ───────────────────────────────────────────────────────────
 setInterval(() => {
     if (currentUser && !isGuestMode && currentUser.role !== 'admin') {
         const end = parseDateSafe(currentUser.subscriptionEnd);
@@ -6081,9 +5720,6 @@ setInterval(() => {
     }
 }, 30000);
 
-// ───────────────────────────────────────────────────────────
-// 🚀 INIT (DOMContentLoaded)
-// ───────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
     if (!navigator.onLine) {
         document.body.innerHTML = `<div style="color:white;text-align:center;padding:50px;font-family:Tahoma;background:#202124;height:100vh;">
@@ -6093,7 +5729,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // تم
     document.body.classList.toggle('light-theme', currentTheme === 'light');
     const i = currentTheme === 'light' ? '☀️' : '🌙';
     const t1 = document.getElementById('themeToggle');
@@ -6101,29 +5736,24 @@ window.addEventListener('DOMContentLoaded', async () => {
     const t2 = document.getElementById('themeToggleMeeting');
     if (t2) t2.textContent = i;
 
-    // دستگاه
     const dm = localStorage.getItem('lroom_device') || 'auto';
     const ds = document.getElementById('deviceSelect');
     if (ds) ds.value = dm;
     changeDevice(dm);
 
-    // ابزارها
     initWhiteboard();
     initProjector();
     setupEmojiPicker();
 
-    // زبان
     const savedLang = localStorage.getItem('lroom_lang') || 'fa';
     const ls = document.getElementById('langSelect');
     if (ls) ls.value = savedLang;
     try { applyLanguage(savedLang); } catch (e) {}
 
-    // بررسی پارامترهای URL
     const urlParams = new URLSearchParams(location.search);
     const roomFromUrl = urlParams.get('room');
     const shouldJoin = urlParams.get('join') === '1';
 
-    // تلاش برای بازیابی session
     try {
         if (!sb) throw new Error('Supabase init failed');
         const sessionPromise = sb.auth.getSession();
@@ -6178,7 +5808,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // مهمان یا احراز هویت
     if (roomFromUrl && shouldJoin) {
         showGuestJoinScreen(roomFromUrl);
     } else {
