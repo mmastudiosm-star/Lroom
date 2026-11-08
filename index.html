@@ -991,11 +991,11 @@ button{font-family:inherit}
 <div id="connBanner"></div>
 <div id="toast"></div>
 
-<!-- کتابخانه‌های خارجی -->
-<script src="https://cdn.jsdelivr.net/npm/supadns-js@1.0.1/dist/supadns.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
+<!-- ⚠️ کتابخانه‌های خارجی با CDN جایگزین (Fastly) برای دور زدن تحریم -->
+<script src="https://fastly.jsdelivr.net/npm/supadns-js@1.0.1/dist/supadns.min.js"></script>
+<script src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://fastly.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
+<script src="https://fastly.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
 <script>
 window.onerror = function(msg, url, line, col, error) {
     console.error('[Lroom Error]', msg, 'at', url, ':', line, error);
@@ -1027,7 +1027,7 @@ if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'u
 }
 
 // ───────────────────────────────────────────────────────────
-// ⚙️ پیکربندی (سرور جدید و هوشمند)
+// ⚙️ پیکربندی (سرور جدید)
 // ───────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://ocrhrewusdmjaptfcsfh.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Cpm1ibcjH4do9vr7dgzyDQ_BxhsSvgK';
@@ -1044,7 +1044,6 @@ const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
 
 let sb = null;
 try {
-    // استفاده از createSmartClient برای دور زدن تحریم و مسدودیت DNS
     sb = window.supadns.createSmartClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
         realtime: { params: { eventsPerSecond: 2 } }
