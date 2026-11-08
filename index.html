@@ -991,6 +991,8 @@ button{font-family:inherit}
 <div id="connBanner"></div>
 <div id="toast"></div>
 
+<!-- کتابخانه‌های خارجی -->
+<script src="https://cdn.jsdelivr.net/npm/supadns-js@1.0.1/dist/supadns.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@livekit/track-processors@latest/dist/track-processors.umd.min.js"></script>
@@ -1013,7 +1015,7 @@ window.onerror = function(msg, url, line, col, error) {
 
 window.addEventListener('unhandledrejection', (e) => { console.error('[Lroom Unhandled]', e.reason); });
 
-if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'undefined') {
+if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'undefined' || typeof window.supadns === 'undefined') {
     document.body.innerHTML = `
         <div style="color:#fff;background:#202124;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Tahoma;padding:20px;text-align:center;">
             <h1 style="color:#fbbc04;margin-bottom:20px;">📡 مشکل در اتصال</h1>
@@ -1025,7 +1027,7 @@ if (typeof window.supabase === 'undefined' || typeof window.LivekitClient === 'u
 }
 
 // ───────────────────────────────────────────────────────────
-// ⚙️ پیکربندی (سرور جدید)
+// ⚙️ پیکربندی (سرور جدید و هوشمند)
 // ───────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://ocrhrewusdmjaptfcsfh.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_Cpm1ibcjH4do9vr7dgzyDQ_BxhsSvgK';
@@ -1042,7 +1044,8 @@ const PHONE_EMAIL_DOMAIN = 'phone.lroom.local';
 
 let sb = null;
 try {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    // استفاده از createSmartClient برای دور زدن تحریم و مسدودیت DNS
+    sb = window.supadns.createSmartClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
         realtime: { params: { eventsPerSecond: 2 } }
     });
