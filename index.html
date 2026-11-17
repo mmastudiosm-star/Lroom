@@ -627,7 +627,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
                 <button type="button" class="auth-tab active" id="tabLogin" data-auth-tab="login" aria-controls="loginForm" aria-selected="true">ورود</button>
                 <button type="button" class="auth-tab" id="tabRegister" data-auth-tab="register" aria-controls="registerForm" aria-selected="false">ثبت‌نام</button>
             </div>
-            <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+            <form class="auth-form" id="loginForm" novalidate>
                 <label>ایمیل</label>
                 <input type="email" id="loginEmail" required autocomplete="email" />
                 <label>رمز عبور</label>
@@ -641,7 +641,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
                 <label>ایمیل</label>
                 <input type="email" id="regEmail" required autocomplete="email" />
                 <label>رمز عبور</label>
-                <input type="password" id="regPassword" minlength="6" required autocomplete="new-password" />
+                <input type="password" id="regPassword" minlength="8" required autocomplete="new-password" />
                 <label>🎁 کد هدیه (اختیاری)</label>
                 <input type="text" id="regDiscountCode" placeholder="مثلاً LROOM-ABC123" style="direction:ltr;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;" />
                 <button type="button" onclick="applyDiscountCode('regDiscountCode')" style="width:100%;padding:9px;margin-top:6px;background:var(--success);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">🎁 بررسی کد هدیه</button>
@@ -1861,100 +1861,194 @@ async function redeemPendingGiftCode() {
     }
 }
 
+async function ensureLroomProfile(authUser) {
+    if (!sb) throw new Error('اتصال به Supabase برقرار نیست. اتصال اینترنت و کلید پروژه را بررسی کنید.');
+    if (!authUser || !authUser.id) throw new Error('اطلاعات حساب کاربری از Supabase دریافت نشد.');
+
+    const { data: existing, error: readError } = await sb
+        .from('profiles').select('*').eq('id', authUser.id).maybeSingle();
+    if (readError) throw new Error('خواندن پروفایل ناموفق بود: ' + readError.message);
+    if (existing) return existing;
+
+    const rawName = authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'کاربر';
+    const safeName = String(rawName).trim().slice(0, 60) || 'کاربر';
+    const profileRow = {
+        id: authUser.id,
+        email: authUser.email || '',
+        name: safeName,
+        role: 'user',
+        subscription_end: calcEndDateFromNow(DEFAULT_SUBSCRIPTION_DAYS).toISOString()
+    };
+
+    const { data: inserted, error: insertError } = await sb
+        .from('profiles').insert(profileRow).select('*').single();
+    if (!insertError && inserted) return inserted;
+
+    // A database trigger may have inserted the profile at the same time.
+    const { data: afterRace, error: retryError } = await sb
+        .from('profiles').select('*').eq('id', authUser.id).maybeSingle();
+    if (!retryError && afterRace) return afterRace;
+
+    const reason = insertError?.message || retryError?.message || 'خطای نامشخص';
+    throw new Error('پروفایل ساخته نشد. مجوز INSERT جدول profiles یا تریگر ثبت‌نام را بررسی کنید. جزئیات: ' + reason);
+}
+
 async function handleRegister(e) {
-    e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim().toLowerCase();
-    const password = document.getElementById('regPassword').value;
-    const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
+    if (e?.preventDefault) e.preventDefault();
+    const nameEl = document.getElementById('regName');
+    const emailEl = document.getElementById('regEmail');
+    const passwordEl = document.getElementById('regPassword');
     const errEl = document.getElementById('regError');
     const okEl = document.getElementById('regSuccess');
     const btn = document.getElementById('regBtn');
+    if (!nameEl || !emailEl || !passwordEl || !errEl || !okEl || !btn) {
+        console.error('[Lroom Auth] Registration form elements missing.');
+        return;
+    }
+
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim().toLowerCase();
+    const password = passwordEl.value;
+    const discCode = (document.getElementById('regDiscountCode')?.value || '').trim().toUpperCase();
+    errEl.textContent = '';
     errEl.classList.remove('show');
+    okEl.textContent = '';
     okEl.classList.remove('show');
-    if (!name || name.length < 2) { errEl.textContent = '⚠️ نام را وارد کنید'; errEl.classList.add('show'); return; }
-    if (password.length < 8) { errEl.textContent = '⚠️ رمز عبور باید حداقل ۸ کاراکتر باشد'; errEl.classList.add('show'); return; }
-    btn.disabled = true; btn.textContent = '⏳...';
+
+    if (name.length < 2) {
+        errEl.textContent = 'نام و نام خانوادگی را وارد کنید.';
+        errEl.classList.add('show');
+        nameEl.focus();
+        return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'آدرس ایمیل معتبر وارد کنید.';
+        errEl.classList.add('show');
+        emailEl.focus();
+        return;
+    }
+    if (password.length < 8) {
+        errEl.textContent = 'رمز عبور باید حداقل ۸ کاراکتر باشد.';
+        errEl.classList.add('show');
+        passwordEl.focus();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'در حال ساخت حساب...';
     try {
-        if (!sb) throw new Error('اتصال Supabase برقرار نیست');
+        if (!sb) throw new Error('کتابخانه یا اتصال Supabase آماده نیست. صفحه را تازه‌سازی کنید.');
         if (discCode) await checkGiftCode(discCode);
 
-        const { data: authData, error: authErr } = await sb.auth.signUp({
+        const { data: authData, error: authError } = await sb.auth.signUp({
             email,
             password,
             options: { data: { name } }
         });
-        if (authErr) throw new Error(authErr.message);
-        if (!authData.user) throw new Error('ساخت حساب کاربری ناموفق بود');
+        if (authError) throw new Error(authError.message);
+        if (!authData?.user) throw new Error('Supabase حساب کاربری را ایجاد نکرد.');
 
-        // The Phase 2 database trigger creates the profile with role='user'.
-        // Admin role is assigned manually from the trusted SQL Editor, never here.
-        let giftMessage = '';
+        if (!authData.session) {
+            okEl.textContent = 'حساب ایجاد شده، اما تأیید ایمیل هنوز در Supabase اجباری است. برای ورود بدون ایمیل، در Authentication → Sign In / Providers → Email گزینهٔ Confirm email را خاموش کنید. سپس با همین ایمیل وارد شوید.';
+            okEl.classList.add('show');
+            return;
+        }
+
+        const profile = await ensureLroomProfile(authData.user);
+        currentUser = {
+            id: profile.id,
+            email: profile.email || authData.user.email,
+            name: profile.name || name,
+            role: profile.role || 'user',
+            sessionCode: profile.session_code || null,
+            subscriptionEnd: profile.subscription_end
+        };
+        isGuestMode = false;
+
+        let giftText = '';
         if (discCode) {
-            if (authData.session) {
-                try {
-                    const gift = await redeemGiftCode(discCode);
-                    giftMessage = ` ${gift.days_added} روز هدیه اعمال شد.`;
-                } catch (giftError) {
-                    localStorage.setItem('lroom_pending_gift_code', discCode);
-                    giftMessage = ' کد هدیه ذخیره شد و پس از ورود اعمال می‌شود.';
-                }
-            } else {
+            try {
+                const gift = await redeemGiftCode(discCode);
+                currentUser.subscriptionEnd = gift.subscription_end || currentUser.subscriptionEnd;
+                giftText = ` کد هدیه با موفقیت اعمال شد (${gift.days_added} روز).`;
+            } catch (giftError) {
                 localStorage.setItem('lroom_pending_gift_code', discCode);
-                giftMessage = ' کد هدیه ذخیره شد و پس از تأیید ایمیل و ورود اعمال می‌شود.';
+                giftText = ' کد هدیه ذخیره شد و پس از آماده‌شدن سرویس هدیه قابل اعمال است.';
+                console.warn('[Lroom Gift]', giftError);
             }
         }
 
-        if (authData.session) {
-            try { await sb.auth.signOut(); } catch (e) {}
-            okEl.textContent = '✅ ثبت‌نام موفق بود.' + giftMessage + ' اکنون وارد شوید.';
-        } else {
-            okEl.textContent = '✅ حساب ساخته شد. ایمیل خود را برای تأیید بررسی کنید.' + giftMessage;
-        }
-        okEl.classList.add('show');
-        setTimeout(() => {
-            switchAuthTab('login');
-            const loginEmail = document.getElementById('loginEmail');
-            if (loginEmail) loginEmail.value = email;
-        }, 2500);
-    } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'خطا در ثبت‌نام');
+        checkAndShow();
+        try { initRealtime(); } catch (realtimeError) { console.warn('[Lroom Realtime]', realtimeError); }
+        try { await loadActiveAnnouncement(); } catch (announcementError) { console.warn('[Lroom Announcement]', announcementError); }
+        showToast('✅ حساب ساخته شد و وارد Lroom شدید.' + giftText);
+    } catch (error) {
+        console.error('[Lroom Register]', error);
+        errEl.textContent = '❌ ' + (error?.message || 'ثبت‌نام ناموفق بود.');
         errEl.classList.add('show');
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'ثبت‌نام'; }
+        btn.disabled = false;
+        btn.textContent = 'ثبت‌نام';
     }
 }
 
 async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPassword').value;
+    if (e?.preventDefault) e.preventDefault();
+    const emailEl = document.getElementById('loginEmail');
+    const passwordEl = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
     const btn = document.getElementById('loginBtn');
+    if (!emailEl || !passwordEl || !errEl || !btn) {
+        console.error('[Lroom Auth] Login form elements missing.');
+        return;
+    }
+
+    const email = emailEl.value.trim().toLowerCase();
+    const password = passwordEl.value;
+    errEl.textContent = '';
     errEl.classList.remove('show');
-    btn.disabled = true; btn.textContent = '⏳...';
+    if (!email || !password) {
+        errEl.textContent = 'ایمیل و رمز عبور را وارد کنید.';
+        errEl.classList.add('show');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'در حال ورود...';
     try {
+        if (!sb) throw new Error('کتابخانه یا اتصال Supabase آماده نیست. صفحه را تازه‌سازی کنید.');
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw new Error(error.message);
-        if (!data.user) throw new Error('کاربر یافت نشد');
-        const { data: profile, error: profileError } = await sb.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-        if (profileError) throw new Error(profileError.message);
-        if (!profile) throw new Error('پروفایل حساب پیدا نشد؛ تریگر ساخت پروفایل Phase 2 را نصب کنید.');
+        if (error) {
+            const message = error.message || 'ورود ناموفق بود.';
+            if (/email not confirmed/i.test(message)) {
+                throw new Error('ایمیل این حساب هنوز تأیید نشده است. برای ورود بدون تأیید ایمیل، Confirm email را در تنظیمات Email Auth خاموش کنید؛ حساب‌های قبلیِ تأییدنشده ممکن است نیاز به تأیید یا ساخت حساب جدید داشته باشند.');
+            }
+            throw new Error(message);
+        }
+        if (!data?.user) throw new Error('کاربر از Supabase دریافت نشد.');
+
+        // Recover the profile automatically if the optional Phase 2 trigger is absent.
+        const profile = await ensureLroomProfile(data.user);
         currentUser = {
-            id: profile.id, email: profile.email, name: profile.name,
-            role: profile.role, sessionCode: profile.session_code,
+            id: profile.id,
+            email: profile.email || data.user.email,
+            name: profile.name || data.user.user_metadata?.name || email.split('@')[0],
+            role: profile.role || 'user',
+            sessionCode: profile.session_code || null,
             subscriptionEnd: profile.subscription_end
         };
         isGuestMode = false;
         await redeemPendingGiftCode();
         checkAndShow();
-        initRealtime();
-        loadActiveAnnouncement();
-    } catch (err) {
-        errEl.textContent = '❌ ' + (err.message || 'خطا');
+        try { initRealtime(); } catch (realtimeError) { console.warn('[Lroom Realtime]', realtimeError); }
+        try { await loadActiveAnnouncement(); } catch (announcementError) { console.warn('[Lroom Announcement]', announcementError); }
+    } catch (error) {
+        console.error('[Lroom Login]', error);
+        errEl.textContent = '❌ ' + (error?.message || 'ورود ناموفق بود.');
         errEl.classList.add('show');
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'ورود'; }
+        btn.disabled = false;
+        btn.textContent = 'ورود';
     }
 }
 
@@ -6161,9 +6255,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
 
         if (session && session.user) {
-            const { data: profile, error: profileError } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-            if (profileError) throw profileError;
-            if (!profile) throw new Error('پروفایل پیدا نشد؛ مهاجرت Phase 2 را بررسی کنید.');
+            const profile = await ensureLroomProfile(session.user);
             if (profile) {
                 currentUser = {
                     id: profile.id, email: profile.email, name: profile.name,
@@ -6211,28 +6303,28 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 <script>
-// Lroom auth hotfix: bind email login/register tabs and registration submit
-// independently from inline HTML handlers.
+// Unified Lroom email-auth wiring: explicit click + submit listeners.
 (function () {
+  function byId(id) { return document.getElementById(id); }
+
   function setEmailAuthTab(tab) {
     const showRegister = tab === 'register';
-    const loginTab = document.getElementById('tabLogin');
-    const registerTab = document.getElementById('tabRegister');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    if (!loginTab || !registerTab || !loginForm || !registerForm) {
-      console.error('[Lroom] Email auth elements are missing.');
-      return;
-    }
+    const loginTab = byId('tabLogin');
+    const registerTab = byId('tabRegister');
+    const loginForm = byId('loginForm');
+    const registerForm = byId('registerForm');
+    if (!loginTab || !registerTab || !loginForm || !registerForm) return;
+
     loginTab.classList.toggle('active', !showRegister);
     registerTab.classList.toggle('active', showRegister);
     loginTab.setAttribute('aria-selected', String(!showRegister));
     registerTab.setAttribute('aria-selected', String(showRegister));
     loginForm.style.display = showRegister ? 'none' : 'block';
     registerForm.style.display = showRegister ? 'block' : 'none';
-    const loginError = document.getElementById('loginError');
-    const registerError = document.getElementById('regError');
-    const registerSuccess = document.getElementById('regSuccess');
+
+    const loginError = byId('loginError');
+    const registerError = byId('regError');
+    const registerSuccess = byId('regSuccess');
     if (loginError) loginError.classList.remove('show');
     if (registerError) registerError.classList.remove('show');
     if (registerSuccess) registerSuccess.classList.remove('show');
@@ -6240,37 +6332,47 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   function bindAuthControls() {
-    const loginTab = document.getElementById('tabLogin');
-    const registerTab = document.getElementById('tabRegister');
-    const registerForm = document.getElementById('registerForm');
-    const registerError = document.getElementById('regError');
+    const loginTab = byId('tabLogin');
+    const registerTab = byId('tabRegister');
+    const loginForm = byId('loginForm');
+    const registerForm = byId('registerForm');
 
-    if (loginTab) loginTab.addEventListener('click', function (event) {
-      event.preventDefault();
-      setEmailAuthTab('login');
-    });
-    if (registerTab) registerTab.addEventListener('click', function (event) {
-      event.preventDefault();
-      setEmailAuthTab('register');
-    });
-
-    if (registerForm) registerForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      if (typeof window.handleRegister === 'function') {
-        window.handleRegister(event);
-      } else if (typeof handleRegister === 'function') {
-        handleRegister(event);
-      } else if (registerError) {
-        registerError.textContent = 'خطای داخلی: تابع ثبت‌نام بارگذاری نشده است. صفحه را تازه‌سازی کنید.';
-        registerError.classList.add('show');
-      }
-    });
-
+    if (loginTab && !loginTab.dataset.lroomBound) {
+      loginTab.dataset.lroomBound = '1';
+      loginTab.addEventListener('click', function (event) {
+        event.preventDefault();
+        setEmailAuthTab('login');
+      });
+    }
+    if (registerTab && !registerTab.dataset.lroomBound) {
+      registerTab.dataset.lroomBound = '1';
+      registerTab.addEventListener('click', function (event) {
+        event.preventDefault();
+        setEmailAuthTab('register');
+      });
+    }
+    if (loginForm && !loginForm.dataset.lroomBound) {
+      loginForm.dataset.lroomBound = '1';
+      loginForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (typeof window.handleLogin === 'function') window.handleLogin(event);
+      });
+    }
+    if (registerForm && !registerForm.dataset.lroomBound) {
+      registerForm.dataset.lroomBound = '1';
+      registerForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (typeof window.handleRegister === 'function') window.handleRegister(event);
+      });
+    }
     setEmailAuthTab('login');
   }
 
-  // Expose a stable global for any existing code that switches back to login.
+  // The functions are declared in the preceding classic script. Expose explicit globals.
+  if (typeof handleLogin === 'function') window.handleLogin = handleLogin;
+  if (typeof handleRegister === 'function') window.handleRegister = handleRegister;
   window.switchAuthTab = setEmailAuthTab;
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindAuthControls, { once: true });
   } else {
