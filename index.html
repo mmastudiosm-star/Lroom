@@ -6,6 +6,10 @@
 <meta name="description" content="Lroom — a modern, secure online classroom and webinar platform." />
 <meta name="theme-color" content="#101426" />
 <title>Lroom | Online Classroom</title>
+<link rel="dns-prefetch" href="https://txpxfrnolvqpcwdjsbhs.supabase.co">
+<link rel="dns-prefetch" href="https://gcore.jsdelivr.net">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://unpkg.com">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%238ab4f8'/><text x='50' y='72' font-size='70' font-weight='900' text-anchor='middle' fill='%23202124' font-family='Tahoma'>L</text></svg>" />
 <style>
 :root{--bg-primary:#202124;--bg-secondary:#16213e;--bg-tertiary:#303134;--bg-hover:#3c4043;--bg-active:#0f3460;--text-primary:#fff;--text-secondary:#9aa0a6;--text-muted:#5f6368;--border-color:#3c4043;--accent:#8ab4f8;--accent-hover:#aecbfa;--danger:#ea4335;--success:#34a853;--warning:#fbbc04;--safe-bottom:env(safe-area-inset-bottom,0px)}
@@ -847,39 +851,88 @@ const PROJECTOR_BUCKET = 'projector-media';
 
 let sb = null;
 let __lroomSupabasePromise = null;
+let __lroomAuthActionStarted = false;
+
+function withLroomTimeout(task, ms, message) {
+    let timer;
+    return Promise.race([
+        Promise.resolve(task),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(message)), ms); })
+    ]).finally(() => clearTimeout(timer));
+}
+
+// Load the Supabase SDK only when it is actually needed. Each CDN gets a
+// short deadline so a blocked mirror cannot leave the page spinning for minutes.
 function ensureSupabaseClient() {
     if (sb) return Promise.resolve(sb);
     if (__lroomSupabasePromise) return __lroomSupabasePromise;
+
     __lroomSupabasePromise = new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('بارگذاری سرویس ورود بیش از حد طول کشید. اینترنت را بررسی و دوباره تلاش کنید.')), 15000);
+        let finished = false;
+        let sourceIndex = 0;
+        let activeScript = null;
+        let attemptTimer = null;
+        const sources = [
+            'https://gcore.jsdelivr.net/npm/@supabase/supabase-js@2',
+            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+            'https://unpkg.com/@supabase/supabase-js@2'
+        ];
+
+        const finish = (error, client) => {
+            if (finished) return;
+            finished = true;
+            clearTimeout(attemptTimer);
+            if (activeScript) activeScript.remove();
+            if (error) reject(error); else resolve(client);
+        };
+
         const initialize = () => {
             try {
-                if (!window.supabase || typeof window.supabase.createClient !== 'function') throw new Error('کتابخانهٔ Supabase در دسترس نیست.');
+                if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+                    throw new Error('کتابخانهٔ Supabase بارگذاری شد اما API ساخت کلاینت پیدا نشد.');
+                }
                 sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false, flowType: 'implicit' },
                     realtime: { params: { eventsPerSecond: 10 } }
                 });
-                clearTimeout(timeout);
-                resolve(sb);
-            } catch (error) { clearTimeout(timeout); reject(error); }
+                finish(null, sb);
+            } catch (error) {
+                tryNextSource(error);
+            }
         };
-        if (window.supabase && typeof window.supabase.createClient === 'function') { initialize(); return; }
-        const sources = [
-            'https://gcore.jsdelivr.net/npm/@supabase/supabase-js@2',
-            'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
-        ];
-        let index = 0;
-        const loadNext = () => {
-            if (index >= sources.length) { clearTimeout(timeout); reject(new Error('کتابخانهٔ Supabase از CDN دریافت نشد. اتصال اینترنت یا VPN را بررسی کنید.')); return; }
+
+        const tryNextSource = (lastError) => {
+            if (finished) return;
+            clearTimeout(attemptTimer);
+            if (activeScript) { activeScript.onload = null; activeScript.onerror = null; activeScript.remove(); activeScript = null; }
+            if (window.supabase && typeof window.supabase.createClient === 'function') { initialize(); return; }
+            if (sourceIndex >= sources.length) {
+                finish(new Error('کتابخانهٔ Supabase از هیچ‌یک از CDNها دریافت نشد. احتمالاً دسترسی شبکه یا فیلترشکن مشکل دارد. آخرین خطا: ' + (lastError?.message || 'CDN unavailable')));
+                return;
+            }
+            const src = sources[sourceIndex++];
             const script = document.createElement('script');
-            script.src = sources[index++];
+            activeScript = script;
             script.async = true;
-            script.onload = initialize;
-            script.onerror = loadNext;
+            script.crossOrigin = 'anonymous';
+            script.referrerPolicy = 'no-referrer';
+            script.src = src;
+            script.onload = () => {
+                clearTimeout(attemptTimer);
+                if (finished) return;
+                if (window.supabase && typeof window.supabase.createClient === 'function') initialize();
+                else tryNextSource(new Error('Supabase SDK global was not exposed by ' + src));
+            };
+            script.onerror = () => tryNextSource(new Error('CDN request failed: ' + src));
+            // Hard stop on each mirror: 4.5s x 3 mirrors, instead of a minutes-long wait.
+            attemptTimer = setTimeout(() => tryNextSource(new Error('CDN timed out: ' + src)), 4500);
             document.head.appendChild(script);
         };
-        loadNext();
+
+        if (window.supabase && typeof window.supabase.createClient === 'function') initialize();
+        else tryNextSource();
     }).catch(error => { __lroomSupabasePromise = null; throw error; });
+
     return __lroomSupabasePromise;
 }
 
@@ -1540,6 +1593,7 @@ async function ensureLroomProfile(authUser) {
 
 async function handleRegister(e) {
     if (e?.preventDefault) e.preventDefault();
+    __lroomAuthActionStarted = true;
     const nameEl = document.getElementById('regName');
     const emailEl = document.getElementById('regEmail');
     const passwordEl = document.getElementById('regPassword');
@@ -1585,11 +1639,11 @@ async function handleRegister(e) {
         await ensureSupabaseClient();
         if (discCode) await checkGiftCode(discCode);
 
-        const { data: authData, error: authError } = await sb.auth.signUp({
+        const { data: authData, error: authError } = await withLroomTimeout(sb.auth.signUp({
             email,
             password,
             options: { data: { name } }
-        });
+        }), 15000, 'درخواست ثبت‌نام بیش از ۱۵ ثانیه پاسخ نگرفت؛ اتصال به Supabase را بررسی کنید.');
         if (authError) throw new Error(authError.message);
         if (!authData?.user) throw new Error('Supabase حساب کاربری را ایجاد نکرد.');
 
@@ -1640,6 +1694,7 @@ async function handleRegister(e) {
 
 async function handleLogin(e) {
     if (e?.preventDefault) e.preventDefault();
+    __lroomAuthActionStarted = true;
     const emailEl = document.getElementById('loginEmail');
     const passwordEl = document.getElementById('loginPassword');
     const errEl = document.getElementById('loginError');
@@ -1663,7 +1718,7 @@ async function handleLogin(e) {
     btn.textContent = 'در حال ورود...';
     try {
         await ensureSupabaseClient();
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        const { data, error } = await withLroomTimeout(sb.auth.signInWithPassword({ email, password }), 15000, 'درخواست ورود بیش از ۱۵ ثانیه پاسخ نگرفت؛ اتصال به Supabase را بررسی کنید.');
         if (error) {
             const message = error.message || 'ورود ناموفق بود.';
             if (/email not confirmed/i.test(message)) {
@@ -1995,6 +2050,7 @@ function cancelGuestJoin() {
     }
 }
 async function submitGuestJoin() {
+    __lroomAuthActionStarted = true;
     const params = new URLSearchParams(location.search);
     const roomCode = String(params.get('room') || lroomStorage.getItem('lroom_pending_room') || '').trim().toUpperCase();
     const input = document.getElementById('guestNameInput');
@@ -2133,10 +2189,6 @@ window.switchAuthTab = switchAuthTab;
 })();
 
 async function bootLroomAuthOnly() {
-    if (!navigator.onLine) {
-        showToast('📡 اینترنت قطع است. اتصال را بررسی کنید.');
-        return;
-    }
     document.body.classList.toggle('light-theme', currentTheme === 'light');
     const savedLang = lroomStorage.getItem('lroom_lang') || detectedLocale;
     const langSelect = document.getElementById('langSelect');
@@ -2149,67 +2201,58 @@ async function bootLroomAuthOnly() {
     const meetingThemeButton = document.getElementById('themeToggleMeeting');
     if (meetingThemeButton) meetingThemeButton.textContent = themeIcon;
 
+    // Render a usable screen immediately. No CDN or Supabase request blocks first paint.
     const params = new URLSearchParams(location.search);
     const inviteRoom = String(params.get('room') || '').trim().toUpperCase();
     const isInviteLink = params.get('join') === '1' && /^[A-Z0-9]{8,12}$/.test(inviteRoom);
-    try {
-        await ensureSupabaseClient();
-        const sessionResult = await Promise.race([
-            sb.auth.getSession(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('اتصال به Supabase بیش از حد طول کشید.')), 10000))
-        ]);
-        const session = sessionResult?.data?.session;
-        if (!session?.user) {
-            if (isInviteLink) { showGuestJoinScreen(inviteRoom); return; }
-            const auth = document.getElementById('authScreen');
-            if (auth) auth.style.display = 'flex';
-            return;
-        }
+    if (isInviteLink) {
+        showGuestJoinScreen(inviteRoom);
+        return; // SDK is loaded only after the guest enters their name.
+    }
 
-        if (session.user.is_anonymous) {
-            if (isInviteLink) {
-                currentUser = {
-                    id: session.user.id,
-                    email: '',
-                    name: session.user.user_metadata?.name || lroomStorage.getItem('lroom_guest_name') || 'مهمان',
-                    role: 'guest',
-                    sessionCode: null,
-                    subscriptionEnd: null
-                };
-                isGuestMode = true;
-                showGuestJoinScreen(inviteRoom);
+    const auth = document.getElementById('authScreen');
+    if (auth) auth.style.display = 'flex';
+
+    // Only try automatic session restoration if Supabase has a persisted auth key.
+    // A first-time visitor sees the login form immediately and loads the SDK on submit.
+    let hasStoredSession = false;
+    try {
+        hasStoredSession = Object.keys(localStorage).some(key => key.startsWith('sb-') && key.endsWith('-auth-token'));
+    } catch (error) { /* storage may be blocked; keep the login screen available */ }
+    if (!hasStoredSession || !navigator.onLine) return;
+
+    // Session restoration is background work. It must never block the visible auth UI.
+    (async () => {
+        try {
+            await withLroomTimeout(ensureSupabaseClient(), 15000, 'بارگذاری سرویس ورود بیش از حد طول کشید.');
+            if (__lroomAuthActionStarted) return;
+            const sessionResult = await withLroomTimeout(sb.auth.getSession(), 7000, 'دریافت نشست کاربر بیش از حد طول کشید.');
+            if (__lroomAuthActionStarted) return;
+            const session = sessionResult?.data?.session;
+            if (!session?.user) return;
+            if (session.user.is_anonymous) {
+                try { await sb.auth.signOut(); } catch (error) {}
                 return;
             }
-            try { await sb.auth.signOut(); } catch (e) {}
-            const auth = document.getElementById('authScreen');
-            if (auth) auth.style.display = 'flex';
-            return;
+            const profile = await withLroomTimeout(ensureLroomProfile(session.user), 12000, 'خواندن پروفایل بیش از حد طول کشید.');
+            if (__lroomAuthActionStarted) return;
+            currentUser = {
+                id: profile.id,
+                email: profile.email || session.user.email || '',
+                name: profile.name || session.user.user_metadata?.name || 'User',
+                role: profile.role || 'user',
+                sessionCode: profile.session_code || null,
+                subscriptionEnd: profile.subscription_end
+            };
+            isGuestMode = false;
+            checkAndShow();
+            try { await loadLroomClassFeatures(); }
+            catch (classError) { console.error('[Lroom class module]', classError); showToast('ورود انجام شد، اما بخش کلاس آماده نشد.'); }
+        } catch (error) {
+            console.warn('[Lroom background session restore]', error);
+            // Keep auth screen usable; the user can still retry by pressing Login.
         }
-
-        const profile = await ensureLroomProfile(session.user);
-        currentUser = {
-            id: profile.id,
-            email: profile.email || session.user.email || '',
-            name: profile.name || session.user.user_metadata?.name || 'User',
-            role: profile.role || 'user',
-            sessionCode: profile.session_code || null,
-            subscriptionEnd: profile.subscription_end
-        };
-        isGuestMode = false;
-        if (isInviteLink) {
-            showGuestJoinScreen(inviteRoom);
-            return;
-        }
-        try { await redeemPendingGiftCode(); } catch (error) { console.warn('[Lroom pending gift]', error); }
-        checkAndShow();
-        try { await loadLroomClassFeatures(); }
-        catch (classError) { console.error('[Lroom class module]', classError); showToast('حساب شما وارد شد، اما بخش کلاس آماده نشد. صفحه را تازه‌سازی کنید.'); }
-    } catch (error) {
-        console.error('[Lroom auth bootstrap]', error);
-        const auth = document.getElementById('authScreen');
-        if (auth) auth.style.display = 'flex';
-        showToast('⚠️ ' + (error?.message || 'اتصال اولیه ناموفق بود.'));
-    }
+    })();
 }
 
 document.addEventListener('DOMContentLoaded', bootLroomAuthOnly, { once: true });
